@@ -1,18 +1,24 @@
 package use_case
 
+import extensions.getStartDayOfMonth
+import extensions.toDays
 import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.minus
+import kotlinx.datetime.number
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
 
-fun getDaysInMonthWithZeroes(localDate: LocalDate): List<Int> {
-    val daysInMonth = daysInMonth(localDate.year, localDate.monthNumber)
-    val startDayOfWeek = getStartOfMonth(localDate).dayOfWeek.isoDayNumber
+fun getDaysInMonthWithZeroes(year: Int, month: Month): List<Int> {
+    //val daysInMonth = daysInMonth(year, month.number)
+    val daysInMonth = month.toDays(year)
+    //val startDayOfWeek = getStartOfMonth(year, month).dayOfWeek.isoDayNumber
+    val startDayOfWeek = month.getStartDayOfMonth(year)
 
     val zerosToPrepend = 7 - startDayOfWeek
     val days = mutableListOf<Int>()
@@ -25,9 +31,9 @@ fun getDaysInMonthWithZeroes(localDate: LocalDate): List<Int> {
         days.add(day)
     }
 
-    val totalRows = if (zerosToPrepend < 5){
+    val totalRows = if (zerosToPrepend < 5) {
         35
-    }else{
+    } else {
         42
     }
 
@@ -38,6 +44,7 @@ fun getDaysInMonthWithZeroes(localDate: LocalDate): List<Int> {
     }
     return days
 }
+
 
 fun isToday(date: LocalDate): Int? {
     // Get the current date
@@ -50,9 +57,9 @@ fun isToday(date: LocalDate): Int? {
     }
 }
 
-fun getStartOfMonth(date: LocalDate): LocalDate {
+fun getStartOfMonth(year: Int, month: Month): LocalDate {
     // Create a new LocalDate for the first day of the same month
-    return LocalDate(date.year, date.month, 1)
+    return LocalDate(year, month.number, 1)
 }
 
 fun getStartOfWeek(date: LocalDate): LocalDate {

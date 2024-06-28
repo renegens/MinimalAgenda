@@ -6,46 +6,54 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import kotlinx.datetime.Clock
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import data.DayData
+import kotlinx.coroutines.launch
+import kotlinx.datetime.LocalDate
 import presentation.theme.Body
 import presentation.theme.Header1
 import presentation.theme.Header2
-import use_case.generateDayEntries
-import use_case.getDaysInMonthWithZeroes
+
 
 @Composable
-fun DayScreen() {
+fun DayScreen(days: List<DayData>, today: LocalDate, todayIndex: Int) {
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
+
     LazyColumn(
+        state = listState,
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
 
-        val currentDate = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-        val dates = generateDayEntries(currentDate)
-
-        items(dates.size) { index ->
-            val current = dates[index]
+        itemsIndexed(
+            items = days,
+            key = { index, day -> day.epochDay }
+        ) { index, day ->
             Divider(color = Color.White)
-            Header(current.month.name)
-            HeaderSecondary(current.dayOfWeek.name, current.dayOfMonth)
+            Header(day.month.name, isToday = day.epochDay == today.toEpochDays())
+            HeaderSecondary(day.dayOfWeek.name,day.dayOfMonth)
             Entries()
         }
+    }
 
+    coroutineScope.launch {
+       listState.scrollToItem(todayIndex, scrollOffset = -200)
     }
 }
 
 @Composable
-fun Header(month: String) {
+fun Header(month: String, isToday: Boolean) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(month, style = Header2, color = Color.White)
+        Text(month, style = Header2, color = if (isToday) Color.Yellow else Color.White)
         Text("Today", style = Body, color = Color.White)
     }
 }

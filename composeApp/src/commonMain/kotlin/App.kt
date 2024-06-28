@@ -3,6 +3,7 @@ import org.jetbrains.compose.ui.tooling.preview.Preview
 import presentation.components.day.DayScreen
 
 import presentation.components.months.MonthsScreen
+import presentation.components.start.StartScreen
 import presentation.components.years.YearsScreen
 import presentation.theme.AppTheme
 
@@ -10,8 +11,6 @@ import presentation.theme.AppTheme
 @Preview
 fun App() {
     AppTheme {
-        //YearsScreen()
-        //MonthsScreen()
-        DayScreen()
+        StartScreen()
     }
 }

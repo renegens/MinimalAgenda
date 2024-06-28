@@ -12,7 +12,14 @@ import presentation.theme.Header1
 import presentation.theme.Header2
 
 @Composable
-fun MonthHeader(month: String, year: Int, color: Color) {
+fun MonthHeader(month: String, year: Int, color: Color, isCurrentMonth: Boolean) {
+
+    val color = if (isCurrentMonth){
+        Color.Yellow
+    }else{
+        color
+    }
+
     Column(
         horizontalAlignment = Alignment.Start,
         modifier = Modifier.fillMaxWidth()

@@ -16,7 +16,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import data.MonthData
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.Month
 import presentation.theme.Body
 import use_case.getDaysInMonthWithZeroes
 
@@ -28,12 +30,13 @@ fun LazyGridScope.header(
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CalendarGrid(
-    localDate: LocalDate,
+fun MonthGrid(
+    monthData: MonthData,
+    isCurrentMonth: Boolean
 ) {
-    MonthHeader(month = localDate.month.name, year = localDate.year, color = Color.Red)
+    MonthHeader(month = monthData.month.name, year = monthData.year, color = Color.White, isCurrentMonth)
     DaysInWeek()
-    CalendarDays(getDaysInMonthWithZeroes(localDate))
+    CalendarDays(monthData.days)
 }
 
 
