@@ -1,8 +1,10 @@
-package com.daryse.daryse.presentation.theme
+package presentation.theme
 
 import androidx.compose.ui.graphics.Color
 
 object CustomColor {
+    val Green = Color(0xFFa7c3a1)
+    val MainBackground = Color(0xFFa7c3a1)
     val MainPrimary = Color(0xFF1E162B)
     val MainTertiary = Color(0x521E162B)
     val MainSecondary = Color(0xFF696471)

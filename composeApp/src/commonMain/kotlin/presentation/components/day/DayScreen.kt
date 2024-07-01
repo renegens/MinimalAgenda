@@ -24,7 +24,7 @@ import presentation.theme.Header2
 
 @Composable
 fun DayScreen(days: List<DayData>, today: LocalDate, todayIndex: Int) {
-    val listState = rememberLazyListState()
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 10)
     val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
@@ -46,7 +46,7 @@ fun DayScreen(days: List<DayData>, today: LocalDate, todayIndex: Int) {
     }
 
     coroutineScope.launch {
-       listState.scrollToItem(todayIndex, scrollOffset = -200)
+       //listState.scrollToItem(todayIndex)
     }
 }
 

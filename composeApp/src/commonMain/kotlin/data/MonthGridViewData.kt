@@ -8,7 +8,6 @@ import kotlinx.datetime.Month
 class MonthGridViewData {
 
     companion object {
-        private const val DAYS_IN_A_WEEK = 7
         private const val SMALL_ROW = 35
         private const val LARGE_ROW = 42
         private const val MAX_ZEROES_TO_PREPEND = 5
@@ -18,7 +17,7 @@ class MonthGridViewData {
         val daysInMonth = month.toDays(year)
         val startDayOfWeek = month.getStartDayOfMonth(year)
 
-        val zerosToPrepend = DAYS_IN_A_WEEK - startDayOfWeek
+        val zerosToPrepend = startDayOfWeek - 1
         val days = mutableListOf<Int>()
 
         for (i in 1..zerosToPrepend) {

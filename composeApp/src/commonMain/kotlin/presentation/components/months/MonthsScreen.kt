@@ -20,7 +20,7 @@ import presentation.components.day.HeaderSecondary
 
 @Composable
 fun MonthsScreen(months: List<MonthData>, today: LocalDate, todayIndex: Int) {
-    val listState = rememberLazyListState()
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5)
     val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
@@ -31,11 +31,11 @@ fun MonthsScreen(months: List<MonthData>, today: LocalDate, todayIndex: Int) {
             items = months,
             key = { _, month -> month.id }
         ) { index, month ->
-            MonthGrid(month, isCurrentMonth = month.id == today.uniqueMonthID())
+            MonthGrid(month, isCurrentMonth = month.id == today.uniqueMonthID(), today)
         }
     }
 
     coroutineScope.launch {
-        listState.scrollToItem(todayIndex, scrollOffset = -200)
+        listState.scrollToItem(todayIndex)
     }
 }

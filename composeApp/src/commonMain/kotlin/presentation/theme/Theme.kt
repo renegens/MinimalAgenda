@@ -5,11 +5,8 @@ import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material.lightColors
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.ui.graphics.Color
 import com.daryse.daryse.presentation.theme.AppShapes
-import com.daryse.daryse.presentation.theme.CustomColor
 
 private val LightThemeColors = lightColors(
     primary = CustomColor.MainPrimary,
