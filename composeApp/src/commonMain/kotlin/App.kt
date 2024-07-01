@@ -1,16 +1,13 @@
 import androidx.compose.runtime.*
 import org.jetbrains.compose.ui.tooling.preview.Preview
-import presentation.components.day.DayScreen
 
-import presentation.components.months.MonthsScreen
-import presentation.components.start.StartScreen
-import presentation.components.years.YearsScreen
+import presentation.screens.main.MainScreen
 import presentation.theme.AppTheme
 
 @Composable
 @Preview
 fun App() {
     AppTheme {
-        StartScreen()
+        MainScreen()
     }
 }

@@ -2,6 +2,7 @@ package presentation.components.day
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import data.DayData
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
@@ -24,14 +26,15 @@ import presentation.theme.Header2
 
 @Composable
 fun DayScreen(days: List<DayData>, today: LocalDate, todayIndex: Int) {
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 10)
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5)
     val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
         state = listState,
         modifier = Modifier
             .fillMaxSize()
-            .background(Color.Black)
+            .background(Color.Black),
+        contentPadding = PaddingValues(top = 56.dp, bottom = 70.dp)
     ) {
 
         itemsIndexed(
