@@ -6,15 +6,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import data.YearData
 import kotlinx.datetime.LocalDate
-import presentation.theme.Header1
 
 @Composable
 fun YearsScreen(years: List<YearData>, today: LocalDate, todayIndex: Int ) {
@@ -32,7 +32,7 @@ fun YearsScreen(years: List<YearData>, today: LocalDate, todayIndex: Int ) {
             key = { _, year -> year.year }
         ) { index, year ->
             Divider(color = Color.White)
-            Text(year.year.toString(), style = Header1, color = Color.White)
+            Text(year.year.toString(), style = MaterialTheme.typography.bodyMedium, color = Color.White)
             Months(renderingYear = year.year, today = today)
         }
     }

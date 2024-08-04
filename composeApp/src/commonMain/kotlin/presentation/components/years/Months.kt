@@ -3,14 +3,14 @@ package presentation.components.years
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import data.Months
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.number
-import presentation.theme.Header2
 
 @Composable
 fun Months(renderingYear: Int, today: LocalDate) {
@@ -47,6 +47,6 @@ fun Months(renderingYear: Int, today: LocalDate) {
 
 @Composable
 private fun MonthText(text: String, color: Color) {
-    Text(text, style = Header2, color = color)
+    Text(text, style = MaterialTheme.typography.bodyMedium, color = color)
 
 }

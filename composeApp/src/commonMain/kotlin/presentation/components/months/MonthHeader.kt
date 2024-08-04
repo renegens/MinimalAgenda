@@ -2,14 +2,13 @@ package presentation.components.months
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material.Divider
-import androidx.compose.material.Text
+import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import presentation.theme.Header1
-import presentation.theme.Header2
 
 @Composable
 fun MonthHeader(month: String, year: Int, color: Color, isCurrentMonth: Boolean) {
@@ -26,12 +25,12 @@ fun MonthHeader(month: String, year: Int, color: Color, isCurrentMonth: Boolean)
     ) {
         Text(
             text = month,
-            style = Header1,
+            style = MaterialTheme.typography.bodyMedium,
             color = color
         )
         Text(
             text = year.toString(),
-            style = Header2,
+            style = MaterialTheme.typography.bodyMedium,
             color = color
         )
         Divider(color = color)

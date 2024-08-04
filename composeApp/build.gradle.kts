@@ -1,4 +1,3 @@
-import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.ExperimentalKotlinGradlePluginApi
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 
@@ -16,9 +15,7 @@ kotlin {
             jvmTarget.set(JvmTarget.JVM_11)
         }
     }
-    
-    jvm("desktop")
-    
+
     listOf(
         iosX64(),
         iosArm64(),
@@ -31,24 +28,25 @@ kotlin {
     }
     
     sourceSets {
-        val desktopMain by getting
-        
         androidMain.dependencies {
             implementation(compose.preview)
             implementation(libs.androidx.activity.compose)
+            implementation(libs.koin.android)
+            implementation(libs.koin.androidx.compose)
         }
         commonMain.dependencies {
             implementation(compose.runtime)
             implementation(compose.foundation)
-            implementation(compose.material)
+            implementation(compose.material3)
             implementation(compose.ui)
             implementation(compose.components.resources)
             implementation(compose.components.uiToolingPreview)
             implementation(libs.kotlinx.datetime)
-            implementation(libs.jetbrains.androidx.lifecycle.viewmodel)
-        }
-        desktopMain.dependencies {
-            implementation(compose.desktop.currentOs)
+            implementation(libs.androidx.lifecycle.viewmodel)
+
+            api(libs.koin.core)
+            implementation(libs.koin.compose)
+            implementation(libs.koin.compose.viewmodel)
         }
     }
 }
@@ -87,17 +85,5 @@ android {
     }
     dependencies {
         debugImplementation(compose.uiTooling)
-    }
-}
-
-compose.desktop {
-    application {
-        mainClass = "MainKt"
-
-        nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
-            packageName = "eu.giant.agenda"
-            packageVersion = "1.0.0"
-        }
     }
 }

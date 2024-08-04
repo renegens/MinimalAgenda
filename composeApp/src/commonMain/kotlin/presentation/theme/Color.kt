@@ -1,5 +1,7 @@
 package presentation.theme
 
+import androidx.compose.material3.darkColorScheme
+import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 object CustomColor {
@@ -18,3 +20,10 @@ object CustomColor {
     val TopPlayerHighlight = Color(0xFFE9B720)
     val SeparatorColor = Color(0xFFEEEEEE)
 }
+
+val LightColorScheme = lightColorScheme(
+    primary = CustomColor.White,
+    tertiary = Color.Red
+)
+
+val DarkColorScheme = darkColorScheme()

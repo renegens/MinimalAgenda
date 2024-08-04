@@ -18,13 +18,7 @@ class MainActivity : ComponentActivity() {
             navigationBarStyle = SystemBarStyle.light(Color.GREEN,Color.TRANSPARENT),
         )
         setContent {
-            App()
+            App(isSystemInDarkMode = false)
         }
     }
-}
-
-@Preview
-@Composable
-fun AppAndroidPreview() {
-    App()
 }
