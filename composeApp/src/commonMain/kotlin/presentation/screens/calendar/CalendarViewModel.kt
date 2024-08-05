@@ -1,18 +1,13 @@
-package presentation.screens.main
+package presentation.screens.calendar
 
 import androidx.lifecycle.viewModelScope
-import data.CalendarGenerator
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
-import presentation.screens.main.MainContract.*
-import repository.CalendarRepository
-import use_case.CalendarWithEvents
+import presentation.screens.calendar.CalendarContract.*
+import use_case.CalendarWithEventsUseCase
 
-
-class MainViewModel(
-    private val calendarRepository: CalendarRepository,
-    private val calendarGenerator: CalendarGenerator,
-    private val calendarWithEvents: CalendarWithEvents
+class CalendarViewModel(
+    private val calendarWithEventsUseCase: CalendarWithEventsUseCase
 ) :
     BaseViewModel<Event, State, Effect>() {
 
@@ -22,7 +17,7 @@ class MainViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            val data = calendarWithEvents()
+            val data = calendarWithEventsUseCase()
             setState {
                 State(calendar = data)
             }

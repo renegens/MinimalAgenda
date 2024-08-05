@@ -11,7 +11,6 @@ import minimalagenda.composeapp.generated.resources.OpenSans_Regular
 import minimalagenda.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.Font
 
-
 val openSansFontFamily: FontFamily
     @Composable
     get() {

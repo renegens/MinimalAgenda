@@ -1,38 +1,34 @@
 package presentation.components.months
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.material3.Divider
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
+import data.MonthData
 
 @Composable
-fun MonthHeader(month: String, year: Int, color: Color, isCurrentMonth: Boolean) {
+fun MonthHeader(monthData: MonthData, isCurrentMonth: Boolean) {
 
-    val color = if (isCurrentMonth){
-        Color.Yellow
-    }else{
-        color
+    val color = if (isCurrentMonth) {
+        MaterialTheme.colorScheme.tertiary
+    } else {
+        MaterialTheme.colorScheme.primary
     }
 
-    Column(
-        horizontalAlignment = Alignment.Start,
-        modifier = Modifier.fillMaxWidth()
-    ) {
+    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Text(
-            text = month,
-            style = MaterialTheme.typography.bodyMedium,
+            text = monthData.shortMonth,
+            style = MaterialTheme.typography.headlineLarge,
             color = color
         )
         Text(
-            text = year.toString(),
-            style = MaterialTheme.typography.bodyMedium,
-            color = color
+            text = monthData.shortYear,
+            style = MaterialTheme.typography.headlineLarge,
+            color = MaterialTheme.colorScheme.primary
         )
-        Divider(color = color)
     }
 }

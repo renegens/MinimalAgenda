@@ -1,15 +1,11 @@
 package presentation.components.months
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.unit.dp
 import data.MonthData
 import extensions.uniqueMonthID
 import kotlinx.datetime.LocalDate
@@ -20,14 +16,17 @@ fun MonthsScreen(months: List<MonthData>, today: LocalDate, todayIndex: Int) {
 
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize().background(Color.Black),
-        contentPadding = PaddingValues(top = 56.dp, bottom = 70.dp)
+        modifier = Modifier.fillMaxSize()
     ) {
         itemsIndexed(
             items = months,
             key = { _, month -> month.id }
         ) { index, month ->
-            MonthGrid(month, isCurrentMonth = month.id == today.uniqueMonthID(), today)
+            MonthGrid(
+                monthData = month,
+                isCurrentMonth = month.id == today.uniqueMonthID(),
+                today = today
+            )
         }
     }
 }

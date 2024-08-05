@@ -9,22 +9,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import data.daysOfWeek
+import kotlinx.datetime.LocalDate
 
 @Composable
-fun DaysInWeek() {
-    val daysOfWeek = listOf("M", "T", "W", "T", "F", "S", "S")
+fun DaysInWeek(today: LocalDate, isCurrentMonth: Boolean) {
+    val todayIndex = today.dayOfWeek.ordinal
 
-    Row(modifier = Modifier.fillMaxWidth().height(44.dp), horizontalArrangement = Arrangement.SpaceAround) {
-        daysOfWeek.forEach {
+    Row(
+        modifier = Modifier.fillMaxWidth().height(44.dp),
+        horizontalArrangement = Arrangement.SpaceAround
+    ) {
+        daysOfWeek.forEachIndexed { index, day ->
             Text(
                 modifier = Modifier.width(44.dp),
-                text = it,
+                text = day,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                color = Color.White,
+                color = if (index == todayIndex && isCurrentMonth) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
             )
         }
     }

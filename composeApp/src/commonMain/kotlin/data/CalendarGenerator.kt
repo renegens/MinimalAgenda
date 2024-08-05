@@ -12,17 +12,6 @@ import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 import kotlinx.datetime.toLocalDateTime
 
-data class Calendar(
-    val days: List<DayData>,
-    val months: List<MonthData>,
-    val years: List<YearData>,
-    val monthIndex: Int,
-    val dayIndex: Int,
-    val yearIndex: Int,
-    val today: LocalDate
-)
-
-
 class CalendarGenerator {
 
     suspend fun run(): Calendar {
@@ -112,7 +101,3 @@ class CalendarGenerator {
         return list
     }
 }
-
-
-
-

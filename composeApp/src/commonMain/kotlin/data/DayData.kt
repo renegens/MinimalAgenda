@@ -1,5 +1,6 @@
 package data
 
+import extensions.toShortName
 import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Month
 
@@ -10,4 +11,7 @@ data class DayData(
     val year: Int,
     val epochDay: Int,
     var events: List<EventData>
-)
+) {
+    val shortDay: String
+        get() = dayOfWeek.name.toShortName()
+}

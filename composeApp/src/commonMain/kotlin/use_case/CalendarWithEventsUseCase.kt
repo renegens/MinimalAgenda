@@ -7,7 +7,7 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import repository.CalendarRepository
 
-class CalendarWithEvents(
+class CalendarWithEventsUseCase(
     private val calendarRepository: CalendarRepository,
     private val calendarGenerator: CalendarGenerator
 ) {
