@@ -11,51 +11,41 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import data.DayData
 import extensions.millisToTime
-import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 import presentation.components.SectionDivider
 
 @Composable
 fun DayScreen(
-    days: List<DayData>,
-    today: LocalDate,
-    todayIndex: Int
+    days: List<DayData>, today: LocalDate, todayIndex: Int, onNowClicked: Boolean
 ) {
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = todayIndex + 1,
-        initialFirstVisibleItemScrollOffset = 5
+        initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5
     )
-    val coroutineScope = rememberCoroutineScope()
+
+    LaunchedEffect(onNowClicked) {
+        listState.animateScrollToItem(todayIndex)
+    }
 
     LazyColumn(
-        state = listState,
-        modifier = Modifier.fillMaxSize()
+        state = listState, modifier = Modifier.fillMaxSize()
     ) {
 
-        itemsIndexed(
-            items = days,
-            key = { index, day -> day.epochDay }
-        ) { index, day ->
-
+        itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == today.toEpochDays()
             Header(
-                day = day.shortDay,
-                dayInMonth = day.dayOfMonth,
-                isToday = isToday
+                day = day.shortDay, dayInMonth = day.dayOfMonth, isToday = isToday
             )
             Entries(day)
             SectionDivider(isCurrent = isToday)
         }
     }
 
-    coroutineScope.launch {
-        //listState.scrollToItem(todayIndex)
-    }
+
 }
 
 @Composable
@@ -69,7 +59,7 @@ fun Header(day: String, dayInMonth: Int, isToday: Boolean) {
 
 @Composable
 fun Entries(day: DayData) {
-    if (day.events.isEmpty()){
+    if (day.events.isEmpty()) {
         Spacer(modifier = Modifier.height(56.dp))
     }
 

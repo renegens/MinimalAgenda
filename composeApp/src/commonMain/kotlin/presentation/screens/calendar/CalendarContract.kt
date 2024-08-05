@@ -12,9 +12,22 @@ class CalendarContract {
         val calendar: Calendar? = null
     ) : UiState
 
-    sealed class Effect : UiEffect
+    sealed class Effect : UiEffect{
+        object ScrollDayToToday: Effect()
+        object ScrollMonthToToday: Effect()
+        object ScrollYearToToday: Effect()
+    }
 
     sealed class Event : UiEvent {
         object LoadData : Event()
+        class OnNowClicked(val section: Section) : Event()
+    }
+
+    enum class Section(val position: Int) {
+        Day(0), Month(1), Year(2);
+
+        companion object {
+            fun fromInt(value: Int) = entries.first { it.position == value }
+        }
     }
 }

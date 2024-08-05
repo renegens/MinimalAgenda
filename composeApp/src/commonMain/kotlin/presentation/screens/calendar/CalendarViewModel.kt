@@ -29,6 +29,14 @@ class CalendarViewModel(
     override fun handleEvent(event: Event) {
         when (event) {
             Event.LoadData -> loadData()
+            is Event.OnNowClicked -> when (event.section) {
+                Section.Day -> setEffect {
+                    Effect.ScrollDayToToday
+                }
+
+                Section.Month -> TODO()
+                Section.Year -> TODO()
+            }
         }
     }
 }
