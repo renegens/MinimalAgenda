@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import data.YearData
@@ -15,11 +16,15 @@ import kotlinx.datetime.LocalDate
 import presentation.components.SectionDivider
 
 @Composable
-fun YearsScreen(years: List<YearData>, today: LocalDate, todayIndex: Int) {
+fun YearsScreen(years: List<YearData>, today: LocalDate, todayIndex: Int, onNowClicked: Boolean) {
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = todayIndex + 1,
         initialFirstVisibleItemScrollOffset = 5
     )
+
+    LaunchedEffect(onNowClicked) {
+        listState.animateScrollToItem(todayIndex)
+    }
 
     LazyColumn(
         state = listState,

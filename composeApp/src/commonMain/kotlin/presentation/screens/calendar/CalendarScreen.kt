@@ -63,13 +63,15 @@ fun CalendarScreen() {
                         CalendarContract.Section.Month.position -> MonthsScreen(
                             months = calendar.months,
                             today = calendar.today,
-                            todayIndex = calendar.monthIndex
+                            todayIndex = calendar.monthIndex,
+                            onNowClicked = isScrolledToMonth
                         )
 
                         CalendarContract.Section.Year.position -> YearsScreen(
                             years = calendar.years,
                             today = calendar.today,
-                            todayIndex = calendar.yearIndex
+                            todayIndex = calendar.yearIndex,
+                            onNowClicked = isScrolledToYear
                         )
                     }
                 }

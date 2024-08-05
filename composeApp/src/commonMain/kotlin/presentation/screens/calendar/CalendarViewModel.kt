@@ -34,8 +34,13 @@ class CalendarViewModel(
                     Effect.ScrollDayToToday
                 }
 
-                Section.Month -> TODO()
-                Section.Year -> TODO()
+                Section.Month -> setEffect {
+                    Effect.ScrollMonthToToday
+                }
+
+                Section.Year -> setEffect {
+                    Effect.ScrollYearToToday
+                }
             }
         }
     }
