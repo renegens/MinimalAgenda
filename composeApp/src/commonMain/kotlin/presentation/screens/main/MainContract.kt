@@ -1,6 +1,8 @@
 package presentation.screens.main
 
 import data.Calendar
+import data.CalendarData
+import data.EventData
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
@@ -9,7 +11,7 @@ import presentation.base.UiState
 class MainContract {
 
     data class State(
-        val calendar: Calendar?
+        val calendar: Calendar? = null
     ) : UiState
 
     sealed class Effect : UiEffect

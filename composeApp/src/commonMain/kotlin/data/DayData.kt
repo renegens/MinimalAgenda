@@ -8,5 +8,6 @@ data class DayData(
     val dayOfWeek: DayOfWeek,
     val dayOfMonth: Int,
     val year: Int,
-    val epochDay: Int
+    val epochDay: Int,
+    var events: List<EventData>
 )

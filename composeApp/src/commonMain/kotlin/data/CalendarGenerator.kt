@@ -23,7 +23,7 @@ data class Calendar(
 )
 
 
-class DateGeneratorAsync {
+class CalendarGenerator {
 
     suspend fun run(): Calendar {
         return withContext(Dispatchers.IO) {
@@ -92,7 +92,8 @@ class DateGeneratorAsync {
                 dayOfWeek = it.dayOfWeek,
                 dayOfMonth = it.dayOfMonth,
                 year = it.year,
-                epochDay = it.toEpochDays()
+                epochDay = it.toEpochDays(),
+                events = emptyList()
             )
             list.add(day)
         }

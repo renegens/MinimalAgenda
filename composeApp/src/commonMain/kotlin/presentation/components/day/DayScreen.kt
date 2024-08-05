@@ -18,13 +18,21 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import data.DayData
+import data.EventData
+import extensions.millisToTime
 import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDate
 
-
 @Composable
-fun DayScreen(days: List<DayData>, today: LocalDate, todayIndex: Int) {
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5)
+fun DayScreen(
+    days: List<DayData>,
+    today: LocalDate,
+    todayIndex: Int
+) {
+    val listState = rememberLazyListState(
+        initialFirstVisibleItemIndex = todayIndex + 1,
+        initialFirstVisibleItemScrollOffset = 5
+    )
     val coroutineScope = rememberCoroutineScope()
 
     LazyColumn(
@@ -41,20 +49,24 @@ fun DayScreen(days: List<DayData>, today: LocalDate, todayIndex: Int) {
         ) { index, day ->
             Divider(color = Color.White)
             Header(day.month.name, isToday = day.epochDay == today.toEpochDays())
-            HeaderSecondary(day.dayOfWeek.name,day.dayOfMonth)
-            Entries()
+            HeaderSecondary(day.dayOfWeek.name, day.dayOfMonth)
+            Entries(day)
         }
     }
 
     coroutineScope.launch {
-       //listState.scrollToItem(todayIndex)
+        //listState.scrollToItem(todayIndex)
     }
 }
 
 @Composable
 fun Header(month: String, isToday: Boolean) {
     Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(month, style = MaterialTheme.typography.bodyMedium, color = if (isToday) Color.Yellow else Color.White)
+        Text(
+            month,
+            style = MaterialTheme.typography.bodyMedium,
+            color = if (isToday) Color.Yellow else Color.White
+        )
         Text("Today", style = MaterialTheme.typography.bodyMedium, color = Color.White)
     }
 }
@@ -63,18 +75,24 @@ fun Header(month: String, isToday: Boolean) {
 fun HeaderSecondary(day: String, dayOfMonth: Int) {
     Row(modifier = Modifier.fillMaxWidth()) {
         Text(day, style = MaterialTheme.typography.bodyMedium, color = Color.White)
-        Text(dayOfMonth.toString(), style = MaterialTheme.typography.bodyMedium, color = Color.White)
+        Text(
+            dayOfMonth.toString(),
+            style = MaterialTheme.typography.bodyMedium,
+            color = Color.White
+        )
     }
 }
 
 @Composable
-fun Entries() {
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text("10.55", style = MaterialTheme.typography.bodyMedium, color = Color.White)
-        Text("Meeting", style = MaterialTheme.typography.bodyMedium, color = Color.White)
-    }
-    Row(modifier = Modifier.fillMaxWidth()) {
-        Text("10.55", style = MaterialTheme.typography.bodyMedium, color = Color.White)
-        Text("Meeting", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+fun Entries(day: DayData) {
+    day.events.filter { it.epochDay == day.epochDay }.forEach {
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Text(
+                it.startTime?.millisToTime() ?: "",
+                style = MaterialTheme.typography.bodyMedium,
+                color = Color.White
+            )
+            Text(it.title ?: "", style = MaterialTheme.typography.bodyMedium, color = Color.White)
+        }
     }
 }

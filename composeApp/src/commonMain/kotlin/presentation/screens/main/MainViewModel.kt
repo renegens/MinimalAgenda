@@ -1,32 +1,39 @@
 package presentation.screens.main
 
 import androidx.lifecycle.viewModelScope
-import data.DateGeneratorAsync
+import data.CalendarGenerator
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
+import presentation.screens.main.MainContract.*
+import repository.CalendarRepository
+import use_case.CalendarWithEvents
 
-class MainViewModel : BaseViewModel<MainContract.Event, MainContract.State, MainContract.Effect>() {
 
-    private val dateGeneratorAsync = DateGeneratorAsync()
+class MainViewModel(
+    private val calendarRepository: CalendarRepository,
+    private val calendarGenerator: CalendarGenerator,
+    private val calendarWithEvents: CalendarWithEvents
+) :
+    BaseViewModel<Event, State, Effect>() {
 
     init {
-        setEvent(MainContract.Event.LoadData)
+        setEvent(Event.LoadData)
     }
 
     private fun loadData() {
         viewModelScope.launch {
-            val data = dateGeneratorAsync.run()
+            val data = calendarWithEvents()
             setState {
-                MainContract.State(calendar = data)
+                State(calendar = data)
             }
         }
     }
 
-    override fun createInitialState() = MainContract.State(null)
+    override fun createInitialState() = State(null)
 
-    override fun handleEvent(event: MainContract.Event) {
-        when (event){
-            MainContract.Event.LoadData -> loadData()
+    override fun handleEvent(event: Event) {
+        when (event) {
+            Event.LoadData -> loadData()
         }
     }
 }

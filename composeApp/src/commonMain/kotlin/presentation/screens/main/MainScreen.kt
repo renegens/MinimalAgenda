@@ -42,7 +42,9 @@ fun MainScreen() {
             HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                 when (page) {
                     0 -> DayScreen(
-                        days = calendar.days, today = calendar.today, todayIndex = calendar.dayIndex
+                        days = calendar.days,
+                        today = calendar.today,
+                        todayIndex = calendar.dayIndex
                     )
 
                     1 -> MonthsScreen(
