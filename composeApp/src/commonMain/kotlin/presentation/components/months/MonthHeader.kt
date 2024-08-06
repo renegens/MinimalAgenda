@@ -8,10 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import data.MonthData
+import domain.model.AgendaMonth
+import kotlinx.datetime.Month
 
 @Composable
-fun MonthHeader(monthData: MonthData, isCurrentMonth: Boolean) {
+fun MonthHeader(month: Month, year: Int,  isCurrentMonth: Boolean) {
 
     val color = if (isCurrentMonth) {
         MaterialTheme.colorScheme.tertiary
@@ -21,12 +22,12 @@ fun MonthHeader(monthData: MonthData, isCurrentMonth: Boolean) {
 
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Text(
-            text = monthData.shortMonth,
+            text = month.name,
             style = MaterialTheme.typography.headlineLarge,
             color = color
         )
         Text(
-            text = monthData.shortYear,
+            text = year.toString(),
             style = MaterialTheme.typography.headlineLarge,
             color = MaterialTheme.colorScheme.primary
         )

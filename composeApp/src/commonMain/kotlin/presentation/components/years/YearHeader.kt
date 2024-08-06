@@ -4,10 +4,10 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import data.YearData
+import domain.model.AgendaYear
 
 @Composable
-fun YearHeader(year: YearData, isCurrentYear: Boolean) {
+fun YearHeader(year: AgendaYear, isCurrentYear: Boolean) {
     val currentYearColor = if (isCurrentYear) {
         MaterialTheme.colorScheme.tertiary
     } else {

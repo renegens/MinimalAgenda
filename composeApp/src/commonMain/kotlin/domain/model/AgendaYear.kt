@@ -1,8 +1,8 @@
-package data
+package domain.model
 
 import extensions.toDigits
 
-data class YearData(
+data class AgendaYear(
     val year: Int
 ){
     val firstPart: String

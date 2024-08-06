@@ -11,12 +11,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import data.YearData
+import domain.model.AgendaYear
 import kotlinx.datetime.LocalDate
 import presentation.components.SectionDivider
 
 @Composable
-fun YearsScreen(years: List<YearData>, today: LocalDate, todayIndex: Int, onNowClicked: Boolean) {
+fun YearsScreen(years: List<AgendaYear>, today: LocalDate, todayIndex: Int, onNowClicked: Boolean) {
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = todayIndex + 1,
         initialFirstVisibleItemScrollOffset = 5

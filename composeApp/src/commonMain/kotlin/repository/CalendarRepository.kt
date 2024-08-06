@@ -1,10 +1,10 @@
 package repository
 
-import data.CalendarData
-import data.EventData
+import data.CalendarEntity
+import data.EventEntity
 
 expect interface CalendarRepository {
-    suspend fun getCalendarsAndroid(): List<CalendarData>
-    fun getCalendarsiOS(): List<CalendarData>
-    suspend fun getEventsAndroid(calendarId: Long): List<EventData>
+    suspend fun getCalendarsAndroid(): List<CalendarEntity>
+    fun getCalendarsiOS(): List<CalendarEntity>
+    suspend fun getEventsAndroid(calendarId: Long): List<EventEntity>
 }

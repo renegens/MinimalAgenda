@@ -1,6 +1,6 @@
 package data
 
-data class CalendarData(
+data class CalendarEntity(
     val id: Long,
     val name: String,
     val accountName: String,

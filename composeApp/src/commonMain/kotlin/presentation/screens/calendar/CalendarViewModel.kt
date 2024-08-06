@@ -4,7 +4,7 @@ import androidx.lifecycle.viewModelScope
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
-import use_case.CalendarWithEventsUseCase
+import domain.use_case.CalendarWithEventsUseCase
 
 class CalendarViewModel(
     private val calendarWithEventsUseCase: CalendarWithEventsUseCase
@@ -19,7 +19,7 @@ class CalendarViewModel(
         viewModelScope.launch {
             val data = calendarWithEventsUseCase()
             setState {
-                State(calendar = data)
+                State(agenda = data)
             }
         }
     }

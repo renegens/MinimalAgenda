@@ -49,7 +49,7 @@ fun CalendarScreen() {
 
 
     Scaffold(modifier = Modifier.safeDrawingPadding()) {
-        state.calendar?.let { calendar ->
+        state.agenda?.let { calendar ->
             Box(modifier = Modifier.fillMaxSize()) {
                 HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                     when (page) {
@@ -61,7 +61,7 @@ fun CalendarScreen() {
                         )
 
                         CalendarContract.Section.Month.position -> MonthsScreen(
-                            months = calendar.months,
+                            allDays = calendar.days,
                             today = calendar.today,
                             todayIndex = calendar.monthIndex,
                             onNowClicked = isScrolledToMonth

@@ -1,7 +1,6 @@
-package use_case
+package domain.use_case
 
-import data.Calendar
-import data.CalendarGenerator
+import domain.model.Agenda
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -14,7 +13,7 @@ class CalendarWithEventsUseCase(
 
     private val KAIZEN_ID = 7L
 
-    suspend operator fun invoke(): Calendar {
+    suspend operator fun invoke(): Agenda {
         return withContext(Dispatchers.IO) {
 
             val emptyCalendar = calendarGenerator.run()

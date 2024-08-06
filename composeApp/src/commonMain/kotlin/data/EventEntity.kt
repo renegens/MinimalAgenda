@@ -1,6 +1,6 @@
 package data
 
-data class EventData(
+data class EventEntity(
     val id: Long?,
     val title: String?,
     val description: String?,

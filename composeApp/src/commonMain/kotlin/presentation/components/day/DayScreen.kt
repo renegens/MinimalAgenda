@@ -14,14 +14,14 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import data.DayData
+import domain.model.AgendaDay
 import extensions.millisToTime
 import kotlinx.datetime.LocalDate
 import presentation.components.SectionDivider
 
 @Composable
 fun DayScreen(
-    days: List<DayData>, today: LocalDate, todayIndex: Int, onNowClicked: Boolean
+    days: List<AgendaDay>, today: LocalDate, todayIndex: Int, onNowClicked: Boolean
 ) {
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5
@@ -58,7 +58,7 @@ fun Header(day: String, dayInMonth: Int, isToday: Boolean) {
 }
 
 @Composable
-fun Entries(day: DayData) {
+fun Entries(day: AgendaDay) {
     if (day.events.isEmpty()) {
         Spacer(modifier = Modifier.height(56.dp))
     }

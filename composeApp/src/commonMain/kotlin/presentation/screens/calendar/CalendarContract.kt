@@ -1,6 +1,6 @@
 package presentation.screens.calendar
 
-import data.Calendar
+import domain.model.Agenda
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
@@ -9,7 +9,7 @@ import presentation.base.UiState
 class CalendarContract {
 
     data class State(
-        val calendar: Calendar? = null
+        val agenda: Agenda? = null
     ) : UiState
 
     sealed class Effect : UiEffect{

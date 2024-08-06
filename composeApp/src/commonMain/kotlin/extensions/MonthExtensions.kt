@@ -7,7 +7,7 @@ import kotlinx.datetime.isoDayNumber
 import kotlinx.datetime.number
 import kotlinx.datetime.plus
 
-fun Month.toDays(year: Int): Int {
+fun Month.toDaysInMonth(year: Int): Int {
     // Create a LocalDate for the first day of the given month and year
     val firstDayOfMonth = LocalDate(year, this, 1)
 

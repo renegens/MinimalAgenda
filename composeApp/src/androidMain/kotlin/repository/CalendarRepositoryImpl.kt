@@ -3,8 +3,8 @@ package repository
 import android.content.Context
 import android.database.Cursor
 import android.provider.CalendarContract
-import data.CalendarData
-import data.EventData
+import data.CalendarEntity
+import data.EventEntity
 import extensions.millisToEpochDay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -12,9 +12,9 @@ import java.util.Calendar
 
 class CalendarRepositoryImpl(private val context: Context) : CalendarRepository {
 
-    override suspend fun getCalendarsAndroid(): List<CalendarData> {
+    override suspend fun getCalendarsAndroid(): List<CalendarEntity> {
         return withContext(Dispatchers.IO) {
-            val calendars = mutableListOf<CalendarData>()
+            val calendars = mutableListOf<CalendarEntity>()
             val projection = arrayOf(
                 CalendarContract.Calendars._ID,
                 CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
@@ -46,7 +46,7 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
                     val accountName = it.getString(accountNameIndex)
                     val accountType = it.getString(accountTypeIndex)
 
-                    calendars.add(CalendarData(id, name, accountName, accountType))
+                    calendars.add(CalendarEntity(id, name, accountName, accountType))
                 }
             }
 
@@ -55,9 +55,9 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
 
     }
 
-    override suspend fun getEventsAndroid(calendarId: Long): List<EventData> {
+    override suspend fun getEventsAndroid(calendarId: Long): List<EventEntity> {
         return withContext(Dispatchers.IO) {
-            val events = mutableListOf<EventData>()
+            val events = mutableListOf<EventEntity>()
             val projection = arrayOf(
                 CalendarContract.Events._ID,
                 CalendarContract.Events.TITLE,
@@ -109,7 +109,7 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
 
 
                     events.add(
-                        EventData(
+                        EventEntity(
                             id,
                             title,
                             description,
@@ -126,7 +126,7 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
 
     }
 
-    override fun getCalendarsiOS(): List<CalendarData> {
+    override fun getCalendarsiOS(): List<CalendarEntity> {
         return emptyList()
     }
 }
