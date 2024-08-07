@@ -5,6 +5,8 @@ import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
 import domain.use_case.CalendarWithEventsUseCase
+import extensions.today
+import extensions.todayEpochDay
 
 class CalendarViewModel(
     private val calendarWithEventsUseCase: CalendarWithEventsUseCase
@@ -30,8 +32,10 @@ class CalendarViewModel(
         when (event) {
             Event.LoadData -> loadData()
             is Event.OnNowClicked -> when (event.section) {
-                Section.Day -> setEffect {
-                    Effect.ScrollDayToToday
+                Section.Day -> {
+                    setEffect {
+                        Effect.ScrollDayToToday
+                    }
                 }
 
                 Section.Month -> setEffect {
@@ -42,6 +46,20 @@ class CalendarViewModel(
                     Effect.ScrollYearToToday
                 }
             }
+
+            is Event.OnDayClicked -> {
+                setEffect {
+                    Effect.GoToDay(index = getIndex(event.epochDay))
+                }
+            }
+
+            is Event.OnMonthClicked -> setEffect {
+                Effect.GoToMonth(event.epochDay)
+            }
         }
     }
+
+    private fun getIndex(epochDay: Int): Int =
+        uiState.value.agenda?.days?.indexOfFirst { it.epochDay == epochDay } ?: -1
+
 }

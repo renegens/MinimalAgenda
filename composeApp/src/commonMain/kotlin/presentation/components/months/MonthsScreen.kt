@@ -6,22 +6,36 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import domain.model.AgendaDay
+import extensions.today
+import extensions.todayEpochDay
 import kotlinx.datetime.LocalDate
 
 @Composable
 fun MonthsScreen(
-    allDays: List<AgendaDay>,
-    today: LocalDate,
-    todayIndex: Int,
-    onNowClicked: Boolean
+    days: List<AgendaDay>,
+    onNowClicked: Boolean,
+    onDayClicked: (Int) -> Unit
 ) {
+    val months by remember {
+        mutableStateOf(days.groupBy { Pair(it.year, it.month) })
+    }
+
+    val todayIndex by remember {
+        mutableStateOf(
+            months.keys.indexOfFirst {
+                it.first == today.year && it.second == today.month
+            }
+        )
+    }
+
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = todayIndex - 1, initialFirstVisibleItemScrollOffset = 5
     )
-
-    val months = allDays.groupBy { Pair(it.year, it.month) }
 
     LaunchedEffect(onNowClicked) {
         listState.animateScrollToItem(todayIndex)
@@ -34,20 +48,10 @@ fun MonthsScreen(
             MonthGrid(
                 year = item.first,
                 month = item.second,
-                days = allDays,
+                days = days,
                 today = today,
-                onDayClicked = {}
+                onDayClicked = onDayClicked
             )
-
         }
-
-//        itemsIndexed(items = months.entries, key = { _, month -> month.id }) { index, month ->
-//            MonthGrid(
-//                agendaMonth = month,
-//                isCurrentMonth = month.id == today.uniqueMonthID(),
-//                today = today,
-//                onDayClicked = {}
-//            )
-//        }
     }
 }

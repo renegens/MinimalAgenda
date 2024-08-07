@@ -18,6 +18,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import extensions.today
+import extensions.todayEpochDay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -25,6 +27,7 @@ import presentation.components.ActionButton
 import presentation.components.day.DayScreen
 import presentation.components.months.MonthsScreen
 import presentation.components.years.YearsScreen
+import presentation.screens.calendar.CalendarContract.*
 
 @OptIn(KoinExperimentalAPI::class)
 @Composable
@@ -37,16 +40,22 @@ fun CalendarScreen() {
     var isScrolledToMonth by remember { mutableStateOf(true) }
     var isScrolledToYear by remember { mutableStateOf(true) }
 
+    var dayScrollPosition by remember { mutableStateOf(-1) }
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
             when (it) {
-                CalendarContract.Effect.ScrollDayToToday -> isScrolledToToday = !isScrolledToToday
-                CalendarContract.Effect.ScrollMonthToToday -> isScrolledToMonth = !isScrolledToMonth
-                CalendarContract.Effect.ScrollYearToToday -> isScrolledToYear = !isScrolledToYear
+                Effect.ScrollDayToToday -> isScrolledToToday = !isScrolledToToday
+                Effect.ScrollMonthToToday -> isScrolledToMonth = !isScrolledToMonth
+                Effect.ScrollYearToToday -> isScrolledToYear = !isScrolledToYear
+                is Effect.GoToDay -> {
+                    pagerState.animateScrollToPage(page = Section.Day.position)
+                    dayScrollPosition = it.index
+                }
+
+                is Effect.GoToMonth -> TODO()
             }
         }
     }
-
 
     Scaffold(modifier = Modifier.safeDrawingPadding()) {
         state.agenda?.let { calendar ->
@@ -55,21 +64,21 @@ fun CalendarScreen() {
                     when (page) {
                         CalendarContract.Section.Day.position -> DayScreen(
                             days = calendar.days,
-                            today = calendar.today,
-                            todayIndex = calendar.dayIndex,
                             onNowClicked = isScrolledToToday,
+                            scrollToDay = dayScrollPosition
                         )
 
                         CalendarContract.Section.Month.position -> MonthsScreen(
-                            allDays = calendar.days,
-                            today = calendar.today,
-                            todayIndex = calendar.monthIndex,
-                            onNowClicked = isScrolledToMonth
+                            days = calendar.days,
+                            onNowClicked = isScrolledToMonth,
+                            onDayClicked = {
+                                viewModel.setEvent(Event.OnDayClicked(epochDay = it))
+                            }
                         )
 
                         CalendarContract.Section.Year.position -> YearsScreen(
                             years = calendar.years,
-                            today = calendar.today,
+                            today = today,
                             todayIndex = calendar.yearIndex,
                             onNowClicked = isScrolledToYear
                         )
@@ -80,11 +89,7 @@ fun CalendarScreen() {
                 ) {
                     ActionButton(nowClicked = {
                         viewModel.setEvent(
-                            CalendarContract.Event.OnNowClicked(
-                                CalendarContract.Section.fromInt(
-                                    pagerState.currentPage
-                                )
-                            )
+                            Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
                         )
                     }, toggleActive = {})
                 }

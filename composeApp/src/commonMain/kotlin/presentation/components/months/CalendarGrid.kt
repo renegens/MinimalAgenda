@@ -34,9 +34,9 @@ fun MonthGrid(
     month: Month,
     year: Int,
     today: LocalDate,
-    onDayClicked: () -> Unit
+    onDayClicked: (Int) -> Unit
 ) {
-    val isCurrent by remember { mutableStateOf(today.month == month) }
+    val isCurrent by derivedStateOf { today.month == month && today.year == year }
 
     Spacer(modifier = Modifier.height(16.dp))
     MonthHeader(month = month, year = year, isCurrentMonth = isCurrent)
@@ -101,7 +101,13 @@ fun CalendarDays(agendaMonth: AgendaMonth, today: LocalDate, onDayClicked: () ->
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-fun CalendarDays(days: List<AgendaDay>, month: Month, year: Int, today: LocalDate, onDayClicked: () -> Unit) {
+fun CalendarDays(
+    days: List<AgendaDay>,
+    month: Month,
+    year: Int,
+    today: LocalDate,
+    onDayClicked: (Int) -> Unit
+) {
     val gridDays by derivedStateOf {
         createGridDay(year = year, month = month)
     }
@@ -127,7 +133,7 @@ fun CalendarDays(days: List<AgendaDay>, month: Month, year: Int, today: LocalDat
                 )
             } else {
                 TextButton(
-                    onClick = { onDayClicked.invoke() },
+                    onClick = { onDayClicked.invoke(gridItem.epochDay) },
                     modifier = Modifier.height(44.dp).width(44.dp)
                 ) {
                     Text(

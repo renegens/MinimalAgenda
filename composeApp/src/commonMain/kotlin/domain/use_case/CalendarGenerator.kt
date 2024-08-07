@@ -5,18 +5,14 @@ import domain.model.AgendaDay
 import domain.model.AgendaMonth
 import domain.model.AgendaYear
 import domain.model.MonthGrid
-import extensions.uniqueMonthID
+import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Clock
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.TimeZone
 import kotlinx.datetime.minus
-import kotlinx.datetime.number
 import kotlinx.datetime.plus
-import kotlinx.datetime.toLocalDateTime
 
 class CalendarGenerator {
 
@@ -24,39 +20,23 @@ class CalendarGenerator {
         return withContext(Dispatchers.IO) {
             val allDays = generateDays()
             val days = allDays.toDayData()
-
-            val yearsFromDays = days.groupBy { it.year }
-            val monthsPerYear = yearsFromDays[2024]!!.groupBy { it.month }
-            println(monthsPerYear)
-            val months = allDays.toMonthData()
             val years = allDays.toYearData()
-
 
             // TODO: They need to be calculated on the view level at refresh since the date may have changed
 
-            val monthIndexToScrollTo = months.indexOfFirst { it.id == currentDate.uniqueMonthID() }
-            val dayIndexToScrollTo = days.last().epochDay - currentDate.toEpochDays()
-            val yearIndexToScrollTo = years.indexOfFirst { it.year == currentDate.year }
+            val yearIndexToScrollTo = years.indexOfFirst { it.year == today.year }
 
             Agenda(
                 days = days,
-                months = months,
                 years = years,
-                monthIndex = monthIndexToScrollTo,
                 yearIndex = yearIndexToScrollTo,
-                dayIndex = dayIndexToScrollTo,
-                today = currentDate
             )
         }
     }
 
-
-    private val currentDate =
-        Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).date
-
     private fun generateDays(): List<LocalDate> {
         // Calculate the start and end dates
-        val startDate = currentDate.minus(DatePeriod(years = 2))
+        val startDate = today.minus(DatePeriod(years = 2))
         val endDate = startDate.plus(DatePeriod(years = 4)) // Total range is 4 years
 
         // Initialize the list to hold LocalDate objects
@@ -118,5 +98,4 @@ class CalendarGenerator {
 
         return list
     }
-
 }
