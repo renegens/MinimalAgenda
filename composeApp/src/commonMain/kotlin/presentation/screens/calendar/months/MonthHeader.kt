@@ -1,4 +1,4 @@
-package presentation.components.months
+package presentation.screens.calendar.months
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -8,11 +8,11 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import domain.model.AgendaMonth
+import data.AgendaMonth
 import kotlinx.datetime.Month
 
 @Composable
-fun MonthHeader(month: Month, year: Int,  isCurrentMonth: Boolean) {
+fun MonthHeader(month: AgendaMonth, year: Int, isCurrentMonth: Boolean) {
 
     val color = if (isCurrentMonth) {
         MaterialTheme.colorScheme.tertiary
@@ -22,7 +22,7 @@ fun MonthHeader(month: Month, year: Int,  isCurrentMonth: Boolean) {
 
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Text(
-            text = month.name,
+            text = month.nameRes,
             style = MaterialTheme.typography.headlineLarge,
             color = color
         )

@@ -1,4 +1,4 @@
-package presentation.components.months
+package presentation.screens.calendar.months
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row

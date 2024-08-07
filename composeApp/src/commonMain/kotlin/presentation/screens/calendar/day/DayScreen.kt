@@ -1,4 +1,4 @@
-package presentation.components.day
+package presentation.screens.calendar.day
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -32,6 +32,9 @@ fun DayScreen(
     onNowClicked: Boolean,
     scrollToDay: Int
 ) {
+
+    if (days.isEmpty()) return
+
     val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == todayEpochDay }) }
 
     val listState = rememberLazyListState(

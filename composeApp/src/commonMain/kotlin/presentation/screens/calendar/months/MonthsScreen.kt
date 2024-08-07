@@ -1,4 +1,4 @@
-package presentation.components.months
+package presentation.screens.calendar.months
 
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.lazy.LazyColumn
@@ -21,15 +21,16 @@ fun MonthsScreen(
     onNowClicked: Boolean,
     onDayClicked: (Int) -> Unit
 ) {
+
+    if (days.isEmpty()) return
+
     val months by remember {
-        mutableStateOf(days.groupBy { Pair(it.year, it.month) })
+        mutableStateOf(days.groupBy { it.agendaMonthYear })
     }
 
     val todayIndex by remember {
         mutableStateOf(
-            months.keys.indexOfFirst {
-                it.first == today.year && it.second == today.month
-            }
+            months.keys.indexOfFirst { it.isCurrent }
         )
     }
 
@@ -46,10 +47,7 @@ fun MonthsScreen(
     ) {
         itemsIndexed(items = months.keys.toList()) { index, item ->
             MonthGrid(
-                year = item.first,
-                month = item.second,
-                days = days,
-                today = today,
+                monthYear = item,
                 onDayClicked = onDayClicked
             )
         }

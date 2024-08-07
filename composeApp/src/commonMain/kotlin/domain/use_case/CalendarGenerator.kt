@@ -1,10 +1,9 @@
 package domain.use_case
 
-import domain.model.Agenda
+import data.toAgendaMonth
 import domain.model.AgendaDay
-import domain.model.AgendaMonth
+import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
-import domain.model.MonthGrid
 import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
@@ -16,21 +15,9 @@ import kotlinx.datetime.plus
 
 class CalendarGenerator {
 
-    suspend fun run(): Agenda {
+    suspend operator fun invoke(): List<AgendaDay> {
         return withContext(Dispatchers.IO) {
-            val allDays = generateDays()
-            val days = allDays.toDayData()
-            val years = allDays.toYearData()
-
-            // TODO: They need to be calculated on the view level at refresh since the date may have changed
-
-            val yearIndexToScrollTo = years.indexOfFirst { it.year == today.year }
-
-            Agenda(
-                days = days,
-                years = years,
-                yearIndex = yearIndexToScrollTo,
-            )
+            return@withContext generateDays().toDayData()
         }
     }
 
@@ -52,48 +39,20 @@ class CalendarGenerator {
         return dateList
     }
 
-    private fun List<LocalDate>.toMonthData(): List<AgendaMonth> {
-        val monthGrid = MonthGrid()
-        val list = mutableSetOf<AgendaMonth>()
-        this.forEach { localDate ->
-
-            val monthGridView = monthGrid.fillZeros(localDate)
-            val month = AgendaMonth(
-                month = localDate.month,
-                days = monthGridView,
-                year = localDate.year
-            ).apply {
-                epochDays += localDate.toEpochDays()
-            }
-            list.add(month)
-        }
-
-        return list.toList()
-    }
-
     private fun List<LocalDate>.toDayData(): List<AgendaDay> {
         val list = mutableListOf<AgendaDay>()
         this.forEach {
             val day = AgendaDay(
-                month = it.month,
+                agendaMonthYear = AgendaMonthYear(
+                    agendaYear = AgendaYear(it.year),
+                    agendaMonth = it.month.toAgendaMonth()
+                ),
                 dayOfWeek = it.dayOfWeek,
                 dayOfMonth = it.dayOfMonth,
-                year = it.year,
                 epochDay = it.toEpochDays(),
                 events = emptyList()
             )
             list.add(day)
-        }
-
-        return list
-    }
-
-    private fun List<LocalDate>.toYearData(): List<AgendaYear> {
-        val list = mutableListOf<AgendaYear>()
-
-        this.groupBy { it.year }.entries.forEach {
-            val year = AgendaYear(year = it.key)
-            list.add(year)
         }
 
         return list

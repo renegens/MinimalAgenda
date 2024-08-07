@@ -1,6 +1,6 @@
 package domain.use_case
 
-import domain.model.Agenda
+import domain.model.AgendaDay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
@@ -13,13 +13,13 @@ class CalendarWithEventsUseCase(
 
     private val KAIZEN_ID = 7L
 
-    suspend operator fun invoke(): Agenda {
+    suspend operator fun invoke(): List<AgendaDay> {
         return withContext(Dispatchers.IO) {
 
-            val emptyCalendar = calendarGenerator.run()
+            val emptyCalendar = calendarGenerator()
             val calendarEvents = calendarRepository.getEventsAndroid(KAIZEN_ID)
 
-            emptyCalendar.days.map { day ->
+            emptyCalendar.map { day ->
                 val eventsForDay = calendarEvents.filter { it.epochDay == day.epochDay }
                 day.events = eventsForDay
 

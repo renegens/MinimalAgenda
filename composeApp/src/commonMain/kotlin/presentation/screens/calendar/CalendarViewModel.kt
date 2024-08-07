@@ -19,14 +19,14 @@ class CalendarViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            val data = calendarWithEventsUseCase()
+            val agendaDays = calendarWithEventsUseCase()
             setState {
-                State(agenda = data)
+                State(days = agendaDays)
             }
         }
     }
 
-    override fun createInitialState() = State(null)
+    override fun createInitialState() = State()
 
     override fun handleEvent(event: Event) {
         when (event) {
@@ -53,13 +53,12 @@ class CalendarViewModel(
                 }
             }
 
-            is Event.OnMonthClicked -> setEffect {
-                Effect.GoToMonth(event.epochDay)
-            }
+            is Event.OnMonthClicked -> {}
+            //setEffect { Εffect.GoToMonth(event.epochDay) }
         }
     }
 
     private fun getIndex(epochDay: Int): Int =
-        uiState.value.agenda?.days?.indexOfFirst { it.epochDay == epochDay } ?: -1
+        uiState.value.days.indexOfFirst { it.epochDay == epochDay }
 
 }

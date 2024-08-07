@@ -24,9 +24,9 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.components.ActionButton
-import presentation.components.day.DayScreen
-import presentation.components.months.MonthsScreen
-import presentation.components.years.YearsScreen
+import presentation.screens.calendar.day.DayScreen
+import presentation.screens.calendar.months.MonthsScreen
+import presentation.screens.calendar.years.YearsScreen
 import presentation.screens.calendar.CalendarContract.*
 
 @OptIn(KoinExperimentalAPI::class)
@@ -58,42 +58,41 @@ fun CalendarScreen() {
     }
 
     Scaffold(modifier = Modifier.safeDrawingPadding()) {
-        state.agenda?.let { calendar ->
-            Box(modifier = Modifier.fillMaxSize()) {
-                HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
-                    when (page) {
-                        CalendarContract.Section.Day.position -> DayScreen(
-                            days = calendar.days,
-                            onNowClicked = isScrolledToToday,
-                            scrollToDay = dayScrollPosition
-                        )
 
-                        CalendarContract.Section.Month.position -> MonthsScreen(
-                            days = calendar.days,
-                            onNowClicked = isScrolledToMonth,
-                            onDayClicked = {
-                                viewModel.setEvent(Event.OnDayClicked(epochDay = it))
-                            }
-                        )
+        Box(modifier = Modifier.fillMaxSize()) {
+            HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
+                when (page) {
+                    CalendarContract.Section.Day.position -> DayScreen(
+                        days = state.days,
+                        onNowClicked = isScrolledToToday,
+                        scrollToDay = dayScrollPosition
+                    )
 
-                        CalendarContract.Section.Year.position -> YearsScreen(
-                            years = calendar.years,
-                            today = today,
-                            todayIndex = calendar.yearIndex,
-                            onNowClicked = isScrolledToYear
-                        )
-                    }
+                    CalendarContract.Section.Month.position -> MonthsScreen(
+                        days = state.days,
+                        onNowClicked = isScrolledToMonth,
+                        onDayClicked = {
+                            viewModel.setEvent(Event.OnDayClicked(epochDay = it))
+                        }
+                    )
+
+                    CalendarContract.Section.Year.position -> YearsScreen(
+                        days = state.days,
+                        onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
+                        onNowClicked = isScrolledToYear
+                    )
                 }
-                Row(
-                    modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
-                ) {
-                    ActionButton(nowClicked = {
-                        viewModel.setEvent(
-                            Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                        )
-                    }, toggleActive = {})
-                }
+            }
+            Row(
+                modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
+            ) {
+                ActionButton(nowClicked = {
+                    viewModel.setEvent(
+                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                    )
+                }, toggleActive = {})
             }
         }
     }
+
 }

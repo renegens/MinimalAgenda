@@ -6,10 +6,9 @@ import kotlinx.datetime.DayOfWeek
 import kotlinx.datetime.Month
 
 data class AgendaDay(
-    val month: Month,
+    val agendaMonthYear: AgendaMonthYear,
     val dayOfWeek: DayOfWeek,
     val dayOfMonth: Int,
-    val year: Int,
     val epochDay: Int,
     var events: List<EventEntity>
 ) {
