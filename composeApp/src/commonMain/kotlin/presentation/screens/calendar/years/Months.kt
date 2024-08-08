@@ -20,11 +20,18 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
 
     Row(modifier = Modifier.fillMaxWidth()) {
         Column(modifier = Modifier.weight(0.5f)) {
-            months.first().forEachIndexed { index, month ->
+            months.first().forEachIndexed { _, month ->
                 val isCurrent =
                     month.number == today.month.number && today.year == year
                 if (isCurrent) {
-                    MonthTextFocused(month.name)
+                    MonthTextFocused(month.name, modifier = Modifier.clickable {
+                        onMonthClicked.invoke(
+                            AgendaMonthYear(
+                                agendaYear = AgendaYear(year),
+                                agendaMonth = month
+                            )
+                        )
+                    })
                 } else {
                     MonthText(month.nameRes, modifier = Modifier.clickable {
                         onMonthClicked.invoke(
@@ -39,11 +46,18 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
         }
 
         Column(modifier = Modifier.weight(0.5f)) {
-            months[1].forEachIndexed { index, month ->
+            months[1].forEachIndexed { _, month ->
                 val isCurrent =
                     month.number == today.month.number && today.year == year
                 if (isCurrent) {
-                    MonthTextFocused(month.name)
+                    MonthTextFocused(month.name, modifier = Modifier.clickable {
+                        onMonthClicked.invoke(
+                            AgendaMonthYear(
+                                agendaYear = AgendaYear(year),
+                                agendaMonth = month
+                            )
+                        )
+                    })
                 } else {
                     MonthText(
                         month.nameRes,
@@ -72,10 +86,11 @@ private fun MonthText(text: String, modifier: Modifier) {
 }
 
 @Composable
-private fun MonthTextFocused(text: String) {
+private fun MonthTextFocused(text: String, modifier: Modifier) {
     Text(
         text,
         style = MaterialTheme.typography.headlineLarge,
-        color = MaterialTheme.colorScheme.tertiary
+        color = MaterialTheme.colorScheme.tertiary,
+        modifier = Modifier.then(modifier)
     )
 }
