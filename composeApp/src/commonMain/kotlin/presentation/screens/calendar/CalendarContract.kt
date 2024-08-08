@@ -2,6 +2,7 @@ package presentation.screens.calendar
 
 import domain.model.AgendaDay
 import domain.model.AgendaMonthYear
+import domain.model.AgendaYear
 import extensions.todayEpochDay
 import presentation.base.UiEffect
 import presentation.base.UiEvent
@@ -19,7 +20,8 @@ class CalendarContract {
         object ScrollMonthToToday : Effect()
         object ScrollYearToToday : Effect()
         class GoToDay(val index: Int) : Effect()
-        class GoToMonth(val epochDay: Int) : Effect()
+        class GoToMonth(val agendaMonthYear: AgendaMonthYear) : Effect()
+        class GoToYear(val agendaYear: AgendaYear) : Effect()
     }
 
     sealed class Event : UiEvent {
@@ -27,6 +29,7 @@ class CalendarContract {
         class OnNowClicked(val section: Section) : Event()
         class OnDayClicked(val epochDay: Int) : Event()
         class OnMonthClicked(val agendaMonthYear: AgendaMonthYear) : Event()
+        class OnYearClicked(val agendaYear: AgendaYear) : Event()
     }
 
     enum class Section(val position: Int) {

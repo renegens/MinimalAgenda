@@ -18,6 +18,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import domain.model.AgendaMonthYear
 import extensions.today
 import extensions.todayEpochDay
 import kotlinx.coroutines.flow.collectLatest
@@ -41,6 +42,9 @@ fun CalendarScreen() {
     var isScrolledToYear by remember { mutableStateOf(true) }
 
     var dayScrollPosition by remember { mutableStateOf(-1) }
+    var yearScrollPosition by remember { mutableStateOf(-1) }
+    var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
+
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
             when (it) {
@@ -52,7 +56,14 @@ fun CalendarScreen() {
                     dayScrollPosition = it.index
                 }
 
-                is Effect.GoToMonth -> TODO()
+                is Effect.GoToMonth -> {
+                    pagerState.animateScrollToPage(page = Section.Month.position)
+                    monthScrollPosition = it.agendaMonthYear
+                }
+                is Effect.GoToYear -> {
+                    pagerState.animateScrollToPage(page = Section.Year.position)
+                    yearScrollPosition = it.agendaYear.year
+                }
             }
         }
     }
@@ -71,15 +82,20 @@ fun CalendarScreen() {
                     CalendarContract.Section.Month.position -> MonthsScreen(
                         days = state.days,
                         onNowClicked = isScrolledToMonth,
+                        scrollToMonth = monthScrollPosition,
                         onDayClicked = {
                             viewModel.setEvent(Event.OnDayClicked(epochDay = it))
+                        },
+                        onYearClicked = {
+                            viewModel.setEvent(Event.OnYearClicked(it))
                         }
                     )
 
                     CalendarContract.Section.Year.position -> YearsScreen(
                         days = state.days,
                         onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
-                        onNowClicked = isScrolledToYear
+                        onNowClicked = isScrolledToYear,
+                        scrollToYear = yearScrollPosition
                     )
                 }
             }

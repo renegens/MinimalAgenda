@@ -25,6 +25,7 @@ import presentation.components.SectionDivider
 fun YearsScreen(
     days: List<AgendaDay>,
     onNowClicked: Boolean,
+    scrollToYear: Int,
     onMonthClicked: (AgendaMonthYear) -> Unit
 ) {
 
@@ -41,11 +42,17 @@ fun YearsScreen(
     }
 
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5
+        initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 2
     )
 
     LaunchedEffect(onNowClicked) {
         listState.animateScrollToItem(todayIndex)
+    }
+
+    LaunchedEffect(scrollToYear) {
+        if (scrollToYear > 0){
+            listState.scrollToItem(scrollToYear)
+        }
     }
 
     LazyColumn(

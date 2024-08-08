@@ -30,4 +30,8 @@ data class AgendaMonthYear(val agendaYear: AgendaYear, val agendaMonth: AgendaMo
             val current = today
             return agendaMonth.number == current.month.number && year == current.year
         }
+
+    fun isSame(agendaMonthYear: AgendaMonthYear): Boolean {
+        return agendaMonthYear.agendaYear.year == agendaYear.year && agendaMonthYear.agendaMonth.number == agendaMonth.number
+    }
 }

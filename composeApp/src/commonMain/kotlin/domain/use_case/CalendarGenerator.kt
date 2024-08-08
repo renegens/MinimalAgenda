@@ -22,15 +22,15 @@ class CalendarGenerator {
     }
 
     private fun generateDays(): List<LocalDate> {
-        // Calculate the start and end dates
-        val startDate = today.minus(DatePeriod(years = 2))
-        val endDate = startDate.plus(DatePeriod(years = 4)) // Total range is 4 years
+
+        val startYear = LocalDate(year = today.year - 2, monthNumber = 1, dayOfMonth = 1)
+        val endDate = LocalDate(year = startYear.year + 4, monthNumber = 12, dayOfMonth = 31)
 
         // Initialize the list to hold LocalDate objects
         val dateList = mutableListOf<LocalDate>()
 
         // Populate the list with each day in the range
-        var currentDate = startDate
+        var currentDate = startYear
         while (currentDate <= endDate) {
             dateList.add(currentDate)
             currentDate = currentDate.plus(DatePeriod(days = 1))

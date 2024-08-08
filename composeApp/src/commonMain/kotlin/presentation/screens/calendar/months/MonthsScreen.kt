@@ -11,6 +11,8 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import domain.model.AgendaDay
+import domain.model.AgendaMonthYear
+import domain.model.AgendaYear
 import extensions.today
 import extensions.todayEpochDay
 import kotlinx.datetime.LocalDate
@@ -19,7 +21,9 @@ import kotlinx.datetime.LocalDate
 fun MonthsScreen(
     days: List<AgendaDay>,
     onNowClicked: Boolean,
-    onDayClicked: (Int) -> Unit
+    scrollToMonth: AgendaMonthYear?,
+    onDayClicked: (Int) -> Unit,
+    onYearClicked: (AgendaYear) -> Unit
 ) {
 
     if (days.isEmpty()) return
@@ -42,13 +46,21 @@ fun MonthsScreen(
         listState.animateScrollToItem(todayIndex)
     }
 
+    LaunchedEffect(scrollToMonth) {
+        scrollToMonth?.let {
+            val index = months.keys.indexOfFirst { agendaMonthYear -> it.isSame(agendaMonthYear) }
+            listState.scrollToItem(index)
+        }
+    }
+
     LazyColumn(
         state = listState, modifier = Modifier.fillMaxSize()
     ) {
-        itemsIndexed(items = months.keys.toList()) { index, item ->
+        itemsIndexed(items = months.keys.toList()) { _, item ->
             MonthGrid(
                 monthYear = item,
-                onDayClicked = onDayClicked
+                onDayClicked = onDayClicked,
+                onYearClicked = onYearClicked
             )
         }
     }

@@ -1,5 +1,6 @@
 package presentation.screens.calendar.months
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
@@ -20,6 +21,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaMonthYear
+import domain.model.AgendaYear
 import domain.model.DayGrid
 import domain.model.createGridDay
 import extensions.today
@@ -28,12 +30,17 @@ import presentation.components.SectionDivider
 @Composable
 fun MonthGrid(
     monthYear: AgendaMonthYear,
-    onDayClicked: (Int) -> Unit
+    onDayClicked: (Int) -> Unit,
+    onYearClicked: (AgendaYear) -> Unit
 ) {
     val isCurrent by remember { mutableStateOf(monthYear.isCurrent) }
 
     Spacer(modifier = Modifier.height(16.dp))
-    MonthHeader(month = monthYear.agendaMonth, year = monthYear.year, isCurrentMonth = isCurrent)
+    MonthHeader(
+        month = monthYear.agendaMonth,
+        year = monthYear.year,
+        isCurrentMonth = isCurrent,
+        modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
     Spacer(modifier = Modifier.height(16.dp))
     DaysInWeek(today = today, isCurrentMonth = isCurrent)
     CalendarDays(

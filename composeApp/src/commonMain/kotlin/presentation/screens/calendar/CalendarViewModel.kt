@@ -47,14 +47,21 @@ class CalendarViewModel(
                 }
             }
 
+            //todo remove the index from here?
             is Event.OnDayClicked -> {
                 setEffect {
                     Effect.GoToDay(index = getIndex(event.epochDay))
                 }
             }
 
-            is Event.OnMonthClicked -> {}
-            //setEffect { Εffect.GoToMonth(event.epochDay) }
+            is Event.OnMonthClicked -> {
+                setEffect {
+                    Effect.GoToMonth(event.agendaMonthYear)
+                }
+            }
+            is Event.OnYearClicked -> {
+                setEffect { Effect.GoToYear(event.agendaYear) }
+            }
         }
     }
 
