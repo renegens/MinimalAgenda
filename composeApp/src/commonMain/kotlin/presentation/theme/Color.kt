@@ -15,7 +15,12 @@ val LightColorScheme = lightColorScheme(
     primary = CustomColor.DarkGray,
     secondary = CustomColor.LightGray,
     tertiary = CustomColor.Orange,
-    surface = CustomColor.Sepia
+    background = CustomColor.Sepia
 )
 
-val DarkColorScheme = darkColorScheme()
+val DarkColorScheme = darkColorScheme(
+    primary = CustomColor.LightGray,
+    secondary = CustomColor.Orange,
+    tertiary = CustomColor.Sepia,
+    background = CustomColor.DarkGray
+)

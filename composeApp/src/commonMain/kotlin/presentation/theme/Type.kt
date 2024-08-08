@@ -24,7 +24,7 @@ val displayLarge: TextStyle
     @Composable
     get() = TextStyle(
         fontFamily = openSansFontFamily,
-        fontWeight = FontWeight.Light,
+        fontWeight = FontWeight.Black,
         fontSize = 57.sp,
         lineHeight = 64.sp,
         letterSpacing = 0.sp

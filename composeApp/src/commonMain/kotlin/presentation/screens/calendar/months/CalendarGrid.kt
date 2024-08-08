@@ -37,9 +37,7 @@ fun MonthGrid(
 
     Spacer(modifier = Modifier.height(16.dp))
     MonthHeader(
-        month = monthYear.agendaMonth,
-        year = monthYear.year,
-        isCurrentMonth = isCurrent,
+        monthYear = monthYear,
         modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
     Spacer(modifier = Modifier.height(16.dp))
     DaysInWeek(today = today, isCurrentMonth = isCurrent)

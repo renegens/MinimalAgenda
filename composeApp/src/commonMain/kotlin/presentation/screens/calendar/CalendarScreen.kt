@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.Scaffold
@@ -68,9 +69,8 @@ fun CalendarScreen() {
         }
     }
 
-    Scaffold(modifier = Modifier.safeDrawingPadding()) {
-
-        Box(modifier = Modifier.fillMaxSize()) {
+    Scaffold {
+        Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
             HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                 when (page) {
                     CalendarContract.Section.Day.position -> DayScreen(

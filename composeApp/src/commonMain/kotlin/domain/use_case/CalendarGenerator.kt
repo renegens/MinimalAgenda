@@ -1,6 +1,7 @@
 package domain.use_case
 
 import data.toAgendaMonth
+import data.toDaysInWeek
 import domain.model.AgendaDay
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
@@ -10,7 +11,6 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
-import kotlinx.datetime.minus
 import kotlinx.datetime.plus
 
 class CalendarGenerator {
@@ -47,7 +47,7 @@ class CalendarGenerator {
                     agendaYear = AgendaYear(it.year),
                     agendaMonth = it.month.toAgendaMonth()
                 ),
-                dayOfWeek = it.dayOfWeek,
+                dayInWeek = it.dayOfWeek.toDaysInWeek(),
                 dayOfMonth = it.dayOfMonth,
                 epochDay = it.toEpochDays(),
                 events = emptyList()

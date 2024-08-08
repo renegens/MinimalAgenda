@@ -57,7 +57,7 @@ fun YearsScreen(
 
     LazyColumn(
         state = listState,
-        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize(),
     ) {
         itemsIndexed(items = years.keys.toList(), key = { _, year -> year.year }) { index, year ->
             YearHeader(year)

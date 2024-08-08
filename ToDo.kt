@@ -1,8 +1,8 @@
 fun todo() {
-    // TODO: [ ] Click on Day in month
-    // TODO: [ ] Typograph headlines
+    // TODO: [x] Click on Day in month
+    // TODO: [x] Typograph headlines
     // TODO: [ ] Permissions
-    // TODO: [ ] Design Day
-    // TODO: [ ] Design Month
-    // TODO: [ ] Design Year
+    // TODO: [x] Design Day
+    // TODO: [x] Design Month
+    // TODO: [x] Design Year
 }

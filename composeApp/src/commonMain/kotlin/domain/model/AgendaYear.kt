@@ -6,10 +6,10 @@ import extensions.today
 data class AgendaYear(
     val year: Int
 ){
-    val firstPart: String
+    val firstTwoDigits: String
         get() = year.toDigits().take(2).joinToString(separator = "")
 
-    val secondPart: String
+    val lastTwoDigits: String
         get() = year.toDigits().takeLast(2).joinToString(separator = "")
 
     val isCurrent: Boolean
