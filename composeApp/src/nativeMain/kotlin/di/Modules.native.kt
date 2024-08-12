@@ -3,8 +3,8 @@ package di
 import org.koin.dsl.bind
 import org.koin.dsl.module
 import repository.CalendarRepository
-import repository.CalendarRepositoryImpl
+import repository.iOSCalendarRepository
 
 actual val platformModule = module {
-    single { CalendarRepositoryImpl() }.bind<CalendarRepository>()
+    single { iOSCalendarRepository() }.bind<CalendarRepository>()
 }

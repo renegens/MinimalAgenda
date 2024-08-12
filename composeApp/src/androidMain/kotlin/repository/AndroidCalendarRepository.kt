@@ -10,9 +10,9 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.util.Calendar
 
-class CalendarRepositoryImpl(private val context: Context) : CalendarRepository {
+class AndroidCalendarRepository(private val context: Context) : CalendarRepository {
 
-    override suspend fun getCalendarsAndroid(): List<CalendarEntity> {
+    override suspend fun getCalendars(): List<CalendarEntity> {
         return withContext(Dispatchers.IO) {
             val calendars = mutableListOf<CalendarEntity>()
             val projection = arrayOf(
@@ -46,7 +46,7 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
                     val accountName = it.getString(accountNameIndex)
                     val accountType = it.getString(accountTypeIndex)
 
-                    calendars.add(CalendarEntity(id, name, accountName, accountType))
+                    calendars.add(CalendarEntity(id.toString(), name, accountName, accountType))
                 }
             }
 
@@ -55,7 +55,7 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
 
     }
 
-    override suspend fun getEventsAndroid(calendarId: Long): List<EventEntity> {
+    override suspend fun getEvents(calendarId: String): List<EventEntity> {
         return withContext(Dispatchers.IO) {
             val events = mutableListOf<EventEntity>()
             val projection = arrayOf(
@@ -110,7 +110,7 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
 
                     events.add(
                         EventEntity(
-                            id,
+                            id.toString(),
                             title,
                             description,
                             startTime,
@@ -124,9 +124,5 @@ class CalendarRepositoryImpl(private val context: Context) : CalendarRepository 
             return@withContext events
         }
 
-    }
-
-    override fun getCalendarsiOS(): List<CalendarEntity> {
-        return emptyList()
     }
 }
