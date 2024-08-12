@@ -21,6 +21,10 @@ class CalendarGenerator {
         }
     }
 
+    fun run(): List<AgendaDay> {
+        return generateDays().toDayData()
+    }
+
     private fun generateDays(): List<LocalDate> {
 
         val startYear = LocalDate(year = today.year - 2, monthNumber = 1, dayOfMonth = 1)

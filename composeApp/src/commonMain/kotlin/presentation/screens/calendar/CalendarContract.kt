@@ -1,9 +1,9 @@
 package presentation.screens.calendar
 
+import data.EventEntity
 import domain.model.AgendaDay
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
-import extensions.todayEpochDay
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
@@ -12,7 +12,8 @@ import presentation.base.UiState
 class CalendarContract {
 
     data class State(
-        val days: List<AgendaDay> = emptyList()
+        val days: List<AgendaDay> = emptyList(),
+        val events: List<EventEntity> = emptyList()
     ) : UiState
 
     sealed class Effect : UiEffect {

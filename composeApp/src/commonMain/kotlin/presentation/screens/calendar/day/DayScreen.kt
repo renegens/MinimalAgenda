@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -25,6 +26,7 @@ import androidx.compose.ui.text.capitalize
 import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
+import data.EventEntity
 import domain.model.AgendaDay
 import extensions.millisToTime
 import extensions.today
@@ -34,9 +36,7 @@ import presentation.components.SectionDivider
 
 @Composable
 fun DayScreen(
-    days: List<AgendaDay>,
-    onNowClicked: Boolean,
-    scrollToDay: Int
+    days: List<AgendaDay>, events: List<EventEntity>, onNowClicked: Boolean, scrollToDay: Int
 ) {
 
     if (days.isEmpty()) return
@@ -64,9 +64,13 @@ fun DayScreen(
             val isToday = day.epochDay == today.toEpochDays()
             Spacer(modifier = Modifier.height(32.dp))
             Header(
-                day = day.dayInWeek.short, dayInMonth = day.dayOfMonth, isToday = isToday
+                day = day.dayInWeek.short,
+                dayInMonth = day.dayOfMonth,
+                month = day.agendaMonthYear.agendaMonth.number,
+                isToday = isToday
             )
-            Entries(day)
+            Spacer(modifier = Modifier.height(8.dp))
+            Entries(events.filter { it.epochDay == day.epochDay })
             Spacer(modifier = Modifier.height(32.dp))
             SectionDivider(isCurrent = isToday)
         }
@@ -74,28 +78,36 @@ fun DayScreen(
 }
 
 @Composable
-fun Header(day: String, dayInMonth: Int, isToday: Boolean) {
-    Text(
-        "$day$dayInMonth",
-        style = MaterialTheme.typography.displayLarge,
-        color = if (isToday) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
+fun Header(day: String, dayInMonth: Int, month: Int, isToday: Boolean) {
+    Row(modifier = Modifier.padding(horizontal = 16.dp)) {
+        Text(
+            text = day,
+            style = MaterialTheme.typography.displayLarge,
+            color = if (isToday) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+        )
+        Text(
+            "$dayInMonth.$month",
+            style = MaterialTheme.typography.displayLarge,
+            color = MaterialTheme.colorScheme.secondary,
+        )
+    }
 }
 
 @Composable
-fun Entries(day: AgendaDay) {
-    if (day.events.isEmpty()) {
+fun Entries(events: List<EventEntity>) {
+    if (events.isEmpty()) {
         EmptyDay()
+        return
     }
 
-    day.events.filter { it.epochDay == day.epochDay }.forEach {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
+    events.sortedBy { it.startTime }.forEach {
+        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(48.dp)) {
             Text(
                 it.startTime?.millisToTime() ?: "",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.primary
             )
+            Spacer(Modifier.width(8.dp))
             Text(
                 it.title ?: "",
                 style = MaterialTheme.typography.bodyMedium,

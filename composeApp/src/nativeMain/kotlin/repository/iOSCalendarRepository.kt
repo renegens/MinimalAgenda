@@ -2,13 +2,17 @@ package repository
 
 import data.CalendarEntity
 import data.EventEntity
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine
+import kotlinx.coroutines.withContext
 import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import platform.Foundation.NSDate
 import platform.EventKit.*
-import platform.Foundation.dateByAddingTimeInterval
+import platform.Foundation.NSCalendar
+import platform.Foundation.NSCalendarUnitMonth
 import platform.Foundation.timeIntervalSince1970
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
@@ -18,73 +22,110 @@ class iOSCalendarRepository : CalendarRepository {
 
     private val eventStore = EKEventStore()
 
-
     override suspend fun getCalendars(): List<CalendarEntity> {
-        return suspendCancellableCoroutine { continuation ->
-            eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
-                if (granted) {
-                    val calendars =
-                        eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent).map {
-                            (it as EKCalendar).let { calendar ->
-                                CalendarEntity(
-                                    id = calendar.calendarIdentifier,
-                                    name = calendar.title,
-                                    accountName = calendar.description ?: "",
-                                    accountType = calendar.type.name
-                                )
+        return withContext(Dispatchers.Default) {
+            suspendCancellableCoroutine { continuation ->
+                eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
+                    if (granted) {
+                        val calendars =
+                            eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent).map {
+                                (it as EKCalendar).let { calendar ->
+                                    CalendarEntity(
+                                        id = calendar.calendarIdentifier,
+                                        name = calendar.title,
+                                        accountName = "",
+                                        accountType = calendar.type.name
+                                    )
 
+                                }
                             }
+
+                        if (calendars.isEmpty()) {
+                            continuation.resume(emptyList())
+                        } else {
+                            continuation.resume(calendars)
                         }
 
-                    if (calendars.isEmpty()) {
-                        continuation.resume(emptyList())
                     } else {
-                        continuation.resume(calendars)
+                        continuation.resumeWithException(
+                            (error ?: RuntimeException("Access denied")) as Throwable
+                        )
                     }
-
-                } else {
-                    continuation.resumeWithException(
-                        (error ?: RuntimeException("Access denied")) as Throwable
-                    )
                 }
             }
         }
     }
 
-    override suspend fun getEvents(calendarId: String): List<EventEntity> {
-        return suspendCancellableCoroutine { continuation ->
-            val calendar = eventStore.calendarWithIdentifier(calendarId)
-            val startDate = NSDate()
-            val endDate = NSDate().dateByAddingTimeInterval(30.0) // 30 days from now
+    override suspend fun getEvents(calendarId: String, timeInMonths: Int): List<EventEntity> {
+        return withContext(Dispatchers.Default) {
 
-            val predicate =
-                eventStore.predicateForEventsWithStartDate(startDate, endDate, listOf(calendar))
-            val events = eventStore.eventsMatchingPredicate(predicate).map {
-                (it as EKEvent).let { event ->
+            suspendCancellableCoroutine { continuation ->
+                val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
+                val startDate = nsStartDateForCalendar(timeInMonths)
+                val endDate = nsEndDateForCalendar(timeInMonths)
+
+                val predicate =
+                    eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
+                val events = eventStore.eventsMatchingPredicate(predicate).map { event ->
+                    event as EKEvent
                     EventEntity(
                         id = event.eventIdentifier,
                         title = event.title,
-                        description = null,
                         startTime = event.startDate?.timeIntervalSince1970?.toLong(),
-                        endTime = event.endDate?.timeIntervalSince1970?.toLong(),
-                        epochDay = timeIntervalSince1970ToEpochDay(
-                            event.startDate?.timeIntervalSince1970?.toLong() ?: -1
-                        )
                     )
                 }
+
+                continuation.resume(events)
             }
-            continuation.resume(events)
         }
     }
 
-    private fun timeIntervalSince1970ToEpochDay(timeIntervalSince1970: Long): Int {
-        // Convert the time interval to an Instant
-        val instant = Instant.fromEpochSeconds(timeIntervalSince1970)
+    private fun nsStartDateForCalendar(months: Int): NSDate {
+        val calendar = NSCalendar.currentCalendar
+        val currentDate = NSDate()
+        val threeYearsAgo = calendar.dateByAddingUnit(
+            NSCalendarUnitMonth,
+            value = months * (-1).toLong(),
+            toDate = currentDate,
+            options = 0u
+        )
+        return threeYearsAgo ?: NSDate()  // Fallback to current date if something goes wrong
+    }
 
-        // Convert the Instant to a LocalDateTime in a specific time zone (UTC in this case)
-        val localDateTime = instant.toLocalDateTime(TimeZone.UTC)
+    private fun nsEndDateForCalendar(months: Int): NSDate {
+        val calendar = NSCalendar.currentCalendar
+        val currentDate = NSDate()
+        val threeYearsInFuture = calendar.dateByAddingUnit(
+            NSCalendarUnitMonth,
+            value = months.toLong(),
+            toDate = currentDate,
+            options = 0u
+        )
+        return threeYearsInFuture ?: NSDate()  // Fallback to current date if something goes wrong
+    }
 
-        // Return the number of days since the epoch (1970-01-01)
-        return localDateTime.date.toEpochDays()
+    override suspend fun getAllEvents(): List<EventEntity> {
+        return withContext(Dispatchers.IO) {
+
+            suspendCancellableCoroutine { continuation ->
+                val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
+                val startDate = nsStartDateForCalendar(24)
+                val endDate = nsEndDateForCalendar(24)
+
+                val predicate =
+                    eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
+                val events = eventStore.eventsMatchingPredicate(predicate).map { event ->
+                    event as EKEvent
+                    EventEntity(
+                        id = event.eventIdentifier,
+                        title = event.title,
+                        startTime = event.startDate?.timeIntervalSince1970?.toLong(),
+                        epochDay = null,
+                    )
+                }
+
+                continuation.resume(events)
+            }
+        }
     }
 }

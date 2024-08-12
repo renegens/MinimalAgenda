@@ -1,12 +1,12 @@
 package presentation.screens.calendar
 
 import androidx.lifecycle.viewModelScope
+import domain.use_case.CalendarGenerator
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
 import domain.use_case.CalendarWithEventsUseCase
-import extensions.today
-import extensions.todayEpochDay
+import domain.use_case.EventsPerMonthUseCase
 
 class CalendarViewModel(
     private val calendarWithEventsUseCase: CalendarWithEventsUseCase
@@ -19,9 +19,10 @@ class CalendarViewModel(
 
     private fun loadData() {
         viewModelScope.launch {
-            val agendaDays = calendarWithEventsUseCase()
-            setState {
-                State(days = agendaDays)
+            when (val state = calendarWithEventsUseCase()){
+                is CalendarWithEventsUseCase.State.Success ->  setState {
+                    State(events = state.events, days = state.days)
+                }
             }
         }
     }
@@ -59,6 +60,7 @@ class CalendarViewModel(
                     Effect.GoToMonth(event.agendaMonthYear)
                 }
             }
+
             is Event.OnYearClicked -> {
                 setEffect { Effect.GoToYear(event.agendaYear) }
             }

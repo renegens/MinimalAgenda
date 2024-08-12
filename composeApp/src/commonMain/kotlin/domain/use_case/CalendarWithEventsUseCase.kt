@@ -1,9 +1,10 @@
 package domain.use_case
 
+import data.EventEntity
 import domain.model.AgendaDay
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
+import kotlinx.datetime.Clock
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.offsetIn
 import repository.CalendarRepository
 
 class CalendarWithEventsUseCase(
@@ -11,22 +12,36 @@ class CalendarWithEventsUseCase(
     private val calendarGenerator: CalendarGenerator
 ) {
 
-    private val KAIZEN_ID = 7L
-    private val EMULATOR_HOME_CALENDAR = "8D5E6554-E85B-47F4-824B-9A3B63626D38"
+    private var emptyCalendar: List<AgendaDay>? = null
 
-    suspend operator fun invoke(): List<AgendaDay> {
-        return withContext(Dispatchers.IO) {
+    sealed class State {
+        class Success(val days: List<AgendaDay>, val events: List<EventEntity>): State()
+    }
 
-            val emptyCalendar = calendarGenerator()
-            val calendars = calendarRepository.getCalendars()
-            println(calendars)
-            //val calendarEvents = calendarRepository.getEvents(KAIZEN_ID.toString())
-            val calendarEvents = calendarRepository.getEvents(EMULATOR_HOME_CALENDAR)
-            emptyCalendar.map { day ->
-                val eventsForDay = calendarEvents.filter { it.epochDay == day.epochDay }
-                day.events = eventsForDay
-            }
-            return@withContext emptyCalendar
+    suspend operator fun invoke(): State {
+
+        if (emptyCalendar == null) {
+            emptyCalendar = calendarGenerator()
         }
+
+        val allEvents = calendarRepository.getAllEvents()
+        println(Clock.System.now().epochSeconds)
+
+        val timeOffset = getTimeZoneOffsetInSeconds()
+        allEvents.map { it.epochDay = secondsToEpochDays(it.startTime!!, timeOffset) }
+
+        return State.Success(days = emptyCalendar!!, events = allEvents)
+    }
+
+    private fun secondsToEpochDays(seconds: Long, timeZoneOffsetInSeconds: Int): Int {
+        // Subtract the timezone offset to convert the time to UTC
+        val utcSeconds = seconds + timeZoneOffsetInSeconds
+        // Convert seconds to days by dividing by the number of seconds in a day
+        return (utcSeconds / (24 * 60 * 60)).toInt()
+    }
+
+    fun getTimeZoneOffsetInSeconds(): Int {
+        // Get the current date-time in the system's default time zone
+        return Clock.System.now().offsetIn(TimeZone.currentSystemDefault()).totalSeconds
     }
 }
