@@ -6,21 +6,18 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
-import kotlinx.datetime.TimeZone
-import kotlinx.datetime.toLocalDateTime
+import platform.EventKit
 import platform.Foundation.NSDate
 import platform.EventKit.*
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSCalendarUnitMonth
 import platform.Foundation.timeIntervalSince1970
 import kotlin.coroutines.resume
-import kotlin.coroutines.resumeWithException
 
 @Suppress("ClassName")
-class iOSCalendarRepository : CalendarRepository {
+class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
-    private val eventStore = EKEventStore()
+    private val eventStore = eventKit.eventStore
 
     override suspend fun getCalendars(): List<CalendarEntity> {
         return withContext(Dispatchers.Default) {
@@ -47,9 +44,7 @@ class iOSCalendarRepository : CalendarRepository {
                         }
 
                     } else {
-                        continuation.resumeWithException(
-                            (error ?: RuntimeException("Access denied")) as Throwable
-                        )
+                        continuation.resume(emptyList())
                     }
                 }
             }

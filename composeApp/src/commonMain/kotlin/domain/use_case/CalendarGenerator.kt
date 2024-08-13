@@ -6,24 +6,13 @@ import domain.model.AgendaDay
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import extensions.today
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.IO
-import kotlinx.coroutines.withContext
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.plus
 
 class CalendarGenerator {
 
-    suspend operator fun invoke(): List<AgendaDay> {
-        return withContext(Dispatchers.IO) {
-            return@withContext generateDays().toDayData()
-        }
-    }
-
-    fun run(): List<AgendaDay> {
-        return generateDays().toDayData()
-    }
+    val calendar: List<AgendaDay> = generateDays().toDayData()
 
     private fun generateDays(): List<LocalDate> {
 

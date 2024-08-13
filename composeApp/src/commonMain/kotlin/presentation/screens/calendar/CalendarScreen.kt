@@ -4,7 +4,6 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -20,8 +19,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaMonthYear
-import extensions.today
-import extensions.todayEpochDay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -77,7 +74,11 @@ fun CalendarScreen() {
                         days = state.days,
                         onNowClicked = isScrolledToToday,
                         scrollToDay = dayScrollPosition,
-                        events = state.events
+                        events = state.events,
+                        calendarPermission = state.calendarPermission,
+                        onRequestCalendarPermission = {
+                            viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
+                        }
                     )
 
                     CalendarContract.Section.Month.position -> MonthsScreen(

@@ -15,28 +15,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.key.Key.Companion.L
-import androidx.compose.ui.text.capitalize
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import data.EventEntity
 import domain.model.AgendaDay
 import extensions.millisToTime
 import extensions.today
 import extensions.todayEpochDay
-import kotlinx.datetime.LocalDate
+import platform.CalendarPermissionHandler
+import presentation.components.CalendarPermission
 import presentation.components.SectionDivider
 
 @Composable
 fun DayScreen(
-    days: List<AgendaDay>, events: List<EventEntity>, onNowClicked: Boolean, scrollToDay: Int
+    days: List<AgendaDay>,
+    events: List<EventEntity>,
+    onNowClicked: Boolean,
+    scrollToDay: Int,
+    calendarPermission: CalendarPermissionHandler.State,
+    onRequestCalendarPermission: () -> Unit
 ) {
 
     if (days.isEmpty()) return
@@ -60,6 +61,12 @@ fun DayScreen(
     LazyColumn(
         state = listState, modifier = Modifier.fillMaxSize()
     ) {
+
+        CalendarPermission(
+            onPermissionRequest = onRequestCalendarPermission,
+            state = calendarPermission
+        )
+
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == today.toEpochDays()
             Spacer(modifier = Modifier.height(32.dp))

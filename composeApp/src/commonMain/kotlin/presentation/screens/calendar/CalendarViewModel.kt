@@ -5,11 +5,13 @@ import domain.use_case.CalendarGenerator
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
-import domain.use_case.CalendarWithEventsUseCase
-import domain.use_case.EventsPerMonthUseCase
+import domain.use_case.GetAllEventsUseCase
+import platform.CalendarPermissionHandler
 
 class CalendarViewModel(
-    private val calendarWithEventsUseCase: CalendarWithEventsUseCase
+    private val getAllEventsUseCase: GetAllEventsUseCase,
+    private val permissionHandler: CalendarPermissionHandler,
+    private val calendarGenerator: CalendarGenerator
 ) :
     BaseViewModel<Event, State, Effect>() {
 
@@ -18,12 +20,15 @@ class CalendarViewModel(
     }
 
     private fun loadData() {
-        viewModelScope.launch {
-            when (val state = calendarWithEventsUseCase()){
-                is CalendarWithEventsUseCase.State.Success ->  setState {
-                    State(events = state.events, days = state.days)
+        when (val permissionState = permissionHandler.getPermissionState()) {
+            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch { loadEvents() }
+            else ->
+                setState {
+                    State(
+                        days = calendarGenerator.calendar,
+                        calendarPermission = permissionState
+                    )
                 }
-            }
         }
     }
 
@@ -64,10 +69,35 @@ class CalendarViewModel(
             is Event.OnYearClicked -> {
                 setEffect { Effect.GoToYear(event.agendaYear) }
             }
+
+            Event.OnRequestCalendarPermissionClicked -> {
+                viewModelScope.launch {
+                    when (val state = permissionHandler.requestCalendarPermission()) {
+                        CalendarPermissionHandler.State.FullAccess -> loadEvents()
+                        else -> setState {
+                            copy(
+                                events = emptyList(),
+                                calendarPermission = state
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private suspend fun loadEvents() {
+        when (val state = getAllEventsUseCase()) {
+            is GetAllEventsUseCase.State.Success -> setState {
+                State(
+                    events = state.events,
+                    days = calendarGenerator.calendar,
+                    calendarPermission = CalendarPermissionHandler.State.FullAccess
+                )
+            }
         }
     }
 
     private fun getIndex(epochDay: Int): Int =
         uiState.value.days.indexOfFirst { it.epochDay == epochDay }
-
 }
