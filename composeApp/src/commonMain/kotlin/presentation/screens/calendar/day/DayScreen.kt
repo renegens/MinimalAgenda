@@ -21,7 +21,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import data.EventEntity
+import data.calendar.EventEntity
 import domain.model.AgendaDay
 import extensions.millisToTime
 import extensions.today

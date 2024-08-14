@@ -43,7 +43,8 @@ kotlin {
             implementation(compose.components.uiToolingPreview)
             implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.lifecycle.viewmodel)
-
+            api(libs.androidx.datastore)
+            api(libs.androidx.datastore.preferences)
             api(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)

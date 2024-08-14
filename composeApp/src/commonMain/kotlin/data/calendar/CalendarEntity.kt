@@ -1,4 +1,4 @@
-package data
+package data.calendar
 
 data class CalendarEntity(
     val id: String?,

@@ -1,4 +1,4 @@
-package data
+package domain.model
 
 import kotlinx.datetime.DayOfWeek
 

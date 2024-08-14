@@ -1,6 +1,6 @@
 package domain.use_case
 
-import data.EventEntity
+import data.calendar.EventEntity
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetIn

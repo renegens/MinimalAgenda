@@ -1,6 +1,5 @@
 package domain.model
 
-import data.AgendaMonth
 import extensions.today
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate

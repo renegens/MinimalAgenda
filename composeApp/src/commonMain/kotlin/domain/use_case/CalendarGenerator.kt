@@ -1,10 +1,10 @@
 package domain.use_case
 
-import data.toAgendaMonth
-import data.toDaysInWeek
 import domain.model.AgendaDay
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
+import domain.model.toAgendaMonth
+import domain.model.toDaysInWeek
 import extensions.today
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate

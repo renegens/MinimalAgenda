@@ -1,7 +1,7 @@
 package repository
 
-import data.CalendarEntity
-import data.EventEntity
+import data.calendar.CalendarEntity
+import data.calendar.EventEntity
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine

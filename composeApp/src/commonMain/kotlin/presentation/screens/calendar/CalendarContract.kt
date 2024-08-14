@@ -1,6 +1,6 @@
 package presentation.screens.calendar
 
-import data.EventEntity
+import data.calendar.EventEntity
 import domain.model.AgendaDay
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear

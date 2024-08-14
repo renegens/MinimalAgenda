@@ -1,7 +1,6 @@
 package domain.model
 
-import data.DayInWeek
-import data.EventEntity
+import data.calendar.EventEntity
 
 data class AgendaDay(
     val agendaMonthYear: AgendaMonthYear,

@@ -3,8 +3,8 @@ package repository
 import android.content.Context
 import android.database.Cursor
 import android.provider.CalendarContract
-import data.CalendarEntity
-import data.EventEntity
+import data.calendar.CalendarEntity
+import data.calendar.EventEntity
 import extensions.millisToEpochDay
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -78,7 +78,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
             val selection =
                 "${CalendarContract.Events.CALENDAR_ID} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTSTART} <= ?"
             val selectionArgs = arrayOf(
-                calendarId.toString(),
+                calendarId,
                 startOfRange.timeInMillis.toString(),
                 endOfRange.timeInMillis.toString()
             )
