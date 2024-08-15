@@ -12,9 +12,9 @@ object CustomColor {
 }
 
 val LightColorScheme = lightColorScheme(
-    primary = CustomColor.DarkGray,
+    primary = CustomColor.Orange,
     secondary = CustomColor.LightGray,
-    tertiary = CustomColor.Orange,
+    tertiary = CustomColor.DarkGray,
     background = CustomColor.Sepia
 )
 

@@ -1,6 +1,10 @@
 package presentation.screens.calendar.day
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -8,21 +12,28 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key.Companion.S
 import androidx.compose.ui.unit.dp
-import data.calendar.EventEntity
+import data.local.HiddenEventEntity
 import domain.model.AgendaDay
+import domain.model.AgendaEvent
+import extensions.millisToHoursAndMinutes
 import extensions.millisToTime
 import extensions.today
 import extensions.todayEpochDay
@@ -33,13 +44,14 @@ import presentation.components.SectionDivider
 @Composable
 fun DayScreen(
     days: List<AgendaDay>,
-    events: List<EventEntity>,
+    agendaEvents: List<AgendaEvent>,
     onNowClicked: Boolean,
     scrollToDay: Int,
+    showAll: Boolean,
+    onHide: (AgendaEvent) -> Unit,
     calendarPermission: CalendarPermissionHandler.State,
     onRequestCalendarPermission: () -> Unit
 ) {
-
     if (days.isEmpty()) return
 
     val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == todayEpochDay }) }
@@ -63,8 +75,7 @@ fun DayScreen(
     ) {
 
         CalendarPermission(
-            onPermissionRequest = onRequestCalendarPermission,
-            state = calendarPermission
+            onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
         )
 
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
@@ -77,7 +88,11 @@ fun DayScreen(
                 isToday = isToday
             )
             Spacer(modifier = Modifier.height(8.dp))
-            Entries(events.filter { it.epochDay == day.epochDay })
+            Entries(
+                agendaEvents = agendaEvents.filter { it.epochDay == day.epochDay },
+                onHide = onHide,
+                showAll = showAll
+            )
             Spacer(modifier = Modifier.height(32.dp))
             SectionDivider(isCurrent = isToday)
         }
@@ -90,37 +105,96 @@ fun Header(day: String, dayInMonth: Int, month: Int, isToday: Boolean) {
         Text(
             text = day,
             style = MaterialTheme.typography.displayLarge,
-            color = if (isToday) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
+            color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
         )
         Text(
             "$dayInMonth.$month",
             style = MaterialTheme.typography.displayLarge,
-            color = MaterialTheme.colorScheme.secondary,
+            color = if (isToday) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
         )
     }
 }
 
 @Composable
-fun Entries(events: List<EventEntity>) {
-    if (events.isEmpty()) {
+fun Entries(
+    agendaEvents: List<AgendaEvent>,
+    onHide: (AgendaEvent) -> Unit,
+    showAll: Boolean
+) {
+
+    val items = if (showAll) {
+        agendaEvents
+    } else {
+        agendaEvents.filterNot { it.isHidden }
+    }
+
+    if (items.isEmpty()) {
         EmptyDay()
         return
     }
 
-    events.sortedBy { it.startTime }.forEach {
-        Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).height(48.dp)) {
-            Text(
-                it.startTime?.millisToTime() ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+    items.sortedBy { it.startTime }.forEach {
+        var showButtons by remember { mutableStateOf(false) }
+
+        Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp)) {
+            Row {
+                val time = it.startTime.millisToHoursAndMinutes()
+                Text(
+                    "${time.first}:",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = it.getHiddenColor(showAll)
+                )
+                Spacer(Modifier.width(4.dp))
+                Text(
+                    time.second,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = it.getHiddenColor(showAll)
+                )
+            }
             Spacer(Modifier.width(8.dp))
-            Text(
-                it.title ?: "",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.primary
-            )
+            Column(
+                modifier = Modifier.fillMaxWidth().background(
+                    color = if (showButtons) Color.LightGray else Color.Transparent
+                ).clickable {
+                    showButtons = !showButtons
+                }
+            ) {
+                Text(
+                    it.title,
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = it.getHiddenColor(showAll),
+                    modifier = Modifier.padding(start = 16.dp)
+                )
+                if (showButtons) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        TextButton(onClick = {
+                            onHide.invoke(it)
+                            showButtons = false
+                        }) {
+                            val text = if (it.isHidden){
+                                "Show on day"
+                            }else{
+                                "Hide"
+                            }
+                            Text(text)
+                        }
+                    }
+                }
+            }
+
         }
+    }
+}
+
+@Composable
+private fun AgendaEvent.getHiddenColor(showAll: Boolean): Color {
+    return when {
+        isHidden.not() -> MaterialTheme.colorScheme.tertiary
+        isHidden && showAll -> MaterialTheme.colorScheme.secondary
+        else -> MaterialTheme.colorScheme.secondary
     }
 }
 

@@ -6,12 +6,14 @@ import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
 import domain.use_case.GetAllEventsUseCase
+import domain.use_case.ToggleEventVisibilityUseCase
 import platform.CalendarPermissionHandler
 
 class CalendarViewModel(
     private val getAllEventsUseCase: GetAllEventsUseCase,
     private val permissionHandler: CalendarPermissionHandler,
-    private val calendarGenerator: CalendarGenerator
+    private val calendarGenerator: CalendarGenerator,
+    private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase
 ) :
     BaseViewModel<Event, State, Effect>() {
 
@@ -21,7 +23,10 @@ class CalendarViewModel(
 
     private fun loadData() {
         when (val permissionState = permissionHandler.getPermissionState()) {
-            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch { loadEvents() }
+            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
+                loadEvents()
+            }
+
             else ->
                 setState {
                     State(
@@ -76,13 +81,25 @@ class CalendarViewModel(
                         CalendarPermissionHandler.State.FullAccess -> loadEvents()
                         else -> setState {
                             copy(
-                                events = emptyList(),
+                                agendaEvents = emptyList(),
                                 calendarPermission = state
                             )
                         }
                     }
                 }
             }
+
+            is Event.ToggleEventVisibility -> viewModelScope.launch {
+                when (val state = toggleEventVisibilityUseCase(agendaEvent = event.agendaEvent)) {
+                    is ToggleEventVisibilityUseCase.State.Success -> {
+                        val events = uiState.value.agendaEvents.toMutableList()
+                        events.remove(event.agendaEvent)
+                        events.add(state.agendaEvent)
+                        setState { copy(agendaEvents = events) }
+                    }
+                }
+            }
+            Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
         }
     }
 
@@ -90,7 +107,7 @@ class CalendarViewModel(
         when (val state = getAllEventsUseCase()) {
             is GetAllEventsUseCase.State.Success -> setState {
                 State(
-                    events = state.events,
+                    agendaEvents = state.agendaEvents,
                     days = calendarGenerator.calendar,
                     calendarPermission = CalendarPermissionHandler.State.FullAccess
                 )

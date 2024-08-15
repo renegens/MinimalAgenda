@@ -25,7 +25,6 @@ class iOSCalendarPermissionHandler(eventKit: EventKit) : CalendarPermissionHandl
     }
 
     override fun getPermissionState(): CalendarPermissionHandler.State {
-        println(EKEventStore.authorizationStatusForEntityType(EKEntityType.EKEntityTypeEvent))
         return when (EKEventStore.authorizationStatusForEntityType(EKEntityType.EKEntityTypeEvent)) {
             EKAuthorizationStatusFullAccess -> CalendarPermissionHandler.State.FullAccess
             EKAuthorizationStatusDenied -> CalendarPermissionHandler.State.Denied

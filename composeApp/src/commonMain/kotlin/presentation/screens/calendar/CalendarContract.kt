@@ -1,7 +1,8 @@
 package presentation.screens.calendar
 
-import data.calendar.EventEntity
+import data.local.HiddenEventEntity
 import domain.model.AgendaDay
+import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import platform.CalendarPermissionHandler
@@ -9,12 +10,12 @@ import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
 
-
 class CalendarContract {
 
     data class State(
         val days: List<AgendaDay> = emptyList(),
-        val events: List<EventEntity> = emptyList(),
+        val agendaEvents: List<AgendaEvent> = emptyList(),
+        val showAll: Boolean = false,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
     ) : UiState
 
@@ -34,6 +35,8 @@ class CalendarContract {
         class OnMonthClicked(val agendaMonthYear: AgendaMonthYear) : Event()
         class OnYearClicked(val agendaYear: AgendaYear) : Event()
         object OnRequestCalendarPermissionClicked : Event()
+        class ToggleEventVisibility(val agendaEvent: AgendaEvent): Event()
+        object ToggleActive: Event()
     }
 
     enum class Section(val position: Int) {

@@ -58,6 +58,7 @@ fun CalendarScreen() {
                     pagerState.animateScrollToPage(page = Section.Month.position)
                     monthScrollPosition = it.agendaMonthYear
                 }
+
                 is Effect.GoToYear -> {
                     pagerState.animateScrollToPage(page = Section.Year.position)
                     yearScrollPosition = it.agendaYear.year
@@ -74,8 +75,10 @@ fun CalendarScreen() {
                         days = state.days,
                         onNowClicked = isScrolledToToday,
                         scrollToDay = dayScrollPosition,
-                        events = state.events,
+                        agendaEvents = state.agendaEvents,
                         calendarPermission = state.calendarPermission,
+                        showAll = state.showAll,
+                        onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
                         onRequestCalendarPermission = {
                             viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
                         }
@@ -104,11 +107,15 @@ fun CalendarScreen() {
             Row(
                 modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
             ) {
-                ActionButton(nowClicked = {
+                ActionButton(
+                    showAll = state.showAll,
+                    nowClicked = {
                     viewModel.setEvent(
                         Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
                     )
-                }, toggleActive = {})
+                }, toggleActive = {
+                    viewModel.setEvent(Event.ToggleActive)
+                })
             }
         }
     }

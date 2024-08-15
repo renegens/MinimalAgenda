@@ -17,7 +17,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit) {
+fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, showAll: Boolean) {
     Box(
         modifier = Modifier.width(100.dp).height(110.dp)
             .clip(RoundedCornerShape(topStart = 12.dp, bottomStart = 12.dp))
@@ -38,8 +38,9 @@ fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit) {
                 contentAlignment = Alignment.Center
 
             ) {
+                val label = if (showAll) "Showing All" else "Active Only"
                 TextButton(onClick = toggleActive) {
-                    Text("Active only", color = MaterialTheme.colorScheme.surface)
+                    Text(label, color = MaterialTheme.colorScheme.surface)
                 }
             }
         }

@@ -1,7 +1,11 @@
 package repository
 
+import data.local.HiddenEventEntity
+import domain.model.AgendaEvent
+
 interface HiddenEventsRepository {
-    suspend fun getEvents(): List<String>
-    suspend fun hideEvent(eventId: String)
-    suspend fun unhideEvent(eventId: String)
+    suspend fun getEvents(): List<HiddenEventEntity>
+    suspend fun hideEvent(agendaEvent: AgendaEvent)
+    suspend fun unhiddenEvent(agendaEvent: AgendaEvent)
+    suspend fun toggleEventVisibility(agendaEvent: AgendaEvent)
 }

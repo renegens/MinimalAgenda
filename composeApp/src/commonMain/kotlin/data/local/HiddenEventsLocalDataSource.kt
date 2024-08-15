@@ -11,6 +11,7 @@ class HiddenEventsLocalDataSource(private val dataStore: DataStore) {
 
     companion object {
         const val HIDDEN_EVENTS = "hidden events"
+        const val EMPTY_JSON_ARRAY = "[]"
     }
 
     suspend fun getEvents(): String {

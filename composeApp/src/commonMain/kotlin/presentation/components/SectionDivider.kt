@@ -17,9 +17,9 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun SectionDivider(isCurrent: Boolean) {
     val current = if (isCurrent) {
-        MaterialTheme.colorScheme.tertiary
-    } else {
         MaterialTheme.colorScheme.primary
+    } else {
+        MaterialTheme.colorScheme.tertiary
     }
     ZigzagLine(color = current)
 }
