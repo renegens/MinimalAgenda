@@ -20,10 +20,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import domain.model.DayGrid
 import domain.model.createGridDay
+import extensions.hasEvents
 import extensions.today
 import presentation.components.MonthHeader
 import presentation.components.SectionDivider
@@ -31,20 +33,20 @@ import presentation.components.SectionDivider
 @Composable
 fun MonthGrid(
     monthYear: AgendaMonthYear,
+    events: List<AgendaEvent>,
     onDayClicked: (Int) -> Unit,
-    onYearClicked: (AgendaYear) -> Unit
+    onYearClicked: (AgendaYear) -> Unit,
+    showAll: Boolean
 ) {
     val isCurrent by remember { mutableStateOf(monthYear.isCurrent) }
 
     Spacer(modifier = Modifier.height(16.dp))
-    MonthHeader(
-        monthYear = monthYear,
+    MonthHeader(monthYear = monthYear,
         modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
     Spacer(modifier = Modifier.height(16.dp))
     DaysInWeek(today = today, isCurrentMonth = isCurrent)
     CalendarDays(
-        monthYear = monthYear,
-        onDayClicked = onDayClicked
+        events = events, monthYear = monthYear, onDayClicked = onDayClicked, showAll = showAll
     )
     Spacer(modifier = Modifier.height(16.dp))
     SectionDivider(isCurrent = isCurrent)
@@ -53,6 +55,8 @@ fun MonthGrid(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun CalendarDays(
+    events: List<AgendaEvent>,
+    showAll: Boolean,
     monthYear: AgendaMonthYear,
     onDayClicked: (Int) -> Unit
 ) {
@@ -67,7 +71,7 @@ fun CalendarDays(
     ) {
         gridDays.forEach { gridItem ->
 
-            val hasToday by derivedStateOf {
+            val isToday by derivedStateOf {
                 gridItem.epochDay == today.toEpochDays()
             }
 
@@ -80,6 +84,9 @@ fun CalendarDays(
                     color = Color.Transparent
                 )
             } else {
+                val hasEvent =
+                    events.hasEvents(epochDay = gridItem.epochDay, showAll = showAll)
+
                 TextButton(
                     onClick = { onDayClicked.invoke(gridItem.epochDay) },
                     modifier = Modifier.height(44.dp).width(44.dp)
@@ -88,10 +95,19 @@ fun CalendarDays(
                         text = gridItem.dayInMonth.toString(),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Start,
-                        color = if (hasToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
+                        color = getTextColor(hasEvent, isToday = isToday)
                     )
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun getTextColor(hasEvent: Boolean, isToday: Boolean): Color {
+    return when {
+        isToday -> MaterialTheme.colorScheme.primary
+        hasEvent -> MaterialTheme.colorScheme.tertiary
+        else -> MaterialTheme.colorScheme.secondary
     }
 }

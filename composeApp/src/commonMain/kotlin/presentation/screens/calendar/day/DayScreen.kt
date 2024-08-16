@@ -86,7 +86,7 @@ fun DayScreen(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Entries(
-                agendaEvents = agendaEvents.filter { it.epochDay == day.epochDay },
+                agendaEvents = agendaEvents.today(day.epochDay),
                 onHide = onHide,
                 showAll = showAll
             )
@@ -152,22 +152,22 @@ fun Entries(
                     modifier = Modifier.padding(start = 12.dp)
                 )
                 AnimatedVisibility(visible = showButtons) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth(),
-                        ) {
-                            TextButton(onClick = {
-                                onHide.invoke(it)
-                                showButtons = false
-                            }) {
-                                val text = if (it.isHidden) {
-                                    "Show"
-                                } else {
-                                    "Hide"
-                                }
-                                Text(text)
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth(),
+                    ) {
+                        TextButton(onClick = {
+                            onHide.invoke(it)
+                            showButtons = false
+                        }) {
+                            val text = if (it.isHidden) {
+                                "Show"
+                            } else {
+                                "Hide"
                             }
+                            Text(text)
                         }
+                    }
                 }
             }
 

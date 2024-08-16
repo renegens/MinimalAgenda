@@ -11,17 +11,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import domain.model.AgendaDay
+import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
-import extensions.today
-import extensions.todayEpochDay
-import kotlinx.datetime.LocalDate
+import extensions.getInRange
 
 @Composable
 fun MonthsScreen(
     days: List<AgendaDay>,
+    events: List<AgendaEvent>,
     onNowClicked: Boolean,
     scrollToMonth: AgendaMonthYear?,
+    showAll: Boolean,
     onDayClicked: (Int) -> Unit,
     onYearClicked: (AgendaYear) -> Unit
 ) {
@@ -56,9 +57,11 @@ fun MonthsScreen(
     LazyColumn(
         state = listState, modifier = Modifier.fillMaxSize()
     ) {
-        itemsIndexed(items = months.keys.toList()) { _, item ->
+        itemsIndexed(items = months.keys.toList()) { _, agendaMonthYear ->
             MonthGrid(
-                monthYear = item,
+                events = events.getInRange(agendaMonthYear),
+                monthYear = agendaMonthYear,
+                showAll = showAll,
                 onDayClicked = onDayClicked,
                 onYearClicked = onYearClicked
             )

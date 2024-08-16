@@ -86,8 +86,10 @@ fun CalendarScreen() {
 
                     CalendarContract.Section.Month.position -> MonthsScreen(
                         days = state.days,
+                        events = state.agendaEvents,
                         onNowClicked = isScrolledToMonth,
                         scrollToMonth = monthScrollPosition,
+                        showAll = state.showAll,
                         onDayClicked = {
                             viewModel.setEvent(Event.OnDayClicked(epochDay = it))
                         },
