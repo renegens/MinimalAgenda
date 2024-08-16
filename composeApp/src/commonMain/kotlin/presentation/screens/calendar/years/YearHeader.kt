@@ -12,20 +12,20 @@ import domain.model.AgendaYear
 @Composable
 fun YearHeader(agendaYear: AgendaYear) {
     val currentYearColor = if (agendaYear.isCurrent) {
-        MaterialTheme.colorScheme.tertiary
+        MaterialTheme.colorScheme.tertiary to MaterialTheme.colorScheme.primary
     } else {
-        MaterialTheme.colorScheme.primary
+        MaterialTheme.colorScheme.secondary to MaterialTheme.colorScheme.secondary
     }
 
     Row(modifier = Modifier.padding(horizontal = 16.dp)) {
         Text(
             agendaYear.firstTwoDigits,
-            color = MaterialTheme.colorScheme.primary,
+            color = currentYearColor.first,
             style = MaterialTheme.typography.displayLarge
         )
         Text(
             agendaYear.lastTwoDigits,
-            color = currentYearColor,
+            color = currentYearColor.second,
             style = MaterialTheme.typography.displayLarge
         )
     }

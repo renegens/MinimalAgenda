@@ -82,7 +82,7 @@ private fun MonthText(text: String, modifier: Modifier) {
     Text(
         text,
         style = MaterialTheme.typography.headlineLarge,
-        color = MaterialTheme.colorScheme.primary,
+        color = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.then(modifier)
     )
 }
@@ -92,7 +92,7 @@ private fun MonthTextFocused(text: String, modifier: Modifier) {
     Text(
         text,
         style = MaterialTheme.typography.headlineLarge,
-        color = MaterialTheme.colorScheme.tertiary,
+        color = MaterialTheme.colorScheme.primary,
         modifier = Modifier.then(modifier)
     )
 }

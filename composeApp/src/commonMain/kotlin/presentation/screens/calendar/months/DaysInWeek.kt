@@ -28,7 +28,7 @@ fun DaysInWeek(today: LocalDate, isCurrentMonth: Boolean) {
                 text = daysInWeek.firstLetter,
                 style = MaterialTheme.typography.bodyMedium,
                 textAlign = TextAlign.Center,
-                color = if (index == todayIndex && isCurrentMonth) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary,
+                color = if (index == todayIndex && isCurrentMonth) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
             )
         }
     }

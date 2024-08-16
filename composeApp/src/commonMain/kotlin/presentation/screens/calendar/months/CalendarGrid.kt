@@ -87,7 +87,7 @@ fun CalendarDays(
                         text = gridItem.dayInMonth.toString(),
                         style = MaterialTheme.typography.bodyMedium,
                         textAlign = TextAlign.Start,
-                        color = if (hasToday) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.primary
+                        color = if (hasToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
                     )
                 }
             }

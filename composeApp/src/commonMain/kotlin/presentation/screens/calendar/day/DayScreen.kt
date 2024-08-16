@@ -2,7 +2,6 @@ package presentation.screens.calendar.day
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -28,13 +27,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.key.Key.Companion.S
 import androidx.compose.ui.unit.dp
-import data.local.HiddenEventEntity
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import extensions.millisToHoursAndMinutes
-import extensions.millisToTime
 import extensions.today
 import extensions.todayEpochDay
 import platform.CalendarPermissionHandler
@@ -175,7 +171,7 @@ fun Entries(
                             showButtons = false
                         }) {
                             val text = if (it.isHidden){
-                                "Show on day"
+                                "Show"
                             }else{
                                 "Hide"
                             }
