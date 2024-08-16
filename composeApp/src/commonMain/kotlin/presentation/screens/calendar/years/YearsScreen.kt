@@ -20,6 +20,7 @@ import domain.model.AgendaYear
 import extensions.today
 import kotlinx.datetime.LocalDate
 import presentation.components.SectionDivider
+import presentation.components.YearHeader
 
 @Composable
 fun YearsScreen(

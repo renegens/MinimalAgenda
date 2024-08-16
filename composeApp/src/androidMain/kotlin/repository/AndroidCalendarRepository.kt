@@ -55,7 +55,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
     }
 
-    override suspend fun getEvents(calendarId: String, timeInMonths: Int): List<EventEntity> {
+    override suspend fun getAllEvents(): List<EventEntity> {
         return withContext(Dispatchers.IO) {
             val events = mutableListOf<EventEntity>()
             val projection = arrayOf(
@@ -78,7 +78,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
             val selection =
                 "${CalendarContract.Events.CALENDAR_ID} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTSTART} <= ?"
             val selectionArgs = arrayOf(
-                calendarId,
+                "calendarId",
                 startOfRange.timeInMillis.toString(),
                 endOfRange.timeInMillis.toString()
             )
@@ -113,6 +113,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                             id.toString(),
                             title,
                             startTime,
+                            allDay = false,
                             epochDay = endTime.millisToEpochDay()
                         )
                     )
@@ -121,10 +122,5 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
             return@withContext events
         }
-
-    }
-
-    override suspend fun getAllEvents(): List<EventEntity> {
-        return emptyList()
     }
 }

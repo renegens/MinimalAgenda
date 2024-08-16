@@ -1,5 +1,6 @@
 package presentation.screens.calendar.day
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -30,11 +31,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
-import extensions.millisToHoursAndMinutes
 import extensions.today
 import extensions.todayEpochDay
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
+import presentation.components.DayHeader
 import presentation.components.SectionDivider
 
 @Composable
@@ -77,7 +78,7 @@ fun DayScreen(
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == today.toEpochDays()
             Spacer(modifier = Modifier.height(32.dp))
-            Header(
+            DayHeader(
                 day = day.dayInWeek.short,
                 dayInMonth = day.dayOfMonth,
                 month = day.agendaMonthYear.agendaMonth.number,
@@ -92,22 +93,6 @@ fun DayScreen(
             Spacer(modifier = Modifier.height(32.dp))
             SectionDivider(isCurrent = isToday)
         }
-    }
-}
-
-@Composable
-fun Header(day: String, dayInMonth: Int, month: Int, isToday: Boolean) {
-    Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = day,
-            style = MaterialTheme.typography.displayLarge,
-            color = if (isToday) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary,
-        )
-        Text(
-            "$dayInMonth.$month",
-            style = MaterialTheme.typography.displayLarge,
-            color = if (isToday) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
-        )
     }
 }
 
@@ -132,25 +117,30 @@ fun Entries(
     items.sortedBy { it.startTime }.forEach {
         var showButtons by remember { mutableStateOf(false) }
 
-        Row(modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(16.dp)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 16.dp)
+                .padding(bottom = 4.dp)
+        ) {
             Row {
-                val time = it.startTime.millisToHoursAndMinutes()
+                val time = it.formatedStartTime
                 Text(
-                    "${time.first}:",
+                    if (it.allDay) "All Day" else time.first,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = it.getHiddenColor(showAll)
+                    color = it.getTextColor(showAll)
                 )
-                Spacer(Modifier.width(4.dp))
-                Text(
-                    time.second,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = it.getHiddenColor(showAll)
-                )
+                if (it.allDay.not()) {
+                    Spacer(Modifier.width(8.dp))
+                    Text(
+                        if (it.allDay) "" else ":${time.second}",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = it.getTextColor(showAll)
+                    )
+                }
             }
-            Spacer(Modifier.width(8.dp))
+            Spacer(Modifier.width(4.dp))
             Column(
                 modifier = Modifier.fillMaxWidth().background(
-                    color = if (showButtons) Color.LightGray else Color.Transparent
+                    color = if (showButtons) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
                 ).clickable {
                     showButtons = !showButtons
                 }
@@ -158,26 +148,26 @@ fun Entries(
                 Text(
                     it.title,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = it.getHiddenColor(showAll),
-                    modifier = Modifier.padding(start = 16.dp)
+                    color = it.getTextColor(showAll),
+                    modifier = Modifier.padding(start = 12.dp)
                 )
-                if (showButtons) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
-                    ) {
-                        TextButton(onClick = {
-                            onHide.invoke(it)
-                            showButtons = false
-                        }) {
-                            val text = if (it.isHidden){
-                                "Show"
-                            }else{
-                                "Hide"
+                AnimatedVisibility(visible = showButtons) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth(),
+                        ) {
+                            TextButton(onClick = {
+                                onHide.invoke(it)
+                                showButtons = false
+                            }) {
+                                val text = if (it.isHidden) {
+                                    "Show"
+                                } else {
+                                    "Hide"
+                                }
+                                Text(text)
                             }
-                            Text(text)
                         }
-                    }
                 }
             }
 
@@ -186,7 +176,7 @@ fun Entries(
 }
 
 @Composable
-private fun AgendaEvent.getHiddenColor(showAll: Boolean): Color {
+private fun AgendaEvent.getTextColor(showAll: Boolean): Color {
     return when {
         isHidden.not() -> MaterialTheme.colorScheme.tertiary
         isHidden && showAll -> MaterialTheme.colorScheme.secondary

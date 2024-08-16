@@ -51,30 +51,6 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         }
     }
 
-    override suspend fun getEvents(calendarId: String, timeInMonths: Int): List<EventEntity> {
-        return withContext(Dispatchers.Default) {
-
-            suspendCancellableCoroutine { continuation ->
-                val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
-                val startDate = nsStartDateForCalendar(timeInMonths)
-                val endDate = nsEndDateForCalendar(timeInMonths)
-
-                val predicate =
-                    eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
-                val events = eventStore.eventsMatchingPredicate(predicate).map { event ->
-                    event as EKEvent
-                    EventEntity(
-                        id = event.eventIdentifier,
-                        title = event.title,
-                        startTime = event.startDate?.timeIntervalSince1970?.toLong(),
-                    )
-                }
-
-                continuation.resume(events)
-            }
-        }
-    }
-
     private fun nsStartDateForCalendar(months: Int): NSDate {
         val calendar = NSCalendar.currentCalendar
         val currentDate = NSDate()
@@ -111,10 +87,12 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
                 val events = eventStore.eventsMatchingPredicate(predicate).map { event ->
                     event as EKEvent
+                    event.allDay
                     EventEntity(
                         id = event.eventIdentifier,
                         title = event.title,
                         startTime = event.startDate?.timeIntervalSince1970?.toLong(),
+                        allDay = event.allDay,
                         epochDay = null,
                     )
                 }

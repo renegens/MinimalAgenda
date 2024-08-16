@@ -1,22 +1,27 @@
 package domain.model
 
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.Month
 import kotlinx.datetime.number
 
 enum class AgendaMonth(val number: Int, val nameRes: String) {
-    January(1, "Jan"),
-    February(2, "Feb"),
+    January(1, "January"),
+    February(2, "February"),
     March(3, "March"),
-    April(4, "Apr"),
+    April(4, "April"),
     May(5, "May"),
-    June(6, "Jun"),
-    July(7, "Jul"),
-    August(8, "Aug"),
-    September(9, "Sep"),
-    October(10, "Oct"),
-    November(11, "Nov"),
-    December(12, "Dec"),
-    Unexpected(-1, "")
+    June(6, "June"),
+    July(7, "July"),
+    August(8, "August"),
+    September(9, "September"),
+    October(10, "October"),
+    November(11, "November"),
+    December(12, "December"),
+    Unexpected(-1, "");
+
+    fun isCurrent(today: LocalDate, year: Int): Boolean {
+        return number == today.month.number && today.year == year
+    }
 }
 
 fun AgendaMonth.toMonth() = when (this.number) {

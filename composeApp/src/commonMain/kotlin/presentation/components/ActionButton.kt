@@ -27,20 +27,20 @@ fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, showAll: Bool
                 modifier = Modifier.weight(0.5f).fillMaxSize()
                     .background(color = MaterialTheme.colorScheme.tertiary),
                 contentAlignment = Alignment.Center
+
             ) {
-                TextButton(onClick = nowClicked) {
-                    Text("Now", color = MaterialTheme.colorScheme.surface)
+                val label = if (showAll) "All" else "Active only"
+                TextButton(onClick = toggleActive) {
+                    Text(label, color = MaterialTheme.colorScheme.surface)
                 }
             }
             Box(
                 modifier = Modifier.weight(0.5f).fillMaxSize()
                     .background(color = MaterialTheme.colorScheme.primary),
                 contentAlignment = Alignment.Center
-
             ) {
-                val label = if (showAll) "Showing All" else "Active Only"
-                TextButton(onClick = toggleActive) {
-                    Text(label, color = MaterialTheme.colorScheme.surface)
+                TextButton(onClick = nowClicked) {
+                    Text("Now", color = MaterialTheme.colorScheme.surface)
                 }
             }
         }

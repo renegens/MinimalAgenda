@@ -9,13 +9,16 @@ object CustomColor {
     val LightGray = Color(0xFFA09F9F)
     val Orange = Color(0xFFEA4E27)
     val Sepia = Color(0xFFF0ECE5)
+    val LightSelection = Color(0xFFd5d1c7)
+    val DarkSelection = Color(0xFFd5d1c7)
 }
 
 val LightColorScheme = lightColorScheme(
     primary = CustomColor.Orange,
     secondary = CustomColor.LightGray,
     tertiary = CustomColor.DarkGray,
-    background = CustomColor.Sepia
+    background = CustomColor.Sepia,
+    secondaryContainer = CustomColor.LightSelection
 )
 
 val DarkColorScheme = darkColorScheme(

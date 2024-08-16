@@ -25,6 +25,7 @@ import domain.model.AgendaYear
 import domain.model.DayGrid
 import domain.model.createGridDay
 import extensions.today
+import presentation.components.MonthHeader
 import presentation.components.SectionDivider
 
 @Composable

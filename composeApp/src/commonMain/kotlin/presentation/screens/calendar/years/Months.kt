@@ -23,10 +23,8 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Column(modifier = Modifier.weight(0.5f)) {
             months.first().forEachIndexed { _, month ->
-                val isCurrent =
-                    month.number == today.month.number && today.year == year
-                if (isCurrent) {
-                    MonthTextFocused(month.name, modifier = Modifier.clickable {
+                if (month.isCurrent(today, year)) {
+                    MonthTextFocused(month.nameRes, modifier = Modifier.clickable {
                         onMonthClicked.invoke(
                             AgendaMonthYear(
                                 agendaYear = AgendaYear(year),
@@ -49,10 +47,8 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
 
         Column(modifier = Modifier.weight(0.5f)) {
             months[1].forEachIndexed { _, month ->
-                val isCurrent =
-                    month.number == today.month.number && today.year == year
-                if (isCurrent) {
-                    MonthTextFocused(month.name, modifier = Modifier.clickable {
+                if (month.isCurrent(today, year)) {
+                    MonthTextFocused(month.nameRes, modifier = Modifier.clickable {
                         onMonthClicked.invoke(
                             AgendaMonthYear(
                                 agendaYear = AgendaYear(year),
@@ -79,8 +75,9 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
 
 @Composable
 private fun MonthText(text: String, modifier: Modifier) {
+    val shortMonth = text.substring(0, 3)
     Text(
-        text,
+        shortMonth,
         style = MaterialTheme.typography.headlineLarge,
         color = MaterialTheme.colorScheme.secondary,
         modifier = Modifier.then(modifier)
