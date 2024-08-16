@@ -15,6 +15,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
+import presentation.theme.CustomColor
 
 @Composable
 fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, showAll: Boolean) {
@@ -25,13 +26,13 @@ fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, showAll: Bool
         Column(modifier = Modifier.fillMaxSize()) {
             Box(
                 modifier = Modifier.weight(0.5f).fillMaxSize()
-                    .background(color = MaterialTheme.colorScheme.tertiary),
+                    .background(color = CustomColor.Black_500),
                 contentAlignment = Alignment.Center
 
             ) {
                 val label = if (showAll) "All" else "Active only"
                 TextButton(onClick = toggleActive) {
-                    Text(label, color = MaterialTheme.colorScheme.surface)
+                    Text(label, color = CustomColor.White_800)
                 }
             }
             Box(
@@ -40,7 +41,7 @@ fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, showAll: Bool
                 contentAlignment = Alignment.Center
             ) {
                 TextButton(onClick = nowClicked) {
-                    Text("Now", color = MaterialTheme.colorScheme.surface)
+                    Text("Now", color = CustomColor.White_800)
                 }
             }
         }

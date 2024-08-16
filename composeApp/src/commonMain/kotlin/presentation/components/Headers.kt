@@ -15,8 +15,9 @@ import domain.model.AgendaYear
 @Composable
 fun MonthHeader(monthYear: AgendaMonthYear, modifier: Modifier) {
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).then(modifier)) {
+        val shortMonth = monthYear.agendaMonth.nameRes.substring(0,3)
         Text(
-            text = monthYear.agendaMonth.nameRes,
+            text = shortMonth,
             style = MaterialTheme.typography.displayLarge,
             color = ColorPrimary(monthYear.isCurrent)
         )
