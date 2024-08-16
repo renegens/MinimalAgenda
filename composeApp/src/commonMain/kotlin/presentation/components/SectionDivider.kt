@@ -4,7 +4,6 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -26,7 +25,7 @@ fun SectionDivider(isCurrent: Boolean) {
 
 @Composable
 private fun ZigzagLine(color: Color) {
-    Canvas(modifier = Modifier.fillMaxWidth().height(8.dp).padding(horizontal = 1.dp)) {
+    Canvas(modifier = Modifier.fillMaxWidth().height(8.dp).padding(horizontal = 16.dp)) {
         val path = Path().apply {
             fillType = PathFillType.EvenOdd
             moveTo(0f, size.height / 2)
@@ -37,7 +36,7 @@ private fun ZigzagLine(color: Color) {
                 lineTo(x + step, size.height / 2)
                 x += step
             }
-            lineTo(size.width, size.height / 2)
+            //lineTo(size.width, size.height / 2)
         }
         drawPath(
             path = path,
