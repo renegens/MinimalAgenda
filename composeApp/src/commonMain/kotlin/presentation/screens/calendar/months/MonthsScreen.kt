@@ -14,7 +14,7 @@ import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
-import extensions.getInRange
+import extensions.getInRangeOf
 
 @Composable
 fun MonthsScreen(
@@ -59,7 +59,7 @@ fun MonthsScreen(
     ) {
         itemsIndexed(items = months.keys.toList()) { _, agendaMonthYear ->
             MonthGrid(
-                events = events.getInRange(agendaMonthYear),
+                events = events.getInRangeOf(agendaMonthYear),
                 monthYear = agendaMonthYear,
                 showAll = showAll,
                 onDayClicked = onDayClicked,

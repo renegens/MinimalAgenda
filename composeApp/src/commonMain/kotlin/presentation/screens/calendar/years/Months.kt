@@ -10,14 +10,21 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import domain.model.AgendaEvent
 import domain.model.AgendaMonth
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
+import extensions.getEventsForMonth
+import extensions.hasHiddenEvents
 import extensions.today
-import kotlinx.datetime.number
 
 @Composable
-fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
+fun Months(
+    yearEvents: List<AgendaEvent>,
+    showAll: Boolean,
+    year: Int,
+    onMonthClicked: (AgendaMonthYear) -> Unit
+) {
     val months = AgendaMonth.entries.chunked(6)
 
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -33,7 +40,13 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
                         )
                     })
                 } else {
-                    MonthText(month.nameRes, modifier = Modifier.clickable {
+                    val events = yearEvents.getEventsForMonth(month, year)
+                    val hasMonthEvents = if (showAll){
+                        events.isNotEmpty()
+                    }else{
+                        events.hasHiddenEvents()
+                    }
+                    MonthText(month.nameRes, hasEvents = hasMonthEvents, modifier = Modifier.clickable {
                         onMonthClicked.invoke(
                             AgendaMonthYear(
                                 agendaYear = AgendaYear(year),
@@ -57,8 +70,15 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
                         )
                     })
                 } else {
+                    val events = yearEvents.getEventsForMonth(month, year)
+                    val hasMonthEvents = if (showAll){
+                        events.isNotEmpty()
+                    }else{
+                        events.hasHiddenEvents()
+                    }
                     MonthText(
                         month.nameRes,
+                        hasEvents = hasMonthEvents,
                         modifier = Modifier.clickable {
                             onMonthClicked.invoke(
                                 AgendaMonthYear(
@@ -74,12 +94,12 @@ fun Months(year: Int, onMonthClicked: (AgendaMonthYear) -> Unit) {
 }
 
 @Composable
-private fun MonthText(text: String, modifier: Modifier) {
+private fun MonthText(text: String, modifier: Modifier, hasEvents: Boolean) {
     val shortMonth = text.substring(0, 3)
     Text(
         shortMonth,
         style = MaterialTheme.typography.headlineLarge,
-        color = MaterialTheme.colorScheme.secondary,
+        color = if (hasEvents) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
         modifier = Modifier.then(modifier)
     )
 }

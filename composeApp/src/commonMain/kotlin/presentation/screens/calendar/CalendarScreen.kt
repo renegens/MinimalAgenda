@@ -100,6 +100,8 @@ fun CalendarScreen() {
 
                     CalendarContract.Section.Year.position -> YearsScreen(
                         days = state.days,
+                        events = state.agendaEvents,
+                        showAll = state.showAll,
                         onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
                         onNowClicked = isScrolledToYear,
                         scrollToYear = yearScrollPosition
