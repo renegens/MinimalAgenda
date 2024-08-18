@@ -1,6 +1,5 @@
 package presentation.screens.calendar
 
-import data.local.HiddenEventEntity
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
@@ -37,6 +36,7 @@ class CalendarContract {
         object OnRequestCalendarPermissionClicked : Event()
         class ToggleEventVisibility(val agendaEvent: AgendaEvent): Event()
         object ToggleActive: Event()
+        class Notify(val agendaEvent: AgendaEvent): Event()
     }
 
     enum class Section(val position: Int) {

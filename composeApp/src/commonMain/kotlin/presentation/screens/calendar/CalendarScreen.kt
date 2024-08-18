@@ -78,6 +78,7 @@ fun CalendarScreen() {
                         agendaEvents = state.agendaEvents,
                         calendarPermission = state.calendarPermission,
                         showAll = state.showAll,
+                        onNotify = { viewModel.setEvent(Event.Notify(it)) },
                         onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
                         onRequestCalendarPermission = {
                             viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
@@ -114,12 +115,12 @@ fun CalendarScreen() {
                 ActionButton(
                     showAll = state.showAll,
                     nowClicked = {
-                    viewModel.setEvent(
-                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                    )
-                }, toggleActive = {
-                    viewModel.setEvent(Event.ToggleActive)
-                })
+                        viewModel.setEvent(
+                            Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                        )
+                    }, toggleActive = {
+                        viewModel.setEvent(Event.ToggleActive)
+                    })
             }
         }
     }

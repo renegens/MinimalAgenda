@@ -47,7 +47,8 @@ fun DayScreen(
     showAll: Boolean,
     onHide: (AgendaEvent) -> Unit,
     calendarPermission: CalendarPermissionHandler.State,
-    onRequestCalendarPermission: () -> Unit
+    onRequestCalendarPermission: () -> Unit,
+    onNotify: (AgendaEvent) -> Unit
 ) {
     if (days.isEmpty()) return
 
@@ -88,6 +89,7 @@ fun DayScreen(
             Entries(
                 agendaEvents = agendaEvents.today(day.epochDay),
                 onHide = onHide,
+                onNotify = onNotify,
                 showAll = showAll
             )
             Spacer(modifier = Modifier.height(32.dp))
@@ -99,6 +101,7 @@ fun DayScreen(
 @Composable
 fun Entries(
     agendaEvents: List<AgendaEvent>,
+    onNotify: (AgendaEvent) -> Unit,
     onHide: (AgendaEvent) -> Unit,
     showAll: Boolean
 ) {
@@ -167,6 +170,11 @@ fun Entries(
                             }
                             Text(text)
                         }
+                        TextButton(onClick = {
+                            onNotify.invoke(it)
+                            showButtons = false
+                        }){
+                            Text("Notify") }
                     }
                 }
             }

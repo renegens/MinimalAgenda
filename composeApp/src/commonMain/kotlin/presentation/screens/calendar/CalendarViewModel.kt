@@ -6,6 +6,7 @@ import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
 import domain.use_case.GetAllEventsUseCase
+import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import platform.CalendarPermissionHandler
 
@@ -13,7 +14,8 @@ class CalendarViewModel(
     private val getAllEventsUseCase: GetAllEventsUseCase,
     private val permissionHandler: CalendarPermissionHandler,
     private val calendarGenerator: CalendarGenerator,
-    private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase
+    private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
+    private val scheduleNotificationUseCase: ScheduleNotificationUseCase
 ) :
     BaseViewModel<Event, State, Effect>() {
 
@@ -99,7 +101,10 @@ class CalendarViewModel(
                     }
                 }
             }
+
+            is Event.Notify -> viewModelScope.launch { scheduleNotificationUseCase(agendaEvent = event.agendaEvent) }
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
+
         }
     }
 
