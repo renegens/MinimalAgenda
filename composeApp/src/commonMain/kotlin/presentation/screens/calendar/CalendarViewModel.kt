@@ -102,7 +102,15 @@ class CalendarViewModel(
                 }
             }
 
-            is Event.Notify -> viewModelScope.launch { scheduleNotificationUseCase(agendaEvent = event.agendaEvent) }
+            is Event.Notify -> viewModelScope.launch {
+                when(scheduleNotificationUseCase(agendaEvent = event.agendaEvent)){
+                    ScheduleNotificationUseCase.State.Fail -> {}
+                    ScheduleNotificationUseCase.State.PermissionMissing -> setEffect {
+                      Effect.NotificationPermissionMissing
+                    }
+                    ScheduleNotificationUseCase.State.Success -> {}
+                }
+            }
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
 
         }

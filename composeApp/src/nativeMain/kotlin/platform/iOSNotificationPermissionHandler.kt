@@ -14,12 +14,8 @@ class iOSNotificationPermissionHandler : NotificationPermissionHandler {
             val center = UNUserNotificationCenter.currentNotificationCenter()
             center.requestAuthorizationWithOptions(
                 options = UNAuthorizationOptionAlert or UNAuthorizationOptionSound or UNAuthorizationOptionBadge
-            ) { granted, error ->
-                if (error != null) {
-                    continuation.resume(false)
-                } else {
-                    continuation.resume(granted)
-                }
+            ) { granted, _ ->
+                continuation.resume(granted)
             }
         }
     }

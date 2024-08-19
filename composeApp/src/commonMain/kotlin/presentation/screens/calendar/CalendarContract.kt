@@ -25,6 +25,7 @@ class CalendarContract {
         class GoToDay(val index: Int) : Effect()
         class GoToMonth(val agendaMonthYear: AgendaMonthYear) : Effect()
         class GoToYear(val agendaYear: AgendaYear) : Effect()
+        object NotificationPermissionMissing: Effect()
     }
 
     sealed class Event : UiEvent {

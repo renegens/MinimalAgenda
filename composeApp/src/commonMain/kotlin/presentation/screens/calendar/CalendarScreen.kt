@@ -23,6 +23,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.components.ActionButton
+import presentation.components.NotificationPermissionDialog
 import presentation.screens.calendar.day.DayScreen
 import presentation.screens.calendar.months.MonthsScreen
 import presentation.screens.calendar.years.YearsScreen
@@ -42,6 +43,8 @@ fun CalendarScreen() {
     var dayScrollPosition by remember { mutableStateOf(-1) }
     var yearScrollPosition by remember { mutableStateOf(-1) }
     var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
+
+    var shouldShowNotificationPermission by remember { mutableStateOf(false)  }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -63,12 +66,17 @@ fun CalendarScreen() {
                     pagerState.animateScrollToPage(page = Section.Year.position)
                     yearScrollPosition = it.agendaYear.year
                 }
+                is Effect.NotificationPermissionMissing -> {
+                    shouldShowNotificationPermission = true
+                }
             }
         }
     }
-
     Scaffold {
         Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+            if (shouldShowNotificationPermission){
+                NotificationPermissionDialog(onDismissRequest = {shouldShowNotificationPermission = false})
+            }
             HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
                 when (page) {
                     CalendarContract.Section.Day.position -> DayScreen(
