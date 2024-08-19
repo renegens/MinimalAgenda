@@ -128,6 +128,8 @@ fun CalendarScreen() {
                         )
                     }, toggleActive = {
                         viewModel.setEvent(Event.ToggleActive)
+                    }, onAdd = {
+
                     })
             }
         }

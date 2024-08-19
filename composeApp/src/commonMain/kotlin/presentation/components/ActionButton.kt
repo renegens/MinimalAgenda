@@ -22,7 +22,7 @@ import androidx.compose.ui.unit.dp
 import presentation.theme.CustomColor
 
 @Composable
-fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, showAll: Boolean) {
+fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, onAdd: () -> Unit, showAll: Boolean) {
         Column(modifier = Modifier.padding(end = 16.dp)) {
             Box(
                 modifier = Modifier.size(64.dp).background(color = CustomColor.Black_500, shape = CircleShape),
@@ -49,7 +49,7 @@ fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, showAll: Bool
                 contentAlignment = Alignment.Center
 
             ) {
-                IconButton(onClick = {}) {
+                IconButton(onClick = onAdd) {
                     Icon(Icons.Default.Add, contentDescription = null, tint = CustomColor.White_800)
                 }
             }
