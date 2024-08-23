@@ -20,7 +20,7 @@ object CustomColor {
 
     val Sepia_900 = Color(0xFFd5d1c7)
 
-    val White_800 = Color(0xFFe4e4e4)
+    val White_500 = Color(0xFFFFFFFF)
 }
 
 val LightColorScheme = lightColorScheme(

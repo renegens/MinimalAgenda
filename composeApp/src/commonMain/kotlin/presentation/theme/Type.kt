@@ -6,6 +6,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import minimalagenda.composeapp.generated.resources.DMSans_18pt_Regular
 import minimalagenda.composeapp.generated.resources.DMSans_24pt_Black
 import minimalagenda.composeapp.generated.resources.DMSans_24pt_Medium
 import minimalagenda.composeapp.generated.resources.DMSans_Black
@@ -17,6 +18,14 @@ private val DMSansBlackFamily: FontFamily
     get() {
         return FontFamily(
             Font(Res.font.DMSans_Black),
+        )
+    }
+
+private val DMSans18RegularFamily: FontFamily
+    @Composable
+    get() {
+        return FontFamily(
+            Font(Res.font.DMSans_18pt_Regular),
         )
     }
 
@@ -36,6 +45,23 @@ val DMSansBlack250: TextStyle
         fontWeight = FontWeight.Black,
         fontSize = 84.sp,
         letterSpacing = (-8).sp,
+    )
+
+val DMSansBlack36: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSansBlackFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 12.sp,
+        letterSpacing = 1.sp
+    )
+
+val DMSans18Regular: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans18RegularFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 40.sp
     )
 
 val DMSans24Black100: TextStyle
