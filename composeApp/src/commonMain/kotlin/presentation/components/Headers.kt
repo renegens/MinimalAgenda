@@ -1,7 +1,6 @@
 package presentation.components
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -11,61 +10,62 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
+import extensions.toShortName
 import presentation.theme.DMSansBlack250
 
 @Composable
 fun MonthHeader(monthYear: AgendaMonthYear, modifier: Modifier) {
-    Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp).then(modifier)) {
-        val shortMonth = monthYear.agendaMonth.nameRes.substring(0, 3)
-        Text(
-            text = shortMonth,
-            style = MaterialTheme.typography.displayLarge,
-            color = ColorPrimary(monthYear.isCurrent)
-        )
-        Text(
-            text = monthYear.agendaYear.lastTwoDigits,
-            style = MaterialTheme.typography.displayLarge,
-            color = ColorSecondary(monthYear.isCurrent)
-        )
+    val label = buildAnnotatedString {
+        withStyle(style = SpanStyle(color = ColorPrimary(monthYear.isCurrent))) {
+            append(monthYear.agendaMonth.nameRes.toShortName())
+        }
+        withStyle(style = SpanStyle(color = ColorSecondary(monthYear.isCurrent))) {
+            append(monthYear.agendaYear.lastTwoDigits)
+        }
     }
+    HeaderLarge(modifier = modifier, label = label)
 }
 
 @Composable
 fun DayHeader(day: String, dayInMonth: Int, month: Int, isToday: Boolean) {
-    Row(modifier = Modifier.padding(horizontal = 16.dp)) {
-        Text(
-            text = day,
-            style = MaterialTheme.typography.displayLarge,
-            color = ColorPrimary(isToday),
-        )
-        Text(
-            "$dayInMonth.$month",
-            style = MaterialTheme.typography.displayLarge,
-            color = ColorSecondary(isToday)
-        )
+    val label = buildAnnotatedString {
+        withStyle(style = SpanStyle(color = ColorPrimary(isToday))) {
+            append(day)
+        }
+        withStyle(style = SpanStyle(color = ColorSecondary(isToday))) {
+            append("$dayInMonth.$month")
+        }
     }
+    HeaderLarge(label = label)
 }
 
 @Composable
 fun YearHeader(agendaYear: AgendaYear) {
+    val label = buildAnnotatedString {
+        withStyle(style = SpanStyle(color = ColorSecondary(agendaYear.isCurrent))) {
+            append(agendaYear.firstTwoDigits)
+        }
+        withStyle(style = SpanStyle(color = ColorPrimary(agendaYear.isCurrent))) {
+            append(agendaYear.lastTwoDigits)
+        }
+    }
+    HeaderLarge(label = label)
+}
+
+@Composable
+private fun HeaderLarge(modifier: Modifier = Modifier, label: AnnotatedString) {
     Box(Modifier.height(84.dp).fillMaxWidth().padding(horizontal = 16.dp)) {
         Text(
             style = DMSansBlack250,
-            text = buildAnnotatedString {
-                withStyle(style = SpanStyle(color = ColorSecondary(agendaYear.isCurrent))) {
-                    append(agendaYear.firstTwoDigits)
-                }
-                withStyle(style = SpanStyle(color = ColorPrimary(agendaYear.isCurrent))) {
-                    append(agendaYear.lastTwoDigits)
-                }
-            },
-            modifier = Modifier.wrapContentHeight(unbounded = true)
+            text = label,
+            modifier = Modifier.wrapContentHeight(unbounded = true).then(modifier)
         )
     }
 }
