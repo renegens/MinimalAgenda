@@ -37,6 +37,9 @@ import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
 import presentation.components.DayHeader
 import presentation.components.SectionDivider
+import presentation.theme.DMSans18Bold60
+import presentation.theme.DMSans18Medium
+import presentation.theme.DMSansBlack36
 
 @Composable
 fun DayScreen(
@@ -78,14 +81,14 @@ fun DayScreen(
 
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == today.toEpochDays()
-            Spacer(modifier = Modifier.height(32.dp))
+            Spacer(modifier = Modifier.height(24.dp))
             DayHeader(
                 day = day.dayInWeek.short,
                 dayInMonth = day.dayOfMonth,
                 month = day.agendaMonthYear.agendaMonth.number,
                 isToday = isToday
             )
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             Entries(
                 agendaEvents = agendaEvents.today(day.epochDay),
                 onHide = onHide,
@@ -122,25 +125,8 @@ fun Entries(
 
         Row(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 16.dp)
-                .padding(bottom = 4.dp)
         ) {
-            Row {
-                val time = it.formatedStartTime
-                Text(
-                    if (it.allDay) "All Day" else time.first,
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = it.getTextColor(showAll)
-                )
-                if (it.allDay.not()) {
-                    Spacer(Modifier.width(8.dp))
-                    Text(
-                        if (it.allDay) "" else ":${time.second}",
-                        style = MaterialTheme.typography.bodyMedium,
-                        color = it.getTextColor(showAll)
-                    )
-                }
-            }
-            Spacer(Modifier.width(4.dp))
+            Time(agendaEvent = it, showAll = showAll)
             Column(
                 modifier = Modifier.fillMaxWidth().background(
                     color = if (showButtons) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
@@ -149,15 +135,14 @@ fun Entries(
                 }
             ) {
                 Text(
-                    it.title,
-                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier.padding(start = 8.dp),
+                    text = it.title,
+                    style = DMSans18Medium,
                     color = it.getTextColor(showAll),
-                    modifier = Modifier.padding(start = 12.dp)
                 )
                 AnimatedVisibility(visible = showButtons) {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth(),
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         TextButton(onClick = {
                             onHide.invoke(it)
@@ -168,17 +153,18 @@ fun Entries(
                             } else {
                                 "Hide"
                             }
-                            Text(text)
+                            Text(text.uppercase(), style = DMSansBlack36)
                         }
                         TextButton(onClick = {
                             onNotify.invoke(it)
                             showButtons = false
-                        }){
-                            Text("Notify") }
+                        }) {
+                            Text("Notify".uppercase(), style = DMSansBlack36)
+                        }
                     }
                 }
             }
-
+            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -200,8 +186,35 @@ fun EmptyDay() {
     ) {
         Text(
             "Day is free, enjoy it",
-            style = MaterialTheme.typography.bodyMedium,
+            style = DMSans18Medium,
             color = MaterialTheme.colorScheme.secondary
         )
+    }
+}
+
+@Composable
+fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
+    Row(modifier = Modifier.width(82.dp)) {
+        val time = agendaEvent.formatedStartTime
+
+        if (agendaEvent.allDay) {
+            Text(
+                text = "All Day",
+                style = DMSans18Bold60,
+                color = agendaEvent.getTextColor(showAll)
+            )
+        } else {
+            Text(
+                modifier = Modifier.width(30.dp),
+                text = time.first,
+                style = DMSans18Bold60,
+                color = agendaEvent.getTextColor(showAll)
+            )
+            Text(
+                ":${time.second}",
+                style = DMSans18Bold60,
+                color = agendaEvent.getTextColor(showAll)
+            )
+        }
     }
 }

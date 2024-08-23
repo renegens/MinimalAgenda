@@ -6,6 +6,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
+import minimalagenda.composeapp.generated.resources.DMSans_18pt_Bold
+import minimalagenda.composeapp.generated.resources.DMSans_18pt_Medium
 import minimalagenda.composeapp.generated.resources.DMSans_18pt_Regular
 import minimalagenda.composeapp.generated.resources.DMSans_24pt_Black
 import minimalagenda.composeapp.generated.resources.DMSans_24pt_Medium
@@ -26,6 +28,22 @@ private val DMSans18RegularFamily: FontFamily
     get() {
         return FontFamily(
             Font(Res.font.DMSans_18pt_Regular),
+        )
+    }
+
+private val DMSans18MediumFamily: FontFamily
+    @Composable
+    get() {
+        return FontFamily(
+            Font(Res.font.DMSans_18pt_Medium),
+        )
+    }
+
+private val DMSans18BoldFamily: FontFamily
+    @Composable
+    get() {
+        return FontFamily(
+            Font(Res.font.DMSans_18pt_Bold),
         )
     }
 
@@ -56,13 +74,7 @@ val DMSansBlack36: TextStyle
         letterSpacing = 1.sp
     )
 
-val DMSans18Regular: TextStyle
-    @Composable
-    get() = TextStyle(
-        fontFamily = DMSans18RegularFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 40.sp
-    )
+
 
 val DMSans24Black100: TextStyle
     @Composable
@@ -80,6 +92,32 @@ val DMSans24Medium120: TextStyle
         fontWeight = FontWeight.Medium,
         fontSize = 40.sp,
         letterSpacing = (-2.5).sp
+    )
+
+val DMSans18Bold60: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans18BoldFamily,
+        fontWeight = FontWeight.Bold,
+        fontSize = 20.sp,
+        letterSpacing = (-1).sp
+    )
+
+val DMSans18Regular: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans18RegularFamily,
+        fontWeight = FontWeight.Normal,
+        fontSize = 40.sp
+    )
+
+val DMSans18Medium: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans18MediumFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+        letterSpacing = (-1).sp
     )
 
 val displayLarge: TextStyle
