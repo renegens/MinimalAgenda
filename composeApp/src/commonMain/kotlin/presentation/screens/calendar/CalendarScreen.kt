@@ -83,7 +83,7 @@ fun CalendarScreen() {
                         days = state.days,
                         onNowClicked = isScrolledToToday,
                         scrollToDay = dayScrollPosition,
-                        agendaEvents = state.agendaEvents,
+                        eventsByDay = state.agendaEvents.groupBy { it.epochDay!! },
                         calendarPermission = state.calendarPermission,
                         showAll = state.showAll,
                         onNotify = { viewModel.setEvent(Event.Notify(it)) },

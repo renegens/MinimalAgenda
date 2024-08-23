@@ -44,7 +44,7 @@ import presentation.theme.DMSansBlack36
 @Composable
 fun DayScreen(
     days: List<AgendaDay>,
-    agendaEvents: List<AgendaEvent>,
+    eventsByDay: Map<Int, List<AgendaEvent>>,
     onNowClicked: Boolean,
     scrollToDay: Int,
     showAll: Boolean,
@@ -90,7 +90,7 @@ fun DayScreen(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Entries(
-                agendaEvents = agendaEvents.today(day.epochDay),
+                agendaEvents = eventsByDay[day.epochDay] ?: emptyList(),
                 onHide = onHide,
                 onNotify = onNotify,
                 showAll = showAll
