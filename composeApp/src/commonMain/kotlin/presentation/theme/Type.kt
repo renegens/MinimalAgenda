@@ -9,6 +9,7 @@ import androidx.compose.ui.unit.sp
 import minimalagenda.composeapp.generated.resources.DMSans_18pt_Bold
 import minimalagenda.composeapp.generated.resources.DMSans_18pt_Medium
 import minimalagenda.composeapp.generated.resources.DMSans_18pt_Regular
+import minimalagenda.composeapp.generated.resources.DMSans_18pt_SemiBold
 import minimalagenda.composeapp.generated.resources.DMSans_24pt_Black
 import minimalagenda.composeapp.generated.resources.DMSans_24pt_Medium
 import minimalagenda.composeapp.generated.resources.DMSans_Black
@@ -44,6 +45,14 @@ private val DMSans18BoldFamily: FontFamily
     get() {
         return FontFamily(
             Font(Res.font.DMSans_18pt_Bold),
+        )
+    }
+
+private val DMSans18SemiBoldFamily: FontFamily
+    @Composable
+    get() {
+        return FontFamily(
+            Font(Res.font.DMSans_18pt_SemiBold),
         )
     }
 
@@ -94,6 +103,14 @@ val DMSans24Medium120: TextStyle
         letterSpacing = (-2.5).sp
     )
 
+val DMSans24Medium60: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans24ptFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+    )
+
 val DMSans18Bold60: TextStyle
     @Composable
     get() = TextStyle(
@@ -117,6 +134,15 @@ val DMSans18Medium: TextStyle
         fontFamily = DMSans18MediumFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 20.sp,
+        letterSpacing = (-1).sp
+    )
+
+val DMSans18SemiBold: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans18SemiBoldFamily,
+        fontWeight = FontWeight.SemiBold,
+        fontSize = 32.sp,
         letterSpacing = (-1).sp
     )
 

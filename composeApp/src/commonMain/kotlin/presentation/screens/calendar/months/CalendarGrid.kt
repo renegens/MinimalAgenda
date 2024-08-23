@@ -2,15 +2,17 @@ package presentation.screens.calendar.months
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -29,6 +31,7 @@ import extensions.hasEvents
 import extensions.today
 import presentation.components.MonthHeader
 import presentation.components.SectionDivider
+import presentation.theme.DMSans18SemiBold
 
 @Composable
 fun MonthGrid(
@@ -40,15 +43,16 @@ fun MonthGrid(
 ) {
     val isCurrent by remember { mutableStateOf(monthYear.isCurrent) }
 
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(24.dp))
     MonthHeader(monthYear = monthYear,
         modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
     Spacer(modifier = Modifier.height(16.dp))
     DaysInWeek(today = today, isCurrentMonth = isCurrent)
+    Spacer(modifier = Modifier.height(24.dp))
     CalendarDays(
         events = events, monthYear = monthYear, onDayClicked = onDayClicked, showAll = showAll
     )
-    Spacer(modifier = Modifier.height(16.dp))
+    Spacer(modifier = Modifier.height(32.dp))
     SectionDivider(isCurrent = isCurrent)
 }
 
@@ -65,9 +69,10 @@ fun CalendarDays(
     }
 
     FlowRow(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.SpaceEvenly,
-        maxItemsInEachRow = 7
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalArrangement = Arrangement.spacedBy(4.dp),
+        maxItemsInEachRow = 7,
     ) {
         gridDays.forEach { gridItem ->
 
@@ -76,26 +81,21 @@ fun CalendarDays(
             }
 
             if (gridItem.dayInMonth == DayGrid.DONT_RENDER) {
-                Text(
-                    text = "0",
-                    style = MaterialTheme.typography.bodyMedium,
-                    textAlign = TextAlign.Start,
-                    modifier = Modifier.height(44.dp).width(44.dp),
-                    color = Color.Transparent
-                )
+                Box(modifier = Modifier.height(40.dp).width(48.dp))
             } else {
                 val hasEvent =
                     events.hasEvents(epochDay = gridItem.epochDay, showAll = showAll)
 
-                TextButton(
-                    onClick = { onDayClicked.invoke(gridItem.epochDay) },
-                    modifier = Modifier.height(44.dp).width(44.dp)
+                Box(
+                    modifier = Modifier.height(40.dp).width(48.dp)
+                        .clickable { onDayClicked.invoke(gridItem.epochDay) }
                 ) {
                     Text(
                         text = gridItem.dayInMonth.toString(),
-                        style = MaterialTheme.typography.bodyMedium,
+                        style = DMSans18SemiBold,
                         textAlign = TextAlign.Start,
-                        color = getTextColor(hasEvent, isToday = isToday)
+                        color = getTextColor(hasEvent, isToday = isToday),
+                        modifier = Modifier.wrapContentHeight(unbounded = true)
                     )
                 }
             }
