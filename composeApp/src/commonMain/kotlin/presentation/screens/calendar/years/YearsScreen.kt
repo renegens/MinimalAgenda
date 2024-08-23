@@ -1,7 +1,9 @@
 package presentation.screens.calendar.years
 
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
@@ -44,7 +46,7 @@ fun YearsScreen(
     }
 
     val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 2
+        initialFirstVisibleItemIndex = todayIndex + 1
     )
 
     LaunchedEffect(onNowClicked) {
@@ -62,16 +64,20 @@ fun YearsScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         itemsIndexed(items = years.keys.toList(), key = { _, year -> year.year }) { index, year ->
-            YearHeader(year)
-            Months(
-                yearEvents = events.getInRangeOf(year),
-                year = year.year,
-                onMonthClicked = onMonthClicked,
-                showAll = showAll
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            SectionDivider(isCurrent = year.year == today.year)
-            Spacer(modifier = Modifier.height(16.dp))
+            Column(modifier = Modifier.fillMaxWidth()) {
+                Spacer(modifier = Modifier.height(24.dp))
+                YearHeader(year)
+                Spacer(modifier = Modifier.height(16.dp))
+                Months(
+                    yearEvents = events.getInRangeOf(year),
+                    year = year.year,
+                    onMonthClicked = onMonthClicked,
+                    showAll = showAll
+                )
+                Spacer(modifier = Modifier.height(32.dp))
+
+                SectionDivider(isCurrent = year.year == today.year)
+            }
         }
     }
 }

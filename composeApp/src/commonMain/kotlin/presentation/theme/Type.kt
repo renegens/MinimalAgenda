@@ -6,34 +6,78 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.sp
-import minimalagenda.composeapp.generated.resources.OpenSans_Bold
-import minimalagenda.composeapp.generated.resources.OpenSans_Regular
+import minimalagenda.composeapp.generated.resources.DMSans_24pt_Black
+import minimalagenda.composeapp.generated.resources.DMSans_24pt_Medium
+import minimalagenda.composeapp.generated.resources.DMSans_Black
 import minimalagenda.composeapp.generated.resources.Res
 import org.jetbrains.compose.resources.Font
 
-val openSansFontFamily: FontFamily
+private val DMSansBlackFamily: FontFamily
     @Composable
     get() {
         return FontFamily(
-            Font(Res.font.OpenSans_Regular),
-            Font(Res.font.OpenSans_Bold)
+            Font(Res.font.DMSans_Black),
         )
     }
+
+private val DMSans24ptFamily: FontFamily
+    @Composable
+    get() {
+        return FontFamily(
+            Font(Res.font.DMSans_24pt_Medium),
+            Font(Res.font.DMSans_24pt_Black),
+        )
+    }
+
+val DMSansBlack250: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSansBlackFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 84.sp,
+        letterSpacing = (-8).sp,
+    )
+
+val DMSans24Black100: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans24ptFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 34.sp,
+        letterSpacing = (-1).sp
+    )
+
+val DMSans24Medium120: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans24ptFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 40.sp,
+        letterSpacing = (-2.5).sp
+    )
 
 val displayLarge: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSansBlackFamily,
         fontWeight = FontWeight.Black,
-        fontSize = 57.sp,
-        lineHeight = 64.sp,
-        letterSpacing = 0.sp
+        fontSize = 72.sp,
+        letterSpacing = (-7).sp
+    )
+
+val headlineLarge: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans24ptFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 32.sp,
+        letterSpacing = (-0.1).sp
     )
 
 val displayMedium: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Light,
         fontSize = 45.sp,
         lineHeight = 52.sp,
@@ -43,7 +87,7 @@ val displayMedium: TextStyle
 val displaySmall: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 36.sp,
         lineHeight = 44.sp,
@@ -51,20 +95,12 @@ val displaySmall: TextStyle
     )
 
 // Headline Styles
-val headlineLarge: TextStyle
-    @Composable
-    get() = TextStyle(
-        fontFamily = openSansFontFamily,
-        fontWeight = FontWeight.Normal,
-        fontSize = 32.sp,
-        lineHeight = 40.sp,
-        letterSpacing = 0.sp
-    )
+
 
 val headlineMedium: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 28.sp,
         lineHeight = 36.sp,
@@ -74,7 +110,7 @@ val headlineMedium: TextStyle
 val headlineSmall: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 24.sp,
         lineHeight = 32.sp,
@@ -85,7 +121,7 @@ val headlineSmall: TextStyle
 val titleLarge: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 22.sp,
         lineHeight = 28.sp,
@@ -95,7 +131,7 @@ val titleLarge: TextStyle
 val titleMedium: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 16.sp,
         lineHeight = 24.sp,
@@ -105,7 +141,7 @@ val titleMedium: TextStyle
 val titleSmall: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
@@ -116,7 +152,7 @@ val titleSmall: TextStyle
 val bodyLarge: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 16.sp,
         lineHeight = 24.sp,
@@ -126,7 +162,7 @@ val bodyLarge: TextStyle
 val bodyMedium: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 14.sp,
         lineHeight = 20.sp,
@@ -136,7 +172,7 @@ val bodyMedium: TextStyle
 val bodySmall: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Normal,
         fontSize = 12.sp,
         lineHeight = 16.sp,
@@ -147,7 +183,7 @@ val bodySmall: TextStyle
 val labelLarge: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 14.sp,
         lineHeight = 20.sp,
@@ -157,7 +193,7 @@ val labelLarge: TextStyle
 val labelMedium: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 12.sp,
         lineHeight = 16.sp,
@@ -167,7 +203,7 @@ val labelMedium: TextStyle
 val labelSmall: TextStyle
     @Composable
     get() = TextStyle(
-        fontFamily = openSansFontFamily,
+        fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 11.sp,
         lineHeight = 16.sp,

@@ -3,8 +3,6 @@ package presentation.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -25,7 +23,7 @@ import presentation.theme.CustomColor
 fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, onAdd: () -> Unit, showAll: Boolean) {
         Column(modifier = Modifier.padding(end = 16.dp)) {
             Box(
-                modifier = Modifier.size(64.dp).background(color = CustomColor.Black_500, shape = CircleShape),
+                modifier = Modifier.size(56.dp).background(color = CustomColor.Black_500, shape = CircleShape),
                 contentAlignment = Alignment.Center
 
             ) {
@@ -34,18 +32,16 @@ fun ActionButton(nowClicked: () -> Unit, toggleActive: () -> Unit, onAdd: () -> 
                     Text(label, color = CustomColor.White_800)
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
             Box(
-                modifier = Modifier.size(64.dp).background(color = MaterialTheme.colorScheme.primary, shape = CircleShape),
+                modifier = Modifier.size(56.dp).background(color = MaterialTheme.colorScheme.primary, shape = CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 TextButton(onClick = nowClicked) {
                     Text("Now", color = CustomColor.White_800)
                 }
             }
-            Spacer(modifier = Modifier.height(4.dp))
             Box(
-                modifier = Modifier.size(64.dp).background(color = CustomColor.Black_500, shape = CircleShape),
+                modifier = Modifier.size(56.dp).background(color = CustomColor.Black_200, shape = CircleShape),
                 contentAlignment = Alignment.Center
 
             ) {

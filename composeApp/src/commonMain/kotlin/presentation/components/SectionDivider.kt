@@ -25,7 +25,7 @@ fun SectionDivider(isCurrent: Boolean) {
 
 @Composable
 private fun ZigzagLine(color: Color) {
-    Canvas(modifier = Modifier.fillMaxWidth().height(8.dp).padding(horizontal = 16.dp)) {
+    Canvas(modifier = Modifier.fillMaxWidth().height(8.dp).padding(horizontal = 8.dp)) {
         val path = Path().apply {
             fillType = PathFillType.EvenOdd
             moveTo(0f, size.height / 2)
