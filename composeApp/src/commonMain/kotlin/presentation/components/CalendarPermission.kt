@@ -13,6 +13,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import platform.CalendarPermissionHandler.State
+import presentation.theme.DMSans18Medium
+import presentation.theme.DMSansBlack36
 
 @OptIn(ExperimentalFoundationApi::class)
 fun LazyListScope.CalendarPermission(
@@ -40,7 +42,7 @@ private fun AskForPermission(onPermissionRequest: () -> Unit) {
         Text(
             text = "We need access to your calendar to provide the best experience.",
             modifier = Modifier.fillMaxWidth(),
-            style = MaterialTheme.typography.bodyMedium,
+            style = DMSans18Medium,
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(8.dp))
@@ -48,7 +50,7 @@ private fun AskForPermission(onPermissionRequest: () -> Unit) {
             onClick = onPermissionRequest,
             modifier = Modifier.align(Alignment.CenterHorizontally)
         ) {
-            Text("Grant Calendar Permission")
+            Text("Grant Calendar Permission".uppercase(), style = DMSansBlack36)
         }
     }
 }
