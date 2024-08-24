@@ -3,6 +3,7 @@ package presentation.screens.calendar.months
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Spacer
@@ -30,6 +31,7 @@ import domain.model.createGridDay
 import extensions.hasEvents
 import extensions.today
 import presentation.components.MonthHeader
+import presentation.components.PaperBackground
 import presentation.components.SectionDivider
 import presentation.theme.DMSans18SemiBold
 
@@ -43,17 +45,21 @@ fun MonthGrid(
 ) {
     val isCurrent by remember { mutableStateOf(monthYear.isCurrent) }
 
-    Spacer(modifier = Modifier.height(24.dp))
-    MonthHeader(monthYear = monthYear,
-        modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
-    Spacer(modifier = Modifier.height(16.dp))
-    DaysInWeek(today = today, isCurrentMonth = isCurrent)
-    Spacer(modifier = Modifier.height(24.dp))
-    CalendarDays(
-        events = events, monthYear = monthYear, onDayClicked = onDayClicked, showAll = showAll
-    )
-    Spacer(modifier = Modifier.height(32.dp))
-    SectionDivider(isCurrent = isCurrent)
+    PaperBackground {
+        Column {
+            Spacer(modifier = Modifier.height(24.dp))
+            MonthHeader(monthYear = monthYear,
+                modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
+            Spacer(modifier = Modifier.height(40.dp))
+            DaysInWeek(today = today, isCurrentMonth = isCurrent)
+            Spacer(modifier = Modifier.height(24.dp))
+            CalendarDays(
+                events = events, monthYear = monthYear, onDayClicked = onDayClicked, showAll = showAll
+            )
+            Spacer(modifier = Modifier.height(32.dp))
+            SectionDivider(isCurrent = isCurrent)
+        }
+    }
 }
 
 @OptIn(ExperimentalLayoutApi::class)

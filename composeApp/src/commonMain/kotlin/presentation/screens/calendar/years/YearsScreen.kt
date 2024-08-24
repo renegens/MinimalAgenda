@@ -20,6 +20,7 @@ import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import extensions.getInRangeOf
 import extensions.today
+import presentation.components.PaperBackground
 import presentation.components.SectionDivider
 import presentation.components.YearHeader
 
@@ -64,19 +65,21 @@ fun YearsScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         itemsIndexed(items = years.keys.toList(), key = { _, year -> year.year }) { index, year ->
-            Column(modifier = Modifier.fillMaxWidth()) {
-                Spacer(modifier = Modifier.height(24.dp))
-                YearHeader(year)
-                Spacer(modifier = Modifier.height(16.dp))
-                Months(
-                    yearEvents = events.getInRangeOf(year),
-                    year = year.year,
-                    onMonthClicked = onMonthClicked,
-                    showAll = showAll
-                )
-                Spacer(modifier = Modifier.height(32.dp))
+            PaperBackground {
+                Column(modifier = Modifier.fillMaxWidth()) {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    YearHeader(year)
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Months(
+                        yearEvents = events.getInRangeOf(year),
+                        year = year.year,
+                        onMonthClicked = onMonthClicked,
+                        showAll = showAll
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
 
-                SectionDivider(isCurrent = year.year == today.year)
+                    SectionDivider(isCurrent = year.year == today.year)
+                }
             }
         }
     }

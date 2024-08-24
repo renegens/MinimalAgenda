@@ -6,7 +6,6 @@ import androidx.compose.ui.graphics.Color
 
 object CustomColor {
     val Orange_500 = Color(0xFFfe3b00) //done
-    val Orange_700 = Color(0xFFea4d27)
 
     val Gray_200 = Color(0xFFCCCCCC)
     val Gray_300 = Color(0xFF999999) //done
@@ -32,7 +31,7 @@ val LightColorScheme = lightColorScheme(
 )
 
 val DarkColorScheme = darkColorScheme(
-    primary = CustomColor.Orange_700,
+    primary = CustomColor.Orange_500,
     secondary = CustomColor.Gray_500,
     tertiary = CustomColor.Gray_200,
     background = CustomColor.Black_200,

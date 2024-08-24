@@ -11,6 +11,5 @@ data class AgendaEvent(
     var isHidden: Boolean,
     val formattedTime: String
 ) {
-
     fun toHiddenEventEntity() = HiddenEventEntity(eventId = id, epochDay = epochDay!!)
 }

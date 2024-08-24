@@ -7,7 +7,6 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -44,7 +43,7 @@ fun CalendarScreen() {
     var yearScrollPosition by remember { mutableStateOf(-1) }
     var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
 
-    var shouldShowNotificationPermission by remember { mutableStateOf(false)  }
+    var shouldShowNotificationPermission by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -66,72 +65,74 @@ fun CalendarScreen() {
                     pagerState.animateScrollToPage(page = Section.Year.position)
                     yearScrollPosition = it.agendaYear.year
                 }
+
                 is Effect.NotificationPermissionMissing -> {
                     shouldShowNotificationPermission = true
                 }
             }
         }
     }
-    Scaffold {
-        Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-            if (shouldShowNotificationPermission){
-                NotificationPermissionDialog(onDismissRequest = {shouldShowNotificationPermission = false})
-            }
-            HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
-                when (page) {
-                    CalendarContract.Section.Day.position -> DayScreen(
-                        days = state.days,
-                        onNowClicked = isScrolledToToday,
-                        scrollToDay = dayScrollPosition,
-                        eventsByDay = state.agendaEvents.groupBy { it.epochDay!! },
-                        calendarPermission = state.calendarPermission,
-                        showAll = state.showAll,
-                        onNotify = { viewModel.setEvent(Event.Notify(it)) },
-                        onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
-                        onRequestCalendarPermission = {
-                            viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                        }
-                    )
+    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
 
-                    CalendarContract.Section.Month.position -> MonthsScreen(
-                        days = state.days,
-                        events = state.agendaEvents,
-                        onNowClicked = isScrolledToMonth,
-                        scrollToMonth = monthScrollPosition,
-                        showAll = state.showAll,
-                        onDayClicked = {
-                            viewModel.setEvent(Event.OnDayClicked(epochDay = it))
-                        },
-                        onYearClicked = {
-                            viewModel.setEvent(Event.OnYearClicked(it))
-                        }
-                    )
-
-                    CalendarContract.Section.Year.position -> YearsScreen(
-                        days = state.days,
-                        events = state.agendaEvents,
-                        showAll = state.showAll,
-                        onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
-                        onNowClicked = isScrolledToYear,
-                        scrollToYear = yearScrollPosition
-                    )
-                }
-            }
-            Row(
-                modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
-            ) {
-                ActionButton(
+        if (shouldShowNotificationPermission) {
+            NotificationPermissionDialog(onDismissRequest = {
+                shouldShowNotificationPermission = false
+            })
+        }
+        HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
+            when (page) {
+                CalendarContract.Section.Day.position -> DayScreen(
+                    days = state.days,
+                    onNowClicked = isScrolledToToday,
+                    scrollToDay = dayScrollPosition,
+                    eventsByDay = state.agendaEvents.groupBy { it.epochDay!! },
+                    calendarPermission = state.calendarPermission,
                     showAll = state.showAll,
-                    nowClicked = {
-                        viewModel.setEvent(
-                            Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                        )
-                    }, toggleActive = {
-                        viewModel.setEvent(Event.ToggleActive)
-                    }, onAdd = {
+                    onNotify = { viewModel.setEvent(Event.Notify(it)) },
+                    onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
+                    onRequestCalendarPermission = {
+                        viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
+                    }
+                )
 
-                    })
+                CalendarContract.Section.Month.position -> MonthsScreen(
+                    days = state.days,
+                    events = state.agendaEvents,
+                    onNowClicked = isScrolledToMonth,
+                    scrollToMonth = monthScrollPosition,
+                    showAll = state.showAll,
+                    onDayClicked = {
+                        viewModel.setEvent(Event.OnDayClicked(epochDay = it))
+                    },
+                    onYearClicked = {
+                        viewModel.setEvent(Event.OnYearClicked(it))
+                    }
+                )
+
+                CalendarContract.Section.Year.position -> YearsScreen(
+                    days = state.days,
+                    events = state.agendaEvents,
+                    showAll = state.showAll,
+                    onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
+                    onNowClicked = isScrolledToYear,
+                    scrollToYear = yearScrollPosition
+                )
             }
+        }
+        Row(
+            modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
+        ) {
+            ActionButton(
+                showAll = state.showAll,
+                nowClicked = {
+                    viewModel.setEvent(
+                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                    )
+                }, toggleActive = {
+                    viewModel.setEvent(Event.ToggleActive)
+                }, onAdd = {
+
+                })
         }
     }
 }

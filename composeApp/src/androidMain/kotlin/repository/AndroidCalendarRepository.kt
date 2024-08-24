@@ -64,13 +64,14 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
     override suspend fun getAllEvents(): List<EventEntity> {
         val list = emptyList<EventEntity>().toMutableList()
 
-        for (i in 1..8000) {
+        for (i in 1..4000) {
             list.add(
                 EventEntity(
                     id = UUID.randomUUID().toString(),
                     title = UUID.randomUUID().toString(),
                     startTime = getRandomTimestampWithinTwoYears(),
-                    allDay = false
+                    allDay = false,
+                    format = "10 12"
                 )
             )
         }

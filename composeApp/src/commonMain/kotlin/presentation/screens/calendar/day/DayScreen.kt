@@ -32,10 +32,10 @@ import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import extensions.today
-import extensions.todayEpochDay
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
 import presentation.components.DayHeader
+import presentation.components.PaperBackground
 import presentation.components.SectionDivider
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
@@ -72,7 +72,6 @@ fun DayScreen(
         }
     }
 
-
     LazyColumn(
         state = listState, modifier = Modifier.fillMaxSize()
     ) {
@@ -80,25 +79,28 @@ fun DayScreen(
         CalendarPermission(
             onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
         )
-
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == currentEpochDay
-            Spacer(modifier = Modifier.height(24.dp))
-            DayHeader(
-                day = day.dayInWeek.short,
-                dayInMonth = day.dayOfMonth,
-                month = day.agendaMonthYear.agendaMonth.number,
-                isToday = isToday
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Entries(
-                agendaEvents = eventsByDay[day.epochDay] ?: emptyList(),
-                onHide = onHide,
-                onNotify = onNotify,
-                showAll = showAll
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            SectionDivider(isCurrent = isToday)
+            PaperBackground {
+                Column {
+                    Spacer(modifier = Modifier.height(24.dp))
+                    DayHeader(
+                        day = day.dayInWeek.short,
+                        dayInMonth = day.dayOfMonth,
+                        month = day.agendaMonthYear.agendaMonth.number,
+                        isToday = isToday
+                    )
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Entries(
+                        agendaEvents = eventsByDay[day.epochDay] ?: emptyList(),
+                        onHide = onHide,
+                        onNotify = onNotify,
+                        showAll = showAll
+                    )
+                    Spacer(modifier = Modifier.height(32.dp))
+                    SectionDivider(isCurrent = isToday)
+                }
+            }
         }
     }
 }
