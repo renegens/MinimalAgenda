@@ -54,8 +54,9 @@ fun DayScreen(
     onNotify: (AgendaEvent) -> Unit
 ) {
     if (days.isEmpty()) return
+    val currentEpochDay by remember { mutableStateOf(today.toEpochDays()) }
 
-    val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == todayEpochDay }) }
+    val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == currentEpochDay}) }
 
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5
@@ -71,6 +72,7 @@ fun DayScreen(
         }
     }
 
+
     LazyColumn(
         state = listState, modifier = Modifier.fillMaxSize()
     ) {
@@ -80,7 +82,7 @@ fun DayScreen(
         )
 
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
-            val isToday = day.epochDay == today.toEpochDays()
+            val isToday = day.epochDay == currentEpochDay
             Spacer(modifier = Modifier.height(24.dp))
             DayHeader(
                 day = day.dayInWeek.short,
@@ -195,7 +197,7 @@ fun EmptyDay() {
 @Composable
 fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
     Row(modifier = Modifier.width(82.dp)) {
-        val time = agendaEvent.formatedStartTime
+        val time = agendaEvent.formattedTime.split(" ")
 
         if (agendaEvent.allDay) {
             Text(
@@ -206,12 +208,12 @@ fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
         } else {
             Text(
                 modifier = Modifier.width(30.dp),
-                text = time.first,
+                text = time[0],
                 style = DMSans18Bold60,
                 color = agendaEvent.getTextColor(showAll)
             )
             Text(
-                ":${time.second}",
+                ":${time[1]}",
                 style = DMSans18Bold60,
                 color = agendaEvent.getTextColor(showAll)
             )

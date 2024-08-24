@@ -6,9 +6,15 @@ import android.provider.CalendarContract
 import data.calendar.CalendarEntity
 import data.calendar.EventEntity
 import extensions.millisToEpochDay
+import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDate
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.atStartOfDayIn
 import java.util.Calendar
+import java.util.UUID
+import kotlin.random.Random
 
 class AndroidCalendarRepository(private val context: Context) : CalendarRepository {
 
@@ -56,6 +62,20 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
     }
 
     override suspend fun getAllEvents(): List<EventEntity> {
+        val list = emptyList<EventEntity>().toMutableList()
+
+        for (i in 1..8000) {
+            list.add(
+                EventEntity(
+                    id = UUID.randomUUID().toString(),
+                    title = UUID.randomUUID().toString(),
+                    startTime = getRandomTimestampWithinTwoYears(),
+                    allDay = false
+                )
+            )
+        }
+        return list
+
         return withContext(Dispatchers.IO) {
             val events = mutableListOf<EventEntity>()
             val projection = arrayOf(
@@ -123,4 +143,21 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
             return@withContext events
         }
     }
+}
+
+fun getRandomTimestampWithinTwoYears(): Long {
+    // Current time
+    val startYear = LocalDate(year = today.year - 2, monthNumber = 1, dayOfMonth = 1)
+    val endDate = LocalDate(year = startYear.year + 4, monthNumber = 12, dayOfMonth = 31)
+
+
+    // Convert start and end times to epoch milliseconds for easier random calculation
+    val startMillis = startYear.atStartOfDayIn(TimeZone.currentSystemDefault()).epochSeconds
+    val endMillis = endDate.atStartOfDayIn(TimeZone.currentSystemDefault()).epochSeconds
+
+    // Generate a random time between startMillis and endMillis
+    val randomMillis = Random.nextLong(startMillis, endMillis)
+
+    // Convert the random milliseconds back to an Instant
+    return randomMillis
 }

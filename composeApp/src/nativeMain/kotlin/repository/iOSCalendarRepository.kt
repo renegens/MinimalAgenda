@@ -7,10 +7,16 @@ import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import platform.EventKit
-import platform.Foundation.NSDate
-import platform.EventKit.*
+import platform.EventKit.EKCalendar
+import platform.EventKit.EKEntityType
+import platform.EventKit.EKEvent
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSCalendarUnitMonth
+import platform.Foundation.NSDate
+import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSTimeInterval
+import platform.Foundation.NSTimeZone
+import platform.Foundation.localTimeZone
 import platform.Foundation.timeIntervalSince1970
 import kotlin.coroutines.resume
 
@@ -72,33 +78,43 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
             toDate = currentDate,
             options = 0u
         )
-        return threeYearsInFuture ?: NSDate()  // Fallback to current date if something goes wrong
+        return threeYearsInFuture ?: NSDate()
     }
 
     override suspend fun getAllEvents(): List<EventEntity> {
         return withContext(Dispatchers.IO) {
-
             suspendCancellableCoroutine { continuation ->
                 val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
                 val startDate = nsStartDateForCalendar(24)
                 val endDate = nsEndDateForCalendar(24)
-
                 val predicate =
                     eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
                 val events = eventStore.eventsMatchingPredicate(predicate).map { event ->
                     event as EKEvent
-                    event.allDay
                     EventEntity(
                         id = event.eventIdentifier,
                         title = event.title,
                         startTime = event.startDate?.timeIntervalSince1970?.toLong(),
                         allDay = event.allDay,
                         epochDay = null,
+                        format = formatUnixTimestamp(event.startDate?.timeIntervalSince1970)
                     )
                 }
 
                 continuation.resume(events)
             }
         }
+    }
+
+    private fun formatUnixTimestamp(unixTimestamp: NSTimeInterval?): String {
+        val nsDate = NSDate(unixTimestamp!!)
+        val nsDateFormatter = NSDateFormatter()
+
+        nsDateFormatter.timeZone = NSTimeZone.localTimeZone
+        nsDateFormatter.dateFormat = "HH mm"
+
+        val localTimeString = nsDateFormatter.stringFromDate(nsDate)
+
+        return localTimeString
     }
 }

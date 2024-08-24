@@ -7,7 +7,8 @@ data class EventEntity(
     val title: String?,
     val startTime: Long?,
     val allDay: Boolean?,
-    var epochDay: Int? = null
+    var epochDay: Int? = null,
+    val format: String = ""
 )
 
 fun EventEntity.toEvent(): AgendaEvent {
@@ -20,6 +21,7 @@ fun EventEntity.toEvent(): AgendaEvent {
         startTime = startTime!!,
         allDay = allDay!!,
         epochDay = epochDay,
-        isHidden = false
+        isHidden = false,
+        formattedTime = format
     )
 }
