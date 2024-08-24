@@ -6,6 +6,7 @@ import platform.EventKit.EKAuthorizationStatusFullAccess
 import platform.EventKit.EKAuthorizationStatusNotDetermined
 import platform.EventKit.EKEntityType
 import platform.EventKit.EKEventStore
+import platform.UIKit.UIDevice
 
 @Suppress("ClassName")
 class iOSCalendarPermissionHandler(eventKit: EventKit) : CalendarPermissionHandler {
@@ -14,11 +15,23 @@ class iOSCalendarPermissionHandler(eventKit: EventKit) : CalendarPermissionHandl
 
     override suspend fun requestCalendarPermission(): CalendarPermissionHandler.State {
         return suspendCancellableCoroutine { continuation ->
-            eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
-                if (granted) {
-                    continuation.resumeWith(Result.success(CalendarPermissionHandler.State.FullAccess))
-                } else {
-                    continuation.resumeWith(Result.success(CalendarPermissionHandler.State.Denied))
+            val system = UIDevice.currentDevice.systemVersion
+
+            if (system.toDouble() >= 17.0) {
+                eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
+                    if (granted) {
+                        continuation.resumeWith(Result.success(CalendarPermissionHandler.State.FullAccess))
+                    } else {
+                        continuation.resumeWith(Result.success(CalendarPermissionHandler.State.Denied))
+                    }
+                }
+            } else {
+                eventStore.requestAccessToEntityType(EKEntityType.EKEntityTypeEvent) { granted, error ->
+                    if (granted) {
+                        continuation.resumeWith(Result.success(CalendarPermissionHandler.State.FullAccess))
+                    } else {
+                        continuation.resumeWith(Result.success(CalendarPermissionHandler.State.Denied))
+                    }
                 }
             }
         }

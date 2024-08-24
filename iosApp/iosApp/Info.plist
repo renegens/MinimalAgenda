@@ -6,6 +6,8 @@
 	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string></string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -27,7 +29,7 @@
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCalendarsUsageDescription</key>
-	<string>This app requires access to your calendar to manage events.</string>
+	<string>This app needs access to your calendar to help manage your events.</string>
 	<key>NSUserNotificationUsageDescription</key>
 	<string>We need notifications to remind you about important events.</string>
 	<key>UIApplicationSceneManifest</key>
