@@ -11,13 +11,19 @@ import platform.UIKit.UIDevice
 @Suppress("ClassName")
 class iOSCalendarPermissionHandler(eventKit: EventKit) : CalendarPermissionHandler {
 
+    private val iOS_17 = 17
     private val eventStore = eventKit.eventStore
 
     override suspend fun requestCalendarPermission(): CalendarPermissionHandler.State {
         return suspendCancellableCoroutine { continuation ->
-            val system = UIDevice.currentDevice.systemVersion
+            val system =
+                UIDevice.currentDevice.systemVersion.substring(startIndex = 0, endIndex = 2)
+                    .toIntOrNull()
+            if (system == null) {
+                continuation.resumeWith(Result.success(CalendarPermissionHandler.State.NotDetermined))
+            }
 
-            if (system.toDouble() >= 17.0) {
+            if (system!! >= iOS_17) {
                 eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
                     if (granted) {
                         continuation.resumeWith(Result.success(CalendarPermissionHandler.State.FullAccess))
