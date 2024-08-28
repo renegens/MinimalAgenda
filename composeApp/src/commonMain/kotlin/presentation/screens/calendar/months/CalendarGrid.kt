@@ -29,7 +29,7 @@ import domain.model.AgendaYear
 import domain.model.DayGrid
 import domain.model.createGridDay
 import extensions.hasEvents
-import extensions.today
+import kotlinx.datetime.LocalDate
 import presentation.components.MonthHeader
 import presentation.components.PaperBackground
 import presentation.components.SectionDivider
@@ -39,6 +39,7 @@ import presentation.theme.DMSans18SemiBold
 fun MonthGrid(
     monthYear: AgendaMonthYear,
     events: List<AgendaEvent>,
+    currentDate: LocalDate,
     onDayClicked: (Int) -> Unit,
     onYearClicked: (AgendaYear) -> Unit,
     showAll: Boolean
@@ -51,10 +52,14 @@ fun MonthGrid(
             MonthHeader(monthYear = monthYear,
                 modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
             Spacer(modifier = Modifier.height(40.dp))
-            DaysInWeek(today = today, isCurrentMonth = isCurrent)
+            DaysInWeek(today = currentDate, isCurrentMonth = isCurrent)
             Spacer(modifier = Modifier.height(24.dp))
             CalendarDays(
-                events = events, monthYear = monthYear, onDayClicked = onDayClicked, showAll = showAll
+                events = events,
+                monthYear = monthYear,
+                onDayClicked = onDayClicked,
+                showAll = showAll,
+                currentDate = currentDate
             )
             Spacer(modifier = Modifier.height(32.dp))
             SectionDivider(isCurrent = isCurrent)
@@ -66,6 +71,7 @@ fun MonthGrid(
 @Composable
 fun CalendarDays(
     events: List<AgendaEvent>,
+    currentDate: LocalDate,
     showAll: Boolean,
     monthYear: AgendaMonthYear,
     onDayClicked: (Int) -> Unit
@@ -83,7 +89,7 @@ fun CalendarDays(
         gridDays.forEach { gridItem ->
 
             val isToday by derivedStateOf {
-                gridItem.epochDay == today.toEpochDays()
+                gridItem.epochDay == currentDate.toEpochDays()
             }
 
             if (gridItem.dayInMonth == DayGrid.DONT_RENDER) {

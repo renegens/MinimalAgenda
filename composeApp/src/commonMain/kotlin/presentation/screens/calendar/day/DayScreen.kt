@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
-import extensions.today
+import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
 import presentation.components.DayHeader
@@ -47,6 +47,7 @@ fun DayScreen(
     eventsByDay: Map<Int, List<AgendaEvent>>,
     onNowClicked: Boolean,
     scrollToDay: Int,
+    currentDate: LocalDate,
     showAll: Boolean,
     onHide: (AgendaEvent) -> Unit,
     calendarPermission: CalendarPermissionHandler.State,
@@ -54,7 +55,7 @@ fun DayScreen(
     onNotify: (AgendaEvent) -> Unit
 ) {
     if (days.isEmpty()) return
-    val currentEpochDay by remember { mutableStateOf(today.toEpochDays()) }
+    val currentEpochDay by remember { mutableStateOf(currentDate.toEpochDays()) }
 
     val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == currentEpochDay}) }
 

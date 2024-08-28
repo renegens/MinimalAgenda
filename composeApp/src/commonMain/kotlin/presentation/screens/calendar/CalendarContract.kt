@@ -4,6 +4,8 @@ import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
+import extensions.today
+import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
 import presentation.base.UiEffect
 import presentation.base.UiEvent
@@ -15,6 +17,7 @@ class CalendarContract {
         val days: List<AgendaDay> = emptyList(),
         val agendaEvents: List<AgendaEvent> = emptyList(),
         val showAll: Boolean = false,
+        val currentDate: LocalDate = today,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
     ) : UiState
 

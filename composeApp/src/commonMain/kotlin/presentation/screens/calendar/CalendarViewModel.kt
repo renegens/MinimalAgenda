@@ -20,7 +20,7 @@ class CalendarViewModel(
     BaseViewModel<Event, State, Effect>() {
 
     init {
-        setEvent(Event.LoadData)
+       // setEvent(Event.LoadData)
     }
 
     private fun loadData() {
@@ -112,11 +112,11 @@ class CalendarViewModel(
                 }
             }
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
-
         }
     }
 
     private suspend fun loadEvents() {
+        println("Loading events")
         when (val state = getAllEventsUseCase()) {
             is GetAllEventsUseCase.State.Success -> setState {
                 State(

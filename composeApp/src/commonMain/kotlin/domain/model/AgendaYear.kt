@@ -1,7 +1,6 @@
 package domain.model
 
 import extensions.toDigits
-import extensions.today
 import kotlinx.datetime.LocalDate
 
 data class AgendaYear(
@@ -13,8 +12,7 @@ data class AgendaYear(
     val lastTwoDigits: String
         get() = year.toDigits().takeLast(2).joinToString(separator = "")
 
-    val isCurrent: Boolean
-        get() = today.year == year
+    fun isCurrent(localDate: LocalDate): Boolean = localDate.year == year
 
     fun isEpochDayInRange(epochDay: Int): Boolean {
         val range = epochRange

@@ -15,11 +15,13 @@ import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import extensions.getInRangeOf
+import kotlinx.datetime.LocalDate
 
 @Composable
 fun MonthsScreen(
     days: List<AgendaDay>,
     events: List<AgendaEvent>,
+    currentDate: LocalDate,
     onNowClicked: Boolean,
     scrollToMonth: AgendaMonthYear?,
     showAll: Boolean,
@@ -61,6 +63,7 @@ fun MonthsScreen(
             MonthGrid(
                 events = events.getInRangeOf(agendaMonthYear),
                 monthYear = agendaMonthYear,
+                currentDate = currentDate,
                 showAll = showAll,
                 onDayClicked = onDayClicked,
                 onYearClicked = onYearClicked
