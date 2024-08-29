@@ -67,8 +67,7 @@ fun PaywallScreen(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.SpaceBetween
     ) {
-        Spacer(modifier = Modifier.height(16.dp))
-
+        Spacer(modifier = Modifier.height(32.dp))
         // Header
         Text(
             text = "Unlock Papely",
@@ -78,7 +77,7 @@ fun PaywallScreen(
             color = MaterialTheme.colorScheme.tertiary
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         // Benefits
         Column(
