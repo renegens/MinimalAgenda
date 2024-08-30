@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -31,9 +32,12 @@ import com.revenuecat.purchases.kmp.Package
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.availablePackages
 import com.revenuecat.purchases.kmp.current
-import com.revenuecat.purchases.kmp.entitlements
-import com.revenuecat.purchases.kmp.get
-import com.revenuecat.purchases.kmp.isActive
+import com.revenuecat.purchases.kmp.models.period
+import com.revenuecat.purchases.kmp.models.price
+import com.revenuecat.purchases.kmp.models.title
+import com.revenuecat.purchases.kmp.models.type
+import com.revenuecat.purchases.kmp.storeProduct
+import extensions.isSubscribed
 import presentation.theme.CustomColor
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSans24Black100
@@ -48,138 +52,170 @@ fun PaywallScreen(
 ) {
     var offeringState by remember { mutableStateOf<List<Package>>(emptyList()) }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(offeringState) {
         Purchases.sharedInstance.getOfferings(
             onError = { error ->
                 // An error occurred
             },
             onSuccess = { offerings ->
                 offerings.current?.availablePackages?.takeUnless { it.isEmpty() }?.let {
+                    // Display packages for sale
+                }
+
+                offerings.current?.availablePackages?.takeUnless { it.isEmpty() }?.let {
                     offeringState = it
                 }
             })
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceBetween
-    ) {
-        Spacer(modifier = Modifier.height(32.dp))
-        // Header
-        Text(
-            text = "Unlock Papely",
-            style = DMSansBlack250,
-            fontSize = 30.sp,
-            letterSpacing = (-1).sp,
-            color = MaterialTheme.colorScheme.tertiary
-        )
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        // Benefits
-        Column(
-            modifier = Modifier.padding(start = 16.dp),
-            horizontalAlignment = Alignment.Start,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            BenefitItem("See only important events")
-            BenefitItem("Clean, eye-friendly interface")
-            BenefitItem("Event notification without hassle")
-            BenefitItem("Integrated with your calendars")
-            BenefitItem("Clutter-free daily view")
-            BenefitItem("Less stress and fewer notifications")
+    if (offeringState.isEmpty()) {
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+            CircularProgressIndicator()
         }
-
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // Free Trial Promotion
-        Box(
+    } else {
+        Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .height(60.dp)
-                .background(MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(4.dp))
+                .fillMaxSize()
                 .padding(16.dp),
-            contentAlignment = Alignment.Center
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
+            Spacer(modifier = Modifier.height(32.dp))
+            // Header
             Text(
-                text = "Try Papely free for 2 weeks!",
+                text = "Unlock Papely",
                 style = DMSansBlack250,
-                letterSpacing = (0).sp,
-                fontSize = 18.sp,
+                fontSize = 30.sp,
+                letterSpacing = (-1).sp,
                 color = MaterialTheme.colorScheme.tertiary
             )
+
+            Spacer(modifier = Modifier.height(8.dp))
+
+            // Benefits
+            Column(
+                modifier = Modifier.padding(start = 16.dp),
+                horizontalAlignment = Alignment.Start,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                BenefitItem("See only important events")
+                BenefitItem("Clean, eye-friendly interface")
+                BenefitItem("Event notification without hassle")
+                BenefitItem("Integrated with your calendars")
+                BenefitItem("Clutter-free daily view")
+                BenefitItem("Less stress and fewer notifications")
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
+
+            // Free Trial Promotion
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(60.dp)
+                    .background(
+                        MaterialTheme.colorScheme.secondaryContainer,
+                        RoundedCornerShape(4.dp)
+                    )
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = "Try Papely free for 1 week!",
+                    style = DMSansBlack250,
+                    letterSpacing = (0).sp,
+                    fontSize = 18.sp,
+                    color = MaterialTheme.colorScheme.tertiary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Subscription Details
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+
+
+                println(offeringState.first().storeProduct.title)
+                println(offeringState.first().storeProduct.type)
+                println(offeringState.first().storeProduct.period)
+                println(offeringState.first().storeProduct.price)
+                println(offeringState.first())
+
+                val price = offeringState.first().storeProduct.price
+
+
+                //todo price per month
+                val pricePerMonth =
+                    ((price.formatted.filter { it.isDigit() }.toDouble() / 100) / 12)
+
+                Text(
+                    text = "${price.formatted}/year after your free trial",
+                    style = DMSans18Medium,
+                    fontSize = 20.sp,
+                    color = MaterialTheme.colorScheme.tertiary
+
+                )
+                Text(
+                    text = "That’s less than ${price.currencyCode}${pricePerMonth}/month!",
+                    style = DMSans18Medium,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+            Spacer(modifier = Modifier.height(32.dp))
+
+            // Call to Action Button
+
+            val colors = if (isSystemInDarkTheme()) {
+                CustomColor.White_500 to CustomColor.Black_900
+            } else {
+                CustomColor.Black_900 to CustomColor.White_500
+            }
+
+            Button(
+                onClick = {
+                    handlePurchase(packageItem = offeringState.first(),
+                        onPurchaseComplete = onPurchaseComplete,
+                        onError = { println(it) })
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(56.dp),
+                elevation = ButtonDefaults.buttonElevation(
+                    defaultElevation = 10.dp,
+                ),
+                colors = ButtonDefaults.buttonColors(containerColor = colors.first)
+            ) {
+                Text(
+                    text = "Start Your Free Trial",
+                    style = DMSans24Black100,
+                    fontSize = 20.sp,
+                    color = colors.second
+                )
+            }
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Terms and Conditions
+            Column {
+                Text(
+                    text = "No commitment. Cancel anytime before your trial ends.",
+                    style = DMSans24Medium60,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = "Subscription renews automatically unless canceled.",
+                    style = DMSans24Medium60,
+                    fontSize = 14.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
         }
-
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Subscription Details
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "$7.99/year after your free trial",
-                style = DMSans18Medium,
-                fontSize = 20.sp,
-                color = MaterialTheme.colorScheme.tertiary
-
-            )
-            Text(
-                text = "That’s less than $0.67/month!",
-                style = DMSans18Medium,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-        Spacer(modifier = Modifier.height(32.dp))
-
-        // Call to Action Button
-
-        val colors = if (isSystemInDarkTheme()){
-            CustomColor.White_500 to CustomColor.Black_900
-        }else{
-            CustomColor.Black_900 to CustomColor.White_500
-        }
-
-        Button(
-            onClick = {  },
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(56.dp),
-            elevation = ButtonDefaults.buttonElevation(
-                defaultElevation = 10.dp,
-            ),
-            colors = ButtonDefaults.buttonColors(containerColor = colors.first)
-        ) {
-            Text(
-                text = "Start Your Free Trial",
-                style = DMSans24Black100,
-                fontSize = 20.sp,
-                color = colors.second
-            )
-        }
-        Spacer(modifier = Modifier.height(24.dp))
-
-        // Terms and Conditions
-        Column {
-            Text(
-                text = "No commitment. Cancel anytime before your trial ends.",
-                style = DMSans24Medium60,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.secondary
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Subscription renews automatically unless canceled.",
-                style = DMSans24Medium60,
-                fontSize = 14.sp,
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-
-        Spacer(modifier = Modifier.height(16.dp))
     }
 }
 
@@ -216,10 +252,15 @@ fun handlePurchase(
         packageToPurchase = packageItem,
         onError = { error, userCancelled ->
             // No purchase
+            if (userCancelled) {
+                // do nothing
+            } else {
+                println(error)
+            }
+            println(error)
         },
         onSuccess = { storeTransaction, customerInfo ->
-            if (customerInfo.entitlements["my_entitlement_identifier"]?.isActive == true) {
-                // Unlock that great "pro" content
+            if (customerInfo.isSubscribed()) {
                 onPurchaseComplete.invoke()
             }
         }
