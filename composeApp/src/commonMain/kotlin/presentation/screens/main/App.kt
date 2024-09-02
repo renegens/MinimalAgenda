@@ -1,47 +1,31 @@
 package presentation.screens.main
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
-import com.revenuecat.purchases.kmp.Purchases
-import extensions.initializeRevenueCat
-import extensions.isSubscribed
-import org.koin.compose.KoinContext
+import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.components.PaperBackground
-import presentation.screens.PaywallScreen
 import presentation.screens.calendar.CalendarScreen
+import presentation.screens.paywall.PaywallScreen
 import presentation.theme.AppTheme
 
+@OptIn(KoinExperimentalAPI::class)
 @Composable
 fun App(isSystemInDarkMode: Boolean) {
 
-    var isSubscribed by remember { mutableStateOf(false) }
-
-    LaunchedEffect(Unit) {
-        initializeRevenueCat()
-        Purchases.sharedInstance.getCustomerInfo(
-            onError = { error ->
-                println(error)
-                isSubscribed = false
-            },
-            onSuccess = { customerInfo ->
-                isSubscribed = customerInfo.isSubscribed()
-            })
-    }
+    val viewModel: AppViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsState()
 
     AppTheme(isSystemInDarkMode) {
-        KoinContext {
-            PaperBackground {
-                if (isSubscribed) {
-                    CalendarScreen()
-                } else {
-                    PaywallScreen(
-                        onPurchaseComplete = { isSubscribed = true },
-                        onError = { println(it) })
-                }
+        PaperBackground {
+            if (state.isSubscribed) {
+                CalendarScreen()
+            } else {
+                PaywallScreen(
+                    onPurchaseComplete = {
+                        viewModel.setEvent(AppContract.Event.OnPurchaseCompleted)
+                    })
             }
         }
     }

@@ -1,6 +1,7 @@
-package presentation.screens
+package presentation.screens.paywall
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -15,29 +16,26 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.revenuecat.purchases.kmp.Package
-import com.revenuecat.purchases.kmp.Purchases
-import com.revenuecat.purchases.kmp.availablePackages
-import com.revenuecat.purchases.kmp.current
-import com.revenuecat.purchases.kmp.models.period
 import com.revenuecat.purchases.kmp.models.price
-import com.revenuecat.purchases.kmp.models.title
-import com.revenuecat.purchases.kmp.models.type
 import com.revenuecat.purchases.kmp.storeProduct
-import extensions.isSubscribed
+import kotlinx.coroutines.flow.collectLatest
+import org.koin.compose.viewmodel.koinViewModel
+import presentation.components.AppAlertDialog
+import presentation.components.DotsPulsing
+import presentation.screens.paywall.PaywallContract.Effect
+import presentation.screens.paywall.PaywallContract.Event
 import presentation.theme.CustomColor
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSans24Black100
@@ -48,35 +46,29 @@ import presentation.theme.DMSansBlack250
 @Composable
 fun PaywallScreen(
     onPurchaseComplete: () -> Unit,
-    onError: (Throwable) -> Unit
 ) {
-    var offeringState by remember { mutableStateOf<List<Package>>(emptyList()) }
+    val viewModel: PaywallViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsState()
 
-    LaunchedEffect(offeringState) {
-        Purchases.sharedInstance.getOfferings(
-            onError = { error ->
-                // An error occurred
-            },
-            onSuccess = { offerings ->
-                offerings.current?.availablePackages?.takeUnless { it.isEmpty() }?.let {
-                    // Display packages for sale
-                }
-
-                offerings.current?.availablePackages?.takeUnless { it.isEmpty() }?.let {
-                    offeringState = it
-                }
-            })
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest {
+            when (it) {
+                Effect.OnPurchaseCompleted -> onPurchaseComplete.invoke()
+            }
+        }
     }
 
-    if (offeringState.isEmpty()) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-            CircularProgressIndicator()
-        }
-    } else {
+    if (state.error != null) {
+        AppAlertDialog(
+            title = "Something went wrong",
+            onDismissRequest = { viewModel.setEvent(Event.DismissErrorDialog) },
+            message = state.error?.message ?: ""
+        )
+    }
+
+    Box(modifier = Modifier.fillMaxSize()) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
@@ -110,25 +102,42 @@ fun PaywallScreen(
 
             // Free Trial Promotion
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(60.dp)
-                    .background(
-                        MaterialTheme.colorScheme.secondaryContainer,
-                        RoundedCornerShape(4.dp)
-                    )
-                    .padding(16.dp),
-                contentAlignment = Alignment.Center
+                modifier = Modifier.fillMaxWidth().height(60.dp).background(
+                    MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(4.dp)
+                ).padding(16.dp), contentAlignment = Alignment.Center
             ) {
-                Text(
-                    text = "Try Papely free for 1 week!",
-                    style = DMSansBlack250,
-                    letterSpacing = (0).sp,
-                    fontSize = 18.sp,
-                    color = MaterialTheme.colorScheme.tertiary
-                )
-            }
+                if (state.isProcessing) {
+                    DotsPulsing()
+                } else {
 
+                    if (state.needsReload) {
+                        Text(
+                            modifier = Modifier.clickable { viewModel.setEvent(Event.GetOfferings) },
+                            text = "Please reload",
+                            style = DMSansBlack250,
+                            letterSpacing = (0).sp,
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    } else {
+                        Text(
+                            text = "Try Papely free for 1 week!",
+                            style = DMSansBlack250,
+                            letterSpacing = (0).sp,
+                            fontSize = 18.sp,
+                            color = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                }
+
+            }
+            Text(
+                text = "No commitment.\nCancel anytime before your trial ends.",
+                style = DMSans24Medium60,
+                fontSize = 14.sp,
+                textAlign = TextAlign.Center,
+                color = MaterialTheme.colorScheme.secondary
+            )
             Spacer(modifier = Modifier.height(24.dp))
 
             // Subscription Details
@@ -136,33 +145,29 @@ fun PaywallScreen(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
 
+                if (state.offerings.isEmpty()) {
+                    Spacer(modifier = Modifier.height(40.dp))
+                } else {
+                    val price = state.offerings.first().storeProduct.price
 
-                println(offeringState.first().storeProduct.title)
-                println(offeringState.first().storeProduct.type)
-                println(offeringState.first().storeProduct.period)
-                println(offeringState.first().storeProduct.price)
-                println(offeringState.first())
+                    //todo price per month
+                    val pricePerMonth =
+                        ((price.formatted.filter { it.isDigit() }.toDouble() / 100) / 12)
 
-                val price = offeringState.first().storeProduct.price
+                    Text(
+                        text = "${price.formatted}/year after your free trial",
+                        style = DMSans18Medium,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.tertiary
 
-
-                //todo price per month
-                val pricePerMonth =
-                    ((price.formatted.filter { it.isDigit() }.toDouble() / 100) / 12)
-
-                Text(
-                    text = "${price.formatted}/year after your free trial",
-                    style = DMSans18Medium,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.tertiary
-
-                )
-                Text(
-                    text = "That’s less than ${price.currencyCode}${pricePerMonth}/month!",
-                    style = DMSans18Medium,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                    )
+//                    Text(
+//                        text = "That’s less than ${price.currencyCode}${pricePerMonth}/month!",
+//                        style = DMSans18Medium,
+//                        fontSize = 16.sp,
+//                        color = MaterialTheme.colorScheme.secondary
+//                    )
+                }
             }
             Spacer(modifier = Modifier.height(32.dp))
 
@@ -176,13 +181,10 @@ fun PaywallScreen(
 
             Button(
                 onClick = {
-                    handlePurchase(packageItem = offeringState.first(),
-                        onPurchaseComplete = onPurchaseComplete,
-                        onError = { println(it) })
+                    viewModel.setEvent(Event.OnPurchaseItemClicked(state.offerings.first()))
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
+                enabled = state.offerings.isNotEmpty() && state.isProcessing.not() && state.needsReload.not(),
+                modifier = Modifier.fillMaxWidth().height(56.dp),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 10.dp,
                 ),
@@ -200,20 +202,23 @@ fun PaywallScreen(
             // Terms and Conditions
             Column {
                 Text(
-                    text = "No commitment. Cancel anytime before your trial ends.",
-                    style = DMSans24Medium60,
-                    fontSize = 14.sp,
-                    color = MaterialTheme.colorScheme.secondary
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
                     text = "Subscription renews automatically unless canceled.",
                     style = DMSans24Medium60,
                     fontSize = 14.sp,
                     color = MaterialTheme.colorScheme.secondary
                 )
+                TextButton(onClick = {viewModel.setEvent(Event.RestorePurchases)}) {
+                    Text(
+                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+                            .clickable { viewModel.setEvent(Event.RestorePurchases) },
+                        textAlign = TextAlign.Center,
+                        text = "Restore Purchases",
+                        style = DMSans24Medium60,
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
-
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -241,30 +246,3 @@ private fun BenefitItem(text: String) {
         )
     }
 }
-
-fun handlePurchase(
-    packageItem: Package,
-    onPurchaseComplete: () -> Unit,
-    onError: (Throwable) -> Unit
-) {
-
-    Purchases.sharedInstance.purchase(
-        packageToPurchase = packageItem,
-        onError = { error, userCancelled ->
-            // No purchase
-            if (userCancelled) {
-                // do nothing
-            } else {
-                println(error)
-            }
-            println(error)
-        },
-        onSuccess = { storeTransaction, customerInfo ->
-            if (customerInfo.isSubscribed()) {
-                onPurchaseComplete.invoke()
-            }
-        }
-    )
-}
-
-
