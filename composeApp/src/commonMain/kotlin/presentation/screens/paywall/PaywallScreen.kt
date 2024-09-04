@@ -18,7 +18,6 @@ import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -129,10 +128,9 @@ fun PaywallScreen(
                         )
                     }
                 }
-
             }
             Text(
-                text = "No commitment.\nCancel anytime before your trial ends.",
+                text = "No commitment.\nCancel anytime before your trial ends in the AppStore.",
                 style = DMSans24Medium60,
                 fontSize = 14.sp,
                 textAlign = TextAlign.Center,
@@ -197,14 +195,21 @@ fun PaywallScreen(
                     color = colors.second
                 )
             }
+            Text(
+                modifier = Modifier.clickable { viewModel.setEvent(Event.RestorePurchases) },
+                text = "Restore Purchases",
+                style = DMSans24Medium60,
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.secondary
+            )
             Spacer(modifier = Modifier.height(24.dp))
 
             // Terms and Conditions
-            Column(modifier = Modifier.fillMaxWidth(),) {
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Center,
-                    text = "Subscription renews automatically unless canceled.",
+                    textAlign = TextAlign.Start,
+                    text = "Subscription unlock for one year renews automatically unless canceled. By subscribing you are agreeing to our EULA",
                     style = DMSans24Medium60,
                     fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.secondary
@@ -212,15 +217,8 @@ fun PaywallScreen(
 
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.SpaceAround
+                    horizontalArrangement = Arrangement.SpaceBetween
                 ) {
-                    Text(
-                        modifier = Modifier.clickable { viewModel.setEvent(Event.RestorePurchases) },
-                        text = "Restore Purchases",
-                        style = DMSans24Medium60,
-                        fontSize = 12.sp,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
                     Text(
                         modifier = Modifier.clickable { viewModel.setEvent(Event.OpenPrivacy) },
                         text = "Privacy Policy",
