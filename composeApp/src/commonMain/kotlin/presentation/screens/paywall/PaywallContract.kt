@@ -24,5 +24,7 @@ class PaywallContract {
         object DismissErrorDialog : Event()
         object GetOfferings : Event()
         object RestorePurchases : Event()
+        object OpenPrivacy: Event()
+        object OpenTermsOfUse: Event()
     }
 }

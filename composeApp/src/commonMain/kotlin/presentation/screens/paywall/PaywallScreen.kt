@@ -200,21 +200,39 @@ fun PaywallScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Terms and Conditions
-            Column {
+            Column(modifier = Modifier.fillMaxWidth(),) {
                 Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
                     text = "Subscription renews automatically unless canceled.",
                     style = DMSans24Medium60,
-                    fontSize = 14.sp,
+                    fontSize = 12.sp,
                     color = MaterialTheme.colorScheme.secondary
                 )
-                TextButton(onClick = {viewModel.setEvent(Event.RestorePurchases)}) {
+
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
+                    horizontalArrangement = Arrangement.SpaceAround
+                ) {
                     Text(
-                        modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-                            .clickable { viewModel.setEvent(Event.RestorePurchases) },
-                        textAlign = TextAlign.Center,
+                        modifier = Modifier.clickable { viewModel.setEvent(Event.RestorePurchases) },
                         text = "Restore Purchases",
                         style = DMSans24Medium60,
-                        fontSize = 14.sp,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        modifier = Modifier.clickable { viewModel.setEvent(Event.OpenPrivacy) },
+                        text = "Privacy Policy",
+                        style = DMSans24Medium60,
+                        fontSize = 12.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        modifier = Modifier.clickable { viewModel.setEvent(Event.OpenTermsOfUse) },
+                        text = "Terms of Use",
+                        style = DMSans24Medium60,
+                        fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }

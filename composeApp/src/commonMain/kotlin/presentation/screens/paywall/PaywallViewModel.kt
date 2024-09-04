@@ -7,11 +7,14 @@ import com.revenuecat.purchases.kmp.PurchasesError
 import com.revenuecat.purchases.kmp.PurchasesErrorCode
 import com.revenuecat.purchases.kmp.availablePackages
 import com.revenuecat.purchases.kmp.current
+import domain.model.PRIVACY_URL
+import domain.model.TERMS_OF_USE_URL
 import extensions.isSubscribed
+import platform.Browser
 import presentation.base.BaseViewModel
 import presentation.screens.paywall.PaywallContract.*
 
-class PaywallViewModel() :
+class PaywallViewModel(private val browser: Browser) :
     BaseViewModel<Event, State, Effect>() {
 
     init {
@@ -33,6 +36,8 @@ class PaywallViewModel() :
 
             Event.GetOfferings -> getOfferings()
             Event.RestorePurchases -> restorePurchases()
+            Event.OpenPrivacy -> browser.openUrl(PRIVACY_URL)
+            Event.OpenTermsOfUse -> browser.openUrl(TERMS_OF_USE_URL)
         }
     }
 
