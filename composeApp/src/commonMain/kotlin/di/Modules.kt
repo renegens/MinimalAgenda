@@ -12,6 +12,8 @@ import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
+import presentation.screens.main.AppViewModel
+import presentation.screens.paywall.PaywallViewModel
 import repository.HiddenEventsRepository
 import repository.HiddenEventsRepositoryImpl
 
@@ -25,4 +27,6 @@ val sharedModule = module {
     single { HiddenEventsLocalDataSource(get()) }
     single { HiddenEventsRepositoryImpl(get()) }.bind<HiddenEventsRepository>()
     viewModelOf(::CalendarViewModel)
+    viewModelOf(::AppViewModel)
+    viewModelOf(::PaywallViewModel)
 }

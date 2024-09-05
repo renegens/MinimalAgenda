@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
-import extensions.today
+import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
 import presentation.components.DayHeader
@@ -47,6 +47,7 @@ fun DayScreen(
     eventsByDay: Map<Int, List<AgendaEvent>>,
     onNowClicked: Boolean,
     scrollToDay: Int,
+    currentDate: LocalDate,
     showAll: Boolean,
     onHide: (AgendaEvent) -> Unit,
     calendarPermission: CalendarPermissionHandler.State,
@@ -54,9 +55,9 @@ fun DayScreen(
     onNotify: (AgendaEvent) -> Unit
 ) {
     if (days.isEmpty()) return
-    val currentEpochDay by remember { mutableStateOf(today.toEpochDays()) }
+    val currentEpochDay by remember { mutableStateOf(currentDate.toEpochDays()) }
 
-    val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == currentEpochDay}) }
+    val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == currentEpochDay }) }
 
     val listState = rememberLazyListState(
         initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5
@@ -71,6 +72,7 @@ fun DayScreen(
             listState.animateScrollToItem(scrollToDay)
         }
     }
+    var selectedAgendaItem by remember { mutableStateOf<AgendaEvent?>(null) }
 
     LazyColumn(
         state = listState, modifier = Modifier.fillMaxSize()
@@ -79,6 +81,7 @@ fun DayScreen(
         CalendarPermission(
             onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
         )
+
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == currentEpochDay
             PaperBackground {
@@ -95,7 +98,9 @@ fun DayScreen(
                         agendaEvents = eventsByDay[day.epochDay] ?: emptyList(),
                         onHide = onHide,
                         onNotify = onNotify,
-                        showAll = showAll
+                        showAll = showAll,
+                        selectedItem = selectedAgendaItem,
+                        onItemSelected = { selectedAgendaItem = it }
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                     SectionDivider(isCurrent = isToday)
@@ -110,9 +115,10 @@ fun Entries(
     agendaEvents: List<AgendaEvent>,
     onNotify: (AgendaEvent) -> Unit,
     onHide: (AgendaEvent) -> Unit,
+    selectedItem: AgendaEvent?,
+    onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean
 ) {
-
     val items = if (showAll) {
         agendaEvents
     } else {
@@ -125,17 +131,19 @@ fun Entries(
     }
 
     items.sortedBy { it.startTime }.forEach {
-        var showButtons by remember { mutableStateOf(false) }
-
         Row(
             modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 16.dp)
         ) {
             Time(agendaEvent = it, showAll = showAll)
             Column(
                 modifier = Modifier.fillMaxWidth().background(
-                    color = if (showButtons) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
+                    color = if (selectedItem == it) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
                 ).clickable {
-                    showButtons = !showButtons
+                    if (selectedItem == it) {
+                        onItemSelected.invoke(null)
+                    } else {
+                        onItemSelected.invoke(it)
+                    }
                 }
             ) {
                 Text(
@@ -144,13 +152,13 @@ fun Entries(
                     style = DMSans18Medium,
                     color = it.getTextColor(showAll),
                 )
-                AnimatedVisibility(visible = showButtons) {
+                AnimatedVisibility(visible = selectedItem == it) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                     ) {
                         TextButton(onClick = {
                             onHide.invoke(it)
-                            showButtons = false
+                            onItemSelected.invoke(null)
                         }) {
                             val text = if (it.isHidden) {
                                 "Show"
@@ -161,7 +169,7 @@ fun Entries(
                         }
                         TextButton(onClick = {
                             onNotify.invoke(it)
-                            showButtons = false
+                            onItemSelected.invoke(null)
                         }) {
                             Text("Notify".uppercase(), style = DMSansBlack36)
                         }

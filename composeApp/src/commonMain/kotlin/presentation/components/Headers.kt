@@ -18,6 +18,7 @@ import androidx.compose.ui.unit.dp
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import extensions.toShortName
+import kotlinx.datetime.LocalDate
 import presentation.theme.DMSansBlack250
 
 @Composable
@@ -47,12 +48,12 @@ fun DayHeader(day: String, dayInMonth: Int, month: Int, isToday: Boolean) {
 }
 
 @Composable
-fun YearHeader(agendaYear: AgendaYear) {
+fun YearHeader(agendaYear: AgendaYear, currentDate: LocalDate) {
     val label = buildAnnotatedString {
-        withStyle(style = SpanStyle(color = ColorSecondary(agendaYear.isCurrent))) {
+        withStyle(style = SpanStyle(color = ColorSecondary(agendaYear.isCurrent(currentDate)))) {
             append(agendaYear.firstTwoDigits)
         }
-        withStyle(style = SpanStyle(color = ColorPrimary(agendaYear.isCurrent))) {
+        withStyle(style = SpanStyle(color = ColorPrimary(agendaYear.isCurrent(currentDate)))) {
             append(agendaYear.lastTwoDigits)
         }
     }

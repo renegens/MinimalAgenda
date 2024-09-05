@@ -7,6 +7,7 @@ import org.koin.dsl.module
 import platform.AndroidCalendarPermissionHandler
 import platform.AndroidNotificationHandler
 import platform.AndroidNotificationPermissionHandler
+import platform.Browser
 import platform.CalendarPermissionHandler
 import platform.NotificationHandler
 import platform.NotificationPermissionHandler
@@ -19,4 +20,5 @@ actual val platformModule: Module = module {
     single { AndroidNotificationPermissionHandler() }.bind<NotificationPermissionHandler>()
     single { AndroidCalendarRepository(get()) }.bind<CalendarRepository>()
     single { AndroidCalendarPermissionHandler() }.bind<CalendarPermissionHandler>()
+    factory { Browser(get()) }
 }

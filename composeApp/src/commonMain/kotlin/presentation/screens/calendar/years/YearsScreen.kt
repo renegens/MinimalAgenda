@@ -19,7 +19,7 @@ import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import extensions.getInRangeOf
-import extensions.today
+import kotlinx.datetime.LocalDate
 import presentation.components.PaperBackground
 import presentation.components.SectionDivider
 import presentation.components.YearHeader
@@ -28,6 +28,7 @@ import presentation.components.YearHeader
 fun YearsScreen(
     days: List<AgendaDay>,
     events: List<AgendaEvent>,
+    currentDate: LocalDate,
     showAll: Boolean,
     onNowClicked: Boolean,
     scrollToYear: Int,
@@ -42,7 +43,7 @@ fun YearsScreen(
 
     val todayIndex by remember {
         mutableStateOf(
-            years.keys.indexOfFirst { it.isCurrent }
+            years.keys.indexOfFirst { it.isCurrent(currentDate) }
         )
     }
 
@@ -68,7 +69,7 @@ fun YearsScreen(
             PaperBackground {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(24.dp))
-                    YearHeader(year)
+                    YearHeader(agendaYear = year, currentDate = currentDate)
                     Spacer(modifier = Modifier.height(16.dp))
                     Months(
                         yearEvents = events.getInRangeOf(year),
@@ -78,7 +79,7 @@ fun YearsScreen(
                     )
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    SectionDivider(isCurrent = year.year == today.year)
+                    SectionDivider(isCurrent = year.year == currentDate.year)
                 }
             }
         }

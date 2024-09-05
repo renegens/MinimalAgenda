@@ -17,11 +17,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.Lifecycle
 import domain.model.AgendaMonthYear
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.components.ActionButton
+import presentation.components.ComposableLifecycle
 import presentation.components.NotificationPermissionDialog
 import presentation.screens.calendar.day.DayScreen
 import presentation.screens.calendar.months.MonthsScreen
@@ -72,6 +74,13 @@ fun CalendarScreen() {
             }
         }
     }
+
+    ComposableLifecycle {
+        if (it == Lifecycle.Event.ON_START){
+            viewModel.setEvent(Event.LoadData)
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
 
         if (shouldShowNotificationPermission) {
@@ -83,6 +92,7 @@ fun CalendarScreen() {
             when (page) {
                 CalendarContract.Section.Day.position -> DayScreen(
                     days = state.days,
+                    currentDate = state.currentDate,
                     onNowClicked = isScrolledToToday,
                     scrollToDay = dayScrollPosition,
                     eventsByDay = state.agendaEvents.groupBy { it.epochDay!! },
@@ -98,6 +108,7 @@ fun CalendarScreen() {
                 CalendarContract.Section.Month.position -> MonthsScreen(
                     days = state.days,
                     events = state.agendaEvents,
+                    currentDate = state.currentDate,
                     onNowClicked = isScrolledToMonth,
                     scrollToMonth = monthScrollPosition,
                     showAll = state.showAll,
@@ -113,6 +124,7 @@ fun CalendarScreen() {
                     days = state.days,
                     events = state.agendaEvents,
                     showAll = state.showAll,
+                    currentDate = state.currentDate,
                     onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
                     onNowClicked = isScrolledToYear,
                     scrollToYear = yearScrollPosition

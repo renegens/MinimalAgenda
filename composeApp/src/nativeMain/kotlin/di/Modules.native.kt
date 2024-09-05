@@ -4,6 +4,7 @@ import data.DataStore
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import platform.Browser
 import platform.CalendarPermissionHandler
 import platform.EventKit
 import platform.NotificationHandler
@@ -21,4 +22,5 @@ actual val platformModule = module {
     single { iOSNotificationHandler() }.bind<NotificationHandler>()
     singleOf(::EventKit)
     single { iOSCalendarPermissionHandler(get()) }.bind<CalendarPermissionHandler>()
+    factory { Browser() }
 }
