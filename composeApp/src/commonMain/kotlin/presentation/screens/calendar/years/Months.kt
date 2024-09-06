@@ -19,7 +19,7 @@ import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import extensions.getEventsForMonth
 import extensions.hasHiddenEvents
-import extensions.today
+import kotlinx.datetime.LocalDate
 import presentation.theme.DMSans24Black100
 import presentation.theme.DMSans24Medium120
 
@@ -28,6 +28,7 @@ fun Months(
     yearEvents: List<AgendaEvent>,
     showAll: Boolean,
     year: Int,
+    currentDate: LocalDate,
     onMonthClicked: (AgendaMonthYear) -> Unit
 ) {
     val months = AgendaMonth.entries.chunked(6)
@@ -35,7 +36,7 @@ fun Months(
     Row(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
         Column(modifier = Modifier.weight(0.5f)) {
             months.first().forEachIndexed { index, month ->
-                if (month.isCurrent(today, year)) {
+                if (month.isCurrent(currentDate, year)) {
                     MonthTextFocused(
                         text = month.nameRes,
                         modifier = Modifier.clickable {
@@ -70,7 +71,7 @@ fun Months(
 
         Column(modifier = Modifier.weight(0.5f)) {
             months[1].forEachIndexed { index, month ->
-                if (month.isCurrent(today, year)) {
+                if (month.isCurrent(currentDate, year)) {
                     MonthTextFocused(
                         text = month.nameRes,
                         modifier = Modifier.clickable {

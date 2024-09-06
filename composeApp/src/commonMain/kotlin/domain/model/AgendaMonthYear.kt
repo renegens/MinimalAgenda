@@ -1,6 +1,5 @@
 package domain.model
 
-import extensions.today
 import kotlinx.datetime.DatePeriod
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.isoDayNumber
@@ -44,11 +43,9 @@ data class AgendaMonthYear(val agendaYear: AgendaYear, val agendaMonth: AgendaMo
     val year: Int
         get() = agendaYear.year
 
-    val isCurrent: Boolean
-        get() {
-            val current = today
-            return agendaMonth.number == current.month.number && year == current.year
-        }
+    fun isCurrent(today: LocalDate): Boolean {
+        return agendaMonth.number == today.month.number && year == today.year
+    }
 
     fun isSame(agendaMonthYear: AgendaMonthYear): Boolean {
         return agendaMonthYear.agendaYear.year == agendaYear.year && agendaMonthYear.agendaMonth.number == agendaMonth.number

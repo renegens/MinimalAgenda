@@ -18,7 +18,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
@@ -44,13 +43,17 @@ fun MonthGrid(
     onYearClicked: (AgendaYear) -> Unit,
     showAll: Boolean
 ) {
-    val isCurrent by remember { mutableStateOf(monthYear.isCurrent) }
+    val isCurrent by mutableStateOf(monthYear.isCurrent(currentDate))
 
     PaperBackground {
         Column {
             Spacer(modifier = Modifier.height(24.dp))
-            MonthHeader(monthYear = monthYear,
-                modifier = Modifier.clickable { onYearClicked.invoke(monthYear.agendaYear) })
+            MonthHeader(
+                monthYear = monthYear,
+                currentDate = currentDate,
+                modifier = Modifier.clickable {
+                    onYearClicked.invoke(monthYear.agendaYear)
+                })
             Spacer(modifier = Modifier.height(40.dp))
             DaysInWeek(today = currentDate, isCurrentMonth = isCurrent)
             Spacer(modifier = Modifier.height(24.dp))
@@ -95,13 +98,10 @@ fun CalendarDays(
             if (gridItem.dayInMonth == DayGrid.DONT_RENDER) {
                 Box(modifier = Modifier.height(40.dp).width(48.dp))
             } else {
-                val hasEvent =
-                    events.hasEvents(epochDay = gridItem.epochDay, showAll = showAll)
+                val hasEvent = events.hasEvents(epochDay = gridItem.epochDay, showAll = showAll)
 
-                Box(
-                    modifier = Modifier.height(40.dp).width(48.dp)
-                        .clickable { onDayClicked.invoke(gridItem.epochDay) }
-                ) {
+                Box(modifier = Modifier.height(40.dp).width(48.dp)
+                    .clickable { onDayClicked.invoke(gridItem.epochDay) }) {
                     Text(
                         text = gridItem.dayInMonth.toString(),
                         style = DMSans18SemiBold,

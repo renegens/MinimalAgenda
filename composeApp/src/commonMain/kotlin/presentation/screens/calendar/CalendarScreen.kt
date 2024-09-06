@@ -35,7 +35,10 @@ import presentation.screens.calendar.CalendarContract.*
 fun CalendarScreen() {
     val viewModel: CalendarViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
-    val pagerState = rememberPagerState(pageCount = { 3 }, initialPage = 0)
+    val pagerState = rememberPagerState(
+        pageCount = { Section.entries.size },
+        initialPage = Section.Day.position
+    )
 
     var isScrolledToToday by remember { mutableStateOf(true) }
     var isScrolledToMonth by remember { mutableStateOf(true) }
@@ -76,7 +79,7 @@ fun CalendarScreen() {
     }
 
     ComposableLifecycle {
-        if (it == Lifecycle.Event.ON_START){
+        if (it == Lifecycle.Event.ON_START) {
             viewModel.setEvent(Event.LoadData)
         }
     }

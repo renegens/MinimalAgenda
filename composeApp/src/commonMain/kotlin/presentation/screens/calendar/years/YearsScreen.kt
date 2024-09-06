@@ -19,6 +19,7 @@ import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import extensions.getInRangeOf
+import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
 import presentation.components.PaperBackground
 import presentation.components.SectionDivider
@@ -41,18 +42,18 @@ fun YearsScreen(
         mutableStateOf(days.groupBy { it.agendaMonthYear.agendaYear })
     }
 
-    val todayIndex by remember {
-        mutableStateOf(
-            years.keys.indexOfFirst { it.isCurrent(currentDate) }
-        )
-    }
-
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = todayIndex + 1
+    val todayIndex by mutableStateOf(
+        years.keys.indexOfFirst { it.isCurrent(currentDate) }
     )
 
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex)
+
+    LaunchedEffect(todayIndex) {
+        listState.scrollToNowIfNeeded(todayIndex)
+    }
+
     LaunchedEffect(onNowClicked) {
-        listState.animateScrollToItem(todayIndex)
+        listState.scrollToNowIfNeeded(todayIndex, shouldAnimate = true)
     }
 
     LaunchedEffect(scrollToYear) {
@@ -74,11 +75,11 @@ fun YearsScreen(
                     Months(
                         yearEvents = events.getInRangeOf(year),
                         year = year.year,
+                        currentDate = currentDate,
                         onMonthClicked = onMonthClicked,
                         showAll = showAll
                     )
                     Spacer(modifier = Modifier.height(32.dp))
-
                     SectionDivider(isCurrent = year.year == currentDate.year)
                 }
             }

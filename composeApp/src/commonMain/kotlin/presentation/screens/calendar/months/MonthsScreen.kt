@@ -15,6 +15,7 @@ import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import extensions.getInRangeOf
+import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
 
 @Composable
@@ -28,25 +29,25 @@ fun MonthsScreen(
     onDayClicked: (Int) -> Unit,
     onYearClicked: (AgendaYear) -> Unit
 ) {
-
     if (days.isEmpty()) return
 
     val months by remember {
         mutableStateOf(days.groupBy { it.agendaMonthYear })
     }
 
-    val todayIndex by remember {
+    val todayIndex by
         mutableStateOf(
-            months.keys.indexOfFirst { it.isCurrent }
+            months.keys.indexOfFirst { it.isCurrent(currentDate) }
         )
+
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex)
+
+    LaunchedEffect(todayIndex) {
+        listState.scrollToNowIfNeeded(todayIndex)
     }
 
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = todayIndex - 1, initialFirstVisibleItemScrollOffset = 5
-    )
-
     LaunchedEffect(onNowClicked) {
-        listState.animateScrollToItem(todayIndex)
+        listState.scrollToNowIfNeeded(todayIndex, shouldAnimate = true)
     }
 
     LaunchedEffect(scrollToMonth) {
