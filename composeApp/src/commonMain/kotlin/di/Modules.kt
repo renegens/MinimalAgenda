@@ -9,6 +9,7 @@ import presentation.screens.calendar.CalendarViewModel
 import domain.use_case.GetAllEventsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
+import org.koin.compose.viewmodel.dsl.viewModel
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
@@ -20,13 +21,16 @@ import repository.HiddenEventsRepositoryImpl
 expect val platformModule: Module
 
 val sharedModule = module {
+    viewModel { AppViewModel() }
+    viewModelOf(::CalendarViewModel)
+    viewModelOf(::PaywallViewModel)
+
     singleOf(::CalendarGenerator)
+
     singleOf(::GetAllEventsUseCase)
-    factory { ToggleEventVisibilityUseCase(get()) }
     factoryOf(::ScheduleNotificationUseCase)
+
     single { HiddenEventsLocalDataSource(get()) }
     single { HiddenEventsRepositoryImpl(get()) }.bind<HiddenEventsRepository>()
-    viewModelOf(::CalendarViewModel)
-    viewModelOf(::AppViewModel)
-    viewModelOf(::PaywallViewModel)
+    factory { ToggleEventVisibilityUseCase(get()) }
 }

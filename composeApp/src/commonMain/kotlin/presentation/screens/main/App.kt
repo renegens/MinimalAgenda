@@ -3,6 +3,7 @@ package presentation.screens.main
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.components.PaperBackground
@@ -13,19 +14,20 @@ import presentation.theme.AppTheme
 @OptIn(KoinExperimentalAPI::class)
 @Composable
 fun App(isSystemInDarkMode: Boolean) {
+    KoinContext {
+        val viewModel: AppViewModel = koinViewModel()
+        val state by viewModel.uiState.collectAsState()
 
-    val viewModel: AppViewModel = koinViewModel()
-    val state by viewModel.uiState.collectAsState()
-
-    AppTheme(isSystemInDarkMode) {
-        PaperBackground {
-            if (state.isSubscribed) {
-                CalendarScreen()
-            } else {
-                PaywallScreen(
-                    onPurchaseComplete = {
-                        viewModel.setEvent(AppContract.Event.OnPurchaseCompleted)
-                    })
+        AppTheme(isSystemInDarkMode) {
+            PaperBackground {
+                if (state.isSubscribed) {
+                    CalendarScreen()
+                } else {
+                    PaywallScreen(
+                        onPurchaseComplete = {
+                            viewModel.setEvent(AppContract.Event.OnPurchaseCompleted)
+                        })
+                }
             }
         }
     }

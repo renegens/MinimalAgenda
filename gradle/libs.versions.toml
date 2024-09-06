@@ -12,7 +12,7 @@ kotlinx-serialization-json = "1.7.1"
 androidx-lifecycle-viewmodel = "2.8.5"
 koin = "3.6.0-Beta4"
 koinComposeMultiplatform = "1.2.0-Beta4"
-purchases-kmp = "1.0.0-beta.3"
+purchases-kmp = "1.0.0-beta.1"
 purchases-common = "10.10.0"
 
 [libraries]

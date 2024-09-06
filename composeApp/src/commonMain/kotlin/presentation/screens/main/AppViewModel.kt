@@ -6,8 +6,7 @@ import presentation.screens.main.AppContract.*
 import extensions.initializeRevenueCat
 import extensions.isSubscribed
 
-class AppViewModel() :
-    BaseViewModel<Event, State, Effect>() {
+class AppViewModel : BaseViewModel<Event, State, Effect>() {
 
     init {
         initializeRevenueCat()
