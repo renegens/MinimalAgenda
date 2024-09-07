@@ -2,7 +2,6 @@ package presentation.theme
 
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import org.koin.compose.KoinContext
 
 @Composable
 fun AppTheme(
@@ -14,11 +13,9 @@ fun AppTheme(
         else -> LightColorScheme
     }
 
-    KoinContext {
-        MaterialTheme(
-            colorScheme = colorScheme,
-            typography = typography,
-            content = content
-        )
-    }
+    MaterialTheme(
+        colorScheme = colorScheme,
+        typography = typography,
+        content = content
+    )
 }

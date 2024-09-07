@@ -1,5 +1,6 @@
 package repository
 
+import android.annotation.SuppressLint
 import android.content.Context
 import android.database.Cursor
 import android.provider.CalendarContract
@@ -12,7 +13,9 @@ import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.UUID
 import kotlin.random.Random
 
@@ -61,17 +64,23 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
     }
 
+    @SuppressLint("SimpleDateFormat")
+    fun dateFormatter(milliseconds: String): String {
+        return SimpleDateFormat("HH mm").format(Date(milliseconds.toLong())).toString()
+    }
+
     override suspend fun getAllEvents(): List<EventEntity> {
         val list = emptyList<EventEntity>().toMutableList()
 
-        for (i in 1..4000) {
+        for (i in 1..80000) {
+            val timestamp = getRandomTimestampWithinTwoYears()
             list.add(
                 EventEntity(
                     id = UUID.randomUUID().toString(),
                     title = UUID.randomUUID().toString(),
-                    startTime = getRandomTimestampWithinTwoYears(),
+                    startTime = timestamp,
                     allDay = false,
-                    format = "10 12"
+                    format = dateFormatter(timestamp.toString())
                 )
             )
         }

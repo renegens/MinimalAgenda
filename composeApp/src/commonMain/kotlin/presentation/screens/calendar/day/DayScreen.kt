@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
+import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
@@ -55,21 +56,23 @@ fun DayScreen(
     onNotify: (AgendaEvent) -> Unit
 ) {
     if (days.isEmpty()) return
-    val currentEpochDay by remember { mutableStateOf(currentDate.toEpochDays()) }
 
-    val todayIndex by remember { mutableStateOf(days.indexOfFirst { it.epochDay == currentEpochDay }) }
+    val currentEpochDay = currentDate.toEpochDays()
+    val todayIndex by mutableStateOf(days.indexOfFirst { it.epochDay == currentEpochDay })
 
-    val listState = rememberLazyListState(
-        initialFirstVisibleItemIndex = todayIndex + 1, initialFirstVisibleItemScrollOffset = 5
-    )
+    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex)
+
+    LaunchedEffect(todayIndex) {
+        listState.scrollToNowIfNeeded(todayIndex)
+    }
 
     LaunchedEffect(onNowClicked) {
-        listState.animateScrollToItem(todayIndex)
+        listState.scrollToNowIfNeeded(todayIndex, shouldAnimate = true)
     }
 
     LaunchedEffect(scrollToDay) {
         if (scrollToDay > 0) {
-            listState.animateScrollToItem(scrollToDay)
+            listState.scrollToItem(scrollToDay)
         }
     }
     var selectedAgendaItem by remember { mutableStateOf<AgendaEvent?>(null) }

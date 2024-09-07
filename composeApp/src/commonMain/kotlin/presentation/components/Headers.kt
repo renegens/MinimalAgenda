@@ -22,12 +22,12 @@ import kotlinx.datetime.LocalDate
 import presentation.theme.DMSansBlack250
 
 @Composable
-fun MonthHeader(monthYear: AgendaMonthYear, modifier: Modifier) {
+fun MonthHeader(monthYear: AgendaMonthYear, modifier: Modifier, currentDate: LocalDate) {
     val label = buildAnnotatedString {
-        withStyle(style = SpanStyle(color = ColorPrimary(monthYear.isCurrent))) {
+        withStyle(style = SpanStyle(color = ColorPrimary(monthYear.isCurrent(currentDate)))) {
             append(monthYear.agendaMonth.nameRes.toShortName())
         }
-        withStyle(style = SpanStyle(color = ColorSecondary(monthYear.isCurrent))) {
+        withStyle(style = SpanStyle(color = ColorSecondary(monthYear.isCurrent(currentDate)))) {
             append(monthYear.agendaYear.lastTwoDigits)
         }
     }

@@ -19,10 +19,6 @@ class CalendarViewModel(
 ) :
     BaseViewModel<Event, State, Effect>() {
 
-    init {
-       // setEvent(Event.LoadData)
-    }
-
     private fun loadData() {
         when (val permissionState = permissionHandler.getPermissionState()) {
             CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
@@ -103,11 +99,12 @@ class CalendarViewModel(
             }
 
             is Event.Notify -> viewModelScope.launch {
-                when(scheduleNotificationUseCase(agendaEvent = event.agendaEvent)){
+                when (scheduleNotificationUseCase(agendaEvent = event.agendaEvent)) {
                     ScheduleNotificationUseCase.State.Fail -> {}
                     ScheduleNotificationUseCase.State.PermissionMissing -> setEffect {
-                      Effect.NotificationPermissionMissing
+                        Effect.NotificationPermissionMissing
                     }
+
                     ScheduleNotificationUseCase.State.Success -> {}
                 }
             }
@@ -116,7 +113,6 @@ class CalendarViewModel(
     }
 
     private suspend fun loadEvents() {
-        println("Loading events")
         when (val state = getAllEventsUseCase()) {
             is GetAllEventsUseCase.State.Success -> setState {
                 State(
