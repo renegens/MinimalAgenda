@@ -19,6 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import domain.model.AgendaMonthYear
+import domain.model.AppTheme
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -29,10 +30,11 @@ import presentation.screens.calendar.day.DayScreen
 import presentation.screens.calendar.months.MonthsScreen
 import presentation.screens.calendar.years.YearsScreen
 import presentation.screens.calendar.CalendarContract.*
+import presentation.screens.settings.SettingsScreen
 
 @OptIn(KoinExperimentalAPI::class)
 @Composable
-fun CalendarScreen() {
+fun CalendarScreen(appTheme: AppTheme) {
     val viewModel: CalendarViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
     val pagerState = rememberPagerState(
@@ -87,13 +89,15 @@ fun CalendarScreen() {
     Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
 
         if (shouldShowNotificationPermission) {
-            NotificationPermissionDialog(onDismissRequest = {
-                shouldShowNotificationPermission = false
-            })
+            NotificationPermissionDialog(
+                onDismissRequest = {
+                    shouldShowNotificationPermission = false
+                })
         }
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
             when (page) {
                 CalendarContract.Section.Day.position -> DayScreen(
+                    appTheme = appTheme,
                     days = state.days,
                     currentDate = state.currentDate,
                     onNowClicked = isScrolledToToday,
@@ -109,6 +113,7 @@ fun CalendarScreen() {
                 )
 
                 CalendarContract.Section.Month.position -> MonthsScreen(
+                    appTheme = appTheme,
                     days = state.days,
                     events = state.agendaEvents,
                     currentDate = state.currentDate,
@@ -124,6 +129,7 @@ fun CalendarScreen() {
                 )
 
                 CalendarContract.Section.Year.position -> YearsScreen(
+                    appTheme = appTheme,
                     days = state.days,
                     events = state.agendaEvents,
                     showAll = state.showAll,
@@ -132,12 +138,15 @@ fun CalendarScreen() {
                     onNowClicked = isScrolledToYear,
                     scrollToYear = yearScrollPosition
                 )
+
+                CalendarContract.Section.Settings.position -> SettingsScreen()
             }
         }
         Row(
             modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
         ) {
             ActionButton(
+                currentSection = Section.fromInt(pagerState.currentPage),
                 showAll = state.showAll,
                 nowClicked = {
                     viewModel.setEvent(

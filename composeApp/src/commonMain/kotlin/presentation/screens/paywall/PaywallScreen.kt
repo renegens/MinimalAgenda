@@ -2,7 +2,6 @@ package presentation.screens.paywall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,7 +34,6 @@ import presentation.components.AppAlertDialog
 import presentation.components.DotsPulsing
 import presentation.screens.paywall.PaywallContract.Effect
 import presentation.screens.paywall.PaywallContract.Event
-import presentation.theme.CustomColor
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSans24Black100
 import presentation.theme.DMSans24Medium120
@@ -43,9 +41,7 @@ import presentation.theme.DMSans24Medium60
 import presentation.theme.DMSansBlack250
 
 @Composable
-fun PaywallScreen(
-    onPurchaseComplete: () -> Unit,
-) {
+fun PaywallScreen(onPurchaseComplete: () -> Unit, ) {
     val viewModel: PaywallViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
 
@@ -171,12 +167,6 @@ fun PaywallScreen(
 
             // Call to Action Button
 
-            val colors = if (isSystemInDarkTheme()) {
-                CustomColor.White_500 to CustomColor.Black_900
-            } else {
-                CustomColor.Black_900 to CustomColor.White_500
-            }
-
             Button(
                 onClick = {
                     viewModel.setEvent(Event.OnPurchaseItemClicked(state.offerings.first()))
@@ -186,13 +176,13 @@ fun PaywallScreen(
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 10.dp,
                 ),
-                colors = ButtonDefaults.buttonColors(containerColor = colors.first)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.inversePrimary)
             ) {
                 Text(
                     text = "Start Your Free Trial",
                     style = DMSans24Black100,
                     fontSize = 20.sp,
-                    color = colors.second
+                    color = MaterialTheme.colorScheme.inverseSurface
                 )
             }
             Text(

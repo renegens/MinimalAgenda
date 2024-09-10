@@ -1,10 +1,12 @@
 package presentation.theme
 
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.sp
 import minimalagenda.composeapp.generated.resources.DMSans_18pt_Bold
 import minimalagenda.composeapp.generated.resources.DMSans_18pt_Medium
@@ -71,7 +73,7 @@ val DMSansBlack250: TextStyle
         fontFamily = DMSansBlackFamily,
         fontWeight = FontWeight.Black,
         fontSize = 84.sp,
-        letterSpacing = (-8).sp,
+        letterSpacing = (-6).sp,
     )
 
 val DMSansBlack36: TextStyle
@@ -82,7 +84,6 @@ val DMSansBlack36: TextStyle
         fontSize = 12.sp,
         letterSpacing = 1.sp
     )
-
 
 
 val DMSans24Black100: TextStyle
@@ -143,6 +144,17 @@ val DMSans18SemiBold: TextStyle
         fontFamily = DMSans18SemiBoldFamily,
         fontWeight = FontWeight.SemiBold,
         fontSize = 32.sp,
+        letterSpacing = (-1).sp
+    )
+
+val TextFieldStyle: TextStyle
+    @Composable
+    get() = TextStyle(
+        color = MaterialTheme.colorScheme.primary,
+        textAlign = TextAlign.Center,
+        fontFamily = DMSans18MediumFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
         letterSpacing = (-1).sp
     )
 

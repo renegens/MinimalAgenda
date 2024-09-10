@@ -88,3 +88,15 @@ private fun ColorSecondary(isCurrent: Boolean): Color {
         MaterialTheme.colorScheme.secondary
     }
 }
+
+@Composable
+fun SettingsHeader(label: String) {
+    Box(Modifier.height(100.dp).fillMaxWidth()) {
+        Text(
+            style = DMSansBlack250,
+            text = label,
+            color = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.wrapContentHeight(unbounded = true)
+        )
+    }
+}

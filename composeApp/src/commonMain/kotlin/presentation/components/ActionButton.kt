@@ -14,16 +14,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import presentation.screens.calendar.CalendarContract.Section
 import presentation.theme.CustomColor
 import presentation.theme.DMSansBlack36
 
 @Composable
 fun ActionButton(
+    currentSection: Section,
     nowClicked: () -> Unit,
     toggleActive: () -> Unit,
     onAdd: () -> Unit,
     showAll: Boolean
 ) {
+    if (currentSection == Section.Settings) return
     Column(modifier = Modifier.padding(end = 16.dp)) {
         Box(
             modifier = Modifier.size(56.dp)

@@ -54,6 +54,8 @@ class CalendarViewModel(
                 Section.Year -> setEffect {
                     Effect.ScrollYearToToday
                 }
+
+                Section.Settings -> {}
             }
 
             //todo remove the index from here?
@@ -108,6 +110,7 @@ class CalendarViewModel(
                     ScheduleNotificationUseCase.State.Success -> {}
                 }
             }
+
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
         }
     }

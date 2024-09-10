@@ -44,7 +44,7 @@ class CalendarContract {
     }
 
     enum class Section(val position: Int) {
-        Day(0), Month(1), Year(2);
+        Day(0), Month(1), Year(2), Settings(3);
 
         companion object {
             fun fromInt(value: Int) = entries.first { it.position == value }
