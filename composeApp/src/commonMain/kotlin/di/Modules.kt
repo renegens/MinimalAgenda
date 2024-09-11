@@ -9,7 +9,7 @@ import org.koin.dsl.module
 import presentation.screens.calendar.CalendarViewModel
 import domain.use_case.GetAllEventsUseCase
 import domain.use_case.GetSettingsUseCase
-import domain.use_case.ListenAppThemeUseCase
+import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
@@ -38,7 +38,7 @@ val sharedModule = module {
     factoryOf(::GetSettingsUseCase)
     factoryOf(::SaveSettingsUseCase)
     factoryOf(::ScheduleNotificationUseCase)
-    singleOf(::ListenAppThemeUseCase)
+    singleOf(::AppThemeListenerUseCase)
 
     single { HiddenEventsLocalDataSource(get()) }
     single { HiddenEventsRepositoryImpl(get()) }.bind<HiddenEventsRepository>()

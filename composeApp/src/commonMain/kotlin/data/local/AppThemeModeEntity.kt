@@ -3,6 +3,6 @@ package data.local
 import kotlinx.serialization.Serializable
 
 @Serializable
-enum class AppThemeEntity {
+enum class AppThemeModeEntity {
     FollowSystem, DefaultLight, DefaultDark
 }

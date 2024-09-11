@@ -1,7 +1,8 @@
 package domain.model
 
 data class Settings(
-    val appTheme: AppTheme = AppTheme.FollowSystem,
+    val appThemeMode: AppThemeMode = AppThemeMode.FollowSystem,
+    val appColor: AppColor = AppColor.Red,
     val privateNotifications: Boolean = true,
-    val notificationTimeInMinutes: Int = 5
+    val notificationTimeInMinutes: Int = 5,
 )

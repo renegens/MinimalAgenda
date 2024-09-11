@@ -1,9 +1,12 @@
 package repository
 
-import data.local.AppThemeEntity
+import data.local.AppColorEntity
+import data.local.AppThemeModeEntity
 import data.local.SettingsEntity
 import data.local.SettingsLocalDataSource
+import domain.model.AppColor
 import domain.model.AppTheme
+import domain.model.AppThemeMode
 import domain.model.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -36,34 +39,65 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
             if (it.isEmpty()) {
                 val defaultSettings = Settings()
                 saveSettings(defaultSettings)
-                return@map defaultSettings.appTheme
+
+                val appTheme = AppTheme(
+                    appColor = defaultSettings.appColor, appThemeMode = defaultSettings.appThemeMode
+                )
+
+                return@map appTheme
             }
             val entity = Json.decodeFromString<SettingsEntity>(it)
-            return@map entity.asDomainModel().appTheme
+
+            val settings = entity.asDomainModel()
+
+            return@map AppTheme(
+                appColor = settings.appColor,
+                appThemeMode = settings.appThemeMode
+            )
         }
     }
 
     private fun Settings.asEntity() = SettingsEntity(
-        appTheme = appTheme.asEntity(),
+        appTheme = appThemeMode.asEntity(),
+        appColor = appColor.asEntity(),
         privateNotifications = privateNotifications,
         notificationTimeInMinutes = notificationTimeInMinutes
     )
 
     private fun SettingsEntity.asDomainModel() = Settings(
-        appTheme = appTheme.asDomainModel(),
+        appThemeMode = appTheme.asDomainModel(),
+        appColor = appColor.asDomainModel(),
         privateNotifications = privateNotifications,
         notificationTimeInMinutes = notificationTimeInMinutes
     )
 
-    private fun AppThemeEntity.asDomainModel() = when (this) {
-        AppThemeEntity.FollowSystem -> AppTheme.FollowSystem
-        AppThemeEntity.DefaultLight -> AppTheme.DefaultLight
-        AppThemeEntity.DefaultDark -> AppTheme.DefaultDark
+    private fun AppThemeModeEntity.asDomainModel() = when (this) {
+        AppThemeModeEntity.FollowSystem -> AppThemeMode.FollowSystem
+        AppThemeModeEntity.DefaultLight -> AppThemeMode.DefaultLight
+        AppThemeModeEntity.DefaultDark -> AppThemeMode.DefaultDark
     }
 
-    private fun AppTheme.asEntity() = when (this) {
-        AppTheme.FollowSystem -> AppThemeEntity.FollowSystem
-        AppTheme.DefaultLight -> AppThemeEntity.DefaultLight
-        AppTheme.DefaultDark -> AppThemeEntity.DefaultDark
+    private fun AppThemeMode.asEntity() = when (this) {
+        AppThemeMode.FollowSystem -> AppThemeModeEntity.FollowSystem
+        AppThemeMode.DefaultLight -> AppThemeModeEntity.DefaultLight
+        AppThemeMode.DefaultDark -> AppThemeModeEntity.DefaultDark
+    }
+
+    private fun AppColor.asEntity() = when (this) {
+        AppColor.Blue -> AppColorEntity.Blue
+        AppColor.Red -> AppColorEntity.Red
+        AppColor.Mint -> AppColorEntity.Mint
+        AppColor.Rosa -> AppColorEntity.Rosa
+        AppColor.Orange -> AppColorEntity.Orange
+        AppColor.Lila -> AppColorEntity.Lila
+    }
+
+    private fun AppColorEntity.asDomainModel() = when (this) {
+        AppColorEntity.Red -> AppColor.Red
+        AppColorEntity.Mint -> AppColor.Mint
+        AppColorEntity.Rosa -> AppColor.Rosa
+        AppColorEntity.Orange -> AppColor.Orange
+        AppColorEntity.Lila -> AppColor.Lila
+        AppColorEntity.Blue -> AppColor.Blue
     }
 }

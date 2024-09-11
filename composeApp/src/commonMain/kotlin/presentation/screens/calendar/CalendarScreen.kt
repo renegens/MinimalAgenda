@@ -19,7 +19,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import domain.model.AgendaMonthYear
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.annotation.KoinExperimentalAPI
@@ -34,7 +34,7 @@ import presentation.screens.settings.SettingsScreen
 
 @OptIn(KoinExperimentalAPI::class)
 @Composable
-fun CalendarScreen(appTheme: AppTheme) {
+fun CalendarScreen(appThemeMode: AppThemeMode) {
     val viewModel: CalendarViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
     val pagerState = rememberPagerState(
@@ -97,7 +97,7 @@ fun CalendarScreen(appTheme: AppTheme) {
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
             when (page) {
                 CalendarContract.Section.Day.position -> DayScreen(
-                    appTheme = appTheme,
+                    appThemeMode = appThemeMode,
                     days = state.days,
                     currentDate = state.currentDate,
                     onNowClicked = isScrolledToToday,
@@ -113,7 +113,7 @@ fun CalendarScreen(appTheme: AppTheme) {
                 )
 
                 CalendarContract.Section.Month.position -> MonthsScreen(
-                    appTheme = appTheme,
+                    appThemeMode = appThemeMode,
                     days = state.days,
                     events = state.agendaEvents,
                     currentDate = state.currentDate,
@@ -129,7 +129,7 @@ fun CalendarScreen(appTheme: AppTheme) {
                 )
 
                 CalendarContract.Section.Year.position -> YearsScreen(
-                    appTheme = appTheme,
+                    appThemeMode = appThemeMode,
                     days = state.days,
                     events = state.agendaEvents,
                     showAll = state.showAll,

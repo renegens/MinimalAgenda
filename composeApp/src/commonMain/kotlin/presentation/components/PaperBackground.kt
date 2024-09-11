@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 import minimalagenda.composeapp.generated.resources.Res
 import minimalagenda.composeapp.generated.resources.tex_dark
 import minimalagenda.composeapp.generated.resources.tex_light
@@ -19,13 +19,13 @@ import org.jetbrains.compose.resources.painterResource
 
 @Composable
 fun PaperBackground(
-    appTheme: AppTheme, content: @Composable () -> Unit
+    appThemeMode: AppThemeMode, content: @Composable () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        val res = when (appTheme) {
-            AppTheme.FollowSystem -> if (isSystemInDarkTheme()) Res.drawable.tex_dark else Res.drawable.tex_light
-            AppTheme.DefaultLight -> Res.drawable.tex_light
-            AppTheme.DefaultDark -> Res.drawable.tex_dark
+        val res = when (appThemeMode) {
+            AppThemeMode.FollowSystem -> if (isSystemInDarkTheme()) Res.drawable.tex_dark else Res.drawable.tex_light
+            AppThemeMode.DefaultLight -> Res.drawable.tex_light
+            AppThemeMode.DefaultDark -> Res.drawable.tex_dark
         }
 
         Image(
@@ -40,13 +40,13 @@ fun PaperBackground(
 
 @Composable
 fun PaperBackgroundColumn(
-    appTheme: AppTheme, content: @Composable () -> Unit
+    appThemeMode: AppThemeMode, content: @Composable () -> Unit
 ) {
     Box(modifier = Modifier.fillMaxSize()) {
-        val res = when (appTheme) {
-            AppTheme.FollowSystem -> if (isSystemInDarkTheme()) Res.drawable.tex_dark else Res.drawable.tex_light
-            AppTheme.DefaultLight -> Res.drawable.tex_light
-            AppTheme.DefaultDark -> Res.drawable.tex_dark
+        val res = when (appThemeMode) {
+            AppThemeMode.FollowSystem -> if (isSystemInDarkTheme()) Res.drawable.tex_dark else Res.drawable.tex_light
+            AppThemeMode.DefaultLight -> Res.drawable.tex_light
+            AppThemeMode.DefaultDark -> Res.drawable.tex_dark
         }
 
         Image(

@@ -1,5 +1,6 @@
 package domain.model
 
-enum class AppTheme {
-    FollowSystem, DefaultLight, DefaultDark
-}
+data class AppTheme(
+    val appColor: AppColor,
+    val appThemeMode: AppThemeMode
+)

@@ -25,7 +25,7 @@ import androidx.compose.ui.unit.dp
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 import domain.model.DayGrid
 import domain.model.createGridDay
 import extensions.hasEvents
@@ -37,7 +37,7 @@ import presentation.theme.DMSans18SemiBold
 
 @Composable
 fun MonthGrid(
-    appTheme: AppTheme,
+    appThemeMode: AppThemeMode,
     monthYear: AgendaMonthYear,
     events: List<AgendaEvent>,
     currentDate: LocalDate,
@@ -47,7 +47,7 @@ fun MonthGrid(
 ) {
     val isCurrent by mutableStateOf(monthYear.isCurrent(currentDate))
 
-    PaperBackground(appTheme = appTheme) {
+    PaperBackground(appThemeMode = appThemeMode) {
         Column {
             Spacer(modifier = Modifier.height(24.dp))
             MonthHeader(

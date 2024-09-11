@@ -28,8 +28,16 @@ class SettingsViewModel(
             is Event.OnModeSelected -> {
                 viewModelScope.launch {
                     val currentSettings = uiState.value.toSettings()
-                    saveSettingsUseCase.invoke(currentSettings.copy(appTheme = event.appTheme))
-                    setState { copy(appTheme = event.appTheme) }
+                    saveSettingsUseCase.invoke(currentSettings.copy(appThemeMode = event.appThemeMode))
+                    setState { copy(appThemeMode = event.appThemeMode) }
+                }
+            }
+
+            is Event.OnColorSelected -> {
+                viewModelScope.launch {
+                    val currentSettings = uiState.value.toSettings()
+                    saveSettingsUseCase.invoke(currentSettings.copy(appColor = event.appColor))
+                    setState { copy(appColor = event.appColor) }
                 }
             }
 
@@ -56,7 +64,8 @@ class SettingsViewModel(
                     setState {
                         copy(
                             isLoading = false,
-                            appTheme = settings.appTheme,
+                            appColor = settings.appColor,
+                            appThemeMode = settings.appThemeMode,
                             privateNotifications = settings.privateNotifications,
                             notificationTime = settings.notificationTimeInMinutes
                         )
@@ -68,7 +77,8 @@ class SettingsViewModel(
 
     private fun State.toSettings(): Settings {
         return Settings(
-            appTheme = appTheme,
+            appThemeMode = appThemeMode,
+            appColor = appColor,
             privateNotifications = privateNotifications,
             notificationTimeInMinutes = notificationTime
         )

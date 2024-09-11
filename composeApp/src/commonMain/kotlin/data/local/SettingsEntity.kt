@@ -4,7 +4,8 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class SettingsEntity(
-    val appTheme: AppThemeEntity,
+    val appTheme: AppThemeModeEntity,
+    val appColor: AppColorEntity,
     val privateNotifications: Boolean,
     val notificationTimeInMinutes: Int
 )

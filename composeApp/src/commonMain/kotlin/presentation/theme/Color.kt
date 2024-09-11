@@ -6,7 +6,13 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.ui.graphics.Color
 
 object CustomColor {
-    val Orange_500 = Color(0xFFfe3b00)
+    val Red_500 = Color(0xFFfe3b00)
+    val Mint_500 = Color(0xFF00b1a9)
+    val Rosa_500 = Color(0xFFf84a6d)
+    val Orange_500 = Color(0xFFf26803)
+    val Lila_500 = Color(0xFFb453d9)
+    val Blue_500 = Color(0xFF0078fb)
+
 
     val Gray_200 = Color(0xFFCCCCCC)
     val Gray_300 = Color(0xFF999999)
@@ -23,20 +29,21 @@ object CustomColor {
     val White_500 = Color(0xFFFFFFFF)
 }
 
-val LightColorScheme: ColorScheme
-    get() = lightColorScheme(
-        primary = CustomColor.Orange_500,
-        secondary = CustomColor.Gray_300,
+fun getLightColorScheme(primaryColor: Color): ColorScheme {
+    return lightColorScheme(
+        primary = primaryColor, secondary =
+        CustomColor.Gray_300,
         tertiary = CustomColor.Gray_500,
         background = CustomColor.Sepia_500,
         secondaryContainer = CustomColor.Sepia_900,
         inversePrimary = CustomColor.Black_900,
         inverseSurface = CustomColor.White_500
     )
+}
 
-val DarkColorScheme: ColorScheme
-    get() = darkColorScheme(
-        primary = CustomColor.Orange_500,
+fun getDarkColorScheme(primaryColor: Color): ColorScheme {
+    return darkColorScheme(
+        primary = primaryColor,
         secondary = CustomColor.Gray_500,
         tertiary = CustomColor.Gray_200,
         background = CustomColor.Black_200,
@@ -44,3 +51,4 @@ val DarkColorScheme: ColorScheme
         inversePrimary = CustomColor.White_500,
         inverseSurface = CustomColor.Black_900
     )
+}

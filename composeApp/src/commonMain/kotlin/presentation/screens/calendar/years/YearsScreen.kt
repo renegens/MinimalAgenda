@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 import extensions.getInRangeOf
 import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
@@ -28,7 +28,7 @@ import presentation.components.YearHeader
 
 @Composable
 fun YearsScreen(
-    appTheme: AppTheme,
+    appThemeMode: AppThemeMode,
     days: List<AgendaDay>,
     events: List<AgendaEvent>,
     currentDate: LocalDate,
@@ -69,7 +69,7 @@ fun YearsScreen(
         modifier = Modifier.fillMaxSize(),
     ) {
         itemsIndexed(items = years.keys.toList(), key = { _, year -> year.year }) { index, year ->
-            PaperBackground(appTheme = appTheme) {
+            PaperBackground(appThemeMode = appThemeMode) {
                 Column(modifier = Modifier.fillMaxWidth()) {
                     Spacer(modifier = Modifier.height(24.dp))
                     YearHeader(agendaYear = year, currentDate = currentDate)

@@ -31,7 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
@@ -45,7 +45,7 @@ import presentation.theme.DMSansBlack36
 
 @Composable
 fun DayScreen(
-    appTheme: AppTheme,
+    appThemeMode: AppThemeMode,
     days: List<AgendaDay>,
     eventsByDay: Map<Int, List<AgendaEvent>>,
     onNowClicked: Boolean,
@@ -89,7 +89,7 @@ fun DayScreen(
 
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == currentEpochDay
-            PaperBackground(appTheme = appTheme) {
+            PaperBackground(appThemeMode = appThemeMode) {
                 Column {
                     Spacer(modifier = Modifier.height(24.dp))
                     DayHeader(

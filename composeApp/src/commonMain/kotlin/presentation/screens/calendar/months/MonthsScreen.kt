@@ -14,14 +14,14 @@ import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 import extensions.getInRangeOf
 import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
 
 @Composable
 fun MonthsScreen(
-    appTheme: AppTheme,
+    appThemeMode: AppThemeMode,
     days: List<AgendaDay>,
     events: List<AgendaEvent>,
     currentDate: LocalDate,
@@ -64,7 +64,7 @@ fun MonthsScreen(
     ) {
         itemsIndexed(items = months.keys.toList()) { _, agendaMonthYear ->
             MonthGrid(
-                appTheme = appTheme,
+                appThemeMode = appThemeMode,
                 events = events.getInRangeOf(agendaMonthYear),
                 monthYear = agendaMonthYear,
                 currentDate = currentDate,

@@ -4,7 +4,7 @@ import domain.model.AppTheme
 import kotlinx.coroutines.flow.Flow
 import repository.SettingsRepository
 
-class ListenAppThemeUseCase(
+class AppThemeListenerUseCase(
     private val settingsRepository: SettingsRepository
 ) {
 

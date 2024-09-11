@@ -1,11 +1,11 @@
 package platform
 
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 
 import platform.UIKit.*
 
-actual fun setStatusBarTheme(appTheme: AppTheme) {
-    val isDarkMode = appTheme == AppTheme.DefaultDark
+actual fun setStatusBarTheme(appThemeMode: AppThemeMode) {
+    val isDarkMode = appThemeMode == AppThemeMode.DefaultDark
 
     if (isDarkMode) {
         UIApplication.sharedApplication.setStatusBarStyle(UIStatusBarStyleLightContent, animated = false)

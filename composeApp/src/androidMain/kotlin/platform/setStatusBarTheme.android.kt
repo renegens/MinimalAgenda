@@ -1,5 +1,5 @@
 package platform
 
-import domain.model.AppTheme
+import domain.model.AppThemeMode
 
-actual fun setStatusBarTheme(appTheme: AppTheme) {}
+actual fun setStatusBarTheme(appThemeMode: AppThemeMode) {}

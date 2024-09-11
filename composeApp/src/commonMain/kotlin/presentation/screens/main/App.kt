@@ -17,12 +17,13 @@ fun App() {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
 
-        state.appTheme?.let { theme ->
+        state.appTheme?.let { (color, theme) ->
             AppTheme(
-                appTheme = theme,
+                appThemeMode = theme,
+                appColor = color
             ) {
                 if (state.isSubscribed) {
-                    CalendarScreen(appTheme = theme)
+                    CalendarScreen(appThemeMode = theme)
                 } else {
                     PaywallScreen(onPurchaseComplete = {
                         viewModel.setEvent(AppContract.Event.OnPurchaseCompleted)

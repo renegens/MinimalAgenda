@@ -2,7 +2,7 @@ package presentation.screens.main
 
 import androidx.lifecycle.viewModelScope
 import com.revenuecat.purchases.kmp.Purchases
-import domain.use_case.ListenAppThemeUseCase
+import domain.use_case.AppThemeListenerUseCase
 import presentation.base.BaseViewModel
 import presentation.screens.main.AppContract.*
 import extensions.initializeRevenueCat
@@ -10,7 +10,7 @@ import extensions.isSubscribed
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
-class AppViewModel(private val listenAppThemeUseCase: ListenAppThemeUseCase) :
+class AppViewModel(private val appThemeListenerUseCase: AppThemeListenerUseCase) :
     BaseViewModel<Event, State, Effect>() {
 
     init {
@@ -22,7 +22,7 @@ class AppViewModel(private val listenAppThemeUseCase: ListenAppThemeUseCase) :
         })
 
         viewModelScope.launch {
-            listenAppThemeUseCase().collectLatest {
+            appThemeListenerUseCase().collectLatest {
                 setState { copy(appTheme = it) }
             }
         }
