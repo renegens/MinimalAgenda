@@ -22,7 +22,7 @@ fun App() {
                 appThemeMode = theme,
                 appColor = color
             ) {
-                if (state.isSubscribed) {
+                if (!state.isSubscribed) {
                     CalendarScreen(appThemeMode = theme)
                 } else {
                     PaywallScreen(onPurchaseComplete = {

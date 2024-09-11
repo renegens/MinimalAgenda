@@ -26,6 +26,7 @@ import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.components.ActionButton
 import presentation.components.ComposableLifecycle
 import presentation.components.NotificationPermissionDialog
+import presentation.screens.add_event.AddEventScreen
 import presentation.screens.calendar.day.DayScreen
 import presentation.screens.calendar.months.MonthsScreen
 import presentation.screens.calendar.years.YearsScreen
@@ -51,6 +52,8 @@ fun CalendarScreen(appThemeMode: AppThemeMode) {
     var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
 
     var shouldShowNotificationPermission by remember { mutableStateOf(false) }
+
+    var shouldShowNewEventScreen by remember { mutableStateOf(true) }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -86,8 +89,14 @@ fun CalendarScreen(appThemeMode: AppThemeMode) {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+    if (shouldShowNewEventScreen) {
+        AddEventScreen(
+            onCancel = { shouldShowNewEventScreen = false },
+            onSave = {})
+        return
+    }
 
+    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
         if (shouldShowNotificationPermission) {
             NotificationPermissionDialog(
                 onDismissRequest = {
@@ -155,7 +164,7 @@ fun CalendarScreen(appThemeMode: AppThemeMode) {
                 }, toggleActive = {
                     viewModel.setEvent(Event.ToggleActive)
                 }, onAdd = {
-
+                    shouldShowNewEventScreen = true
                 })
         }
     }

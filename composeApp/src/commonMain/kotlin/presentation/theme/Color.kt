@@ -20,6 +20,8 @@ object CustomColor {
 
     val Sepia_500 = Color(0xFFF0ECE5)
 
+    val Sepia_100 = Color(0xFFece8e0)
+
     val Black_900 = Color(0xFF121212)
     val Black_500 = Color(0xFF000000)
     val Black_200 = Color(0xFF333333)
@@ -37,7 +39,8 @@ fun getLightColorScheme(primaryColor: Color): ColorScheme {
         background = CustomColor.Sepia_500,
         secondaryContainer = CustomColor.Sepia_900,
         inversePrimary = CustomColor.Black_900,
-        inverseSurface = CustomColor.White_500
+        inverseSurface = CustomColor.White_500,
+        surfaceVariant = CustomColor.Sepia_100
     )
 }
 
@@ -49,6 +52,7 @@ fun getDarkColorScheme(primaryColor: Color): ColorScheme {
         background = CustomColor.Black_200,
         secondaryContainer = CustomColor.Black_900,
         inversePrimary = CustomColor.White_500,
-        inverseSurface = CustomColor.Black_900
+        inverseSurface = CustomColor.Black_900,
+        surfaceVariant = CustomColor.Sepia_100
     )
 }

@@ -42,10 +42,7 @@ internal fun NotificationTimeInput(time: Int, onTimeEntered: (Int) -> Unit) {
 
             Box(
                 modifier = Modifier.width(64.dp).height(32.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(4.dp)
-                    ),
+                    .background(color = MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 BasicTextField(

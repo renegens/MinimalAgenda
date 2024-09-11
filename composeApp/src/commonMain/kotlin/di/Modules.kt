@@ -16,6 +16,7 @@ import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
+import presentation.screens.add_event.AddEventViewModel
 import presentation.screens.main.AppViewModel
 import presentation.screens.paywall.PaywallViewModel
 import presentation.screens.settings.SettingsViewModel
@@ -28,6 +29,7 @@ expect val platformModule: Module
 
 val sharedModule = module {
     viewModelOf(::AppViewModel)
+    viewModelOf(::AddEventViewModel)
     viewModelOf(::CalendarViewModel)
     viewModelOf(::PaywallViewModel)
     viewModelOf(::SettingsViewModel)

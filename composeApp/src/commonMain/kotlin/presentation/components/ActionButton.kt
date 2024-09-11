@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import presentation.screens.calendar.CalendarContract.Section
 import presentation.theme.CustomColor
+import presentation.theme.DMSans18Regular
 import presentation.theme.DMSansBlack36
 
 @Composable
@@ -56,19 +58,18 @@ fun ActionButton(
                 modifier = Modifier.wrapContentHeight(unbounded = true)
             )
         }
-        // TODO: enable with add
-//        Box(
-//            modifier = Modifier.size(56.dp)
-//                .background(color = CustomColor.Black_200, shape = CircleShape)
-//                .clickable { onAdd.invoke() },
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                "+",
-//                color = CustomColor.White_500,
-//                style = DMSans18Regular,
-//                modifier = Modifier.wrapContentHeight(unbounded = true).offset(y = (-2).dp)
-//            )
-//        }
+        Box(
+            modifier = Modifier.size(56.dp)
+                .background(color = CustomColor.Black_200, shape = CircleShape)
+                .clickable { onAdd.invoke() },
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                "+",
+                color = CustomColor.White_500,
+                style = DMSans18Regular,
+                modifier = Modifier.wrapContentHeight(unbounded = true).offset(y = (-2).dp)
+            )
+        }
     }
 }
