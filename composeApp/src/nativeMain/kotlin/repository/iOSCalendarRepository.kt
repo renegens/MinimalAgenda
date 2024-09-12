@@ -2,14 +2,17 @@ package repository
 
 import data.calendar.CalendarEntity
 import data.calendar.EventEntity
+import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.LocalDateTime
 import platform.EventKit
 import platform.EventKit.EKCalendar
 import platform.EventKit.EKEntityType
 import platform.EventKit.EKEvent
+import platform.EventKit.EKSpan
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSCalendarUnitMonth
 import platform.Foundation.NSDate
@@ -18,6 +21,7 @@ import platform.Foundation.NSTimeInterval
 import platform.Foundation.NSTimeZone
 import platform.Foundation.localTimeZone
 import platform.Foundation.timeIntervalSince1970
+import platform.toEKEventDate
 import kotlin.coroutines.resume
 
 @Suppress("ClassName")
@@ -26,7 +30,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
     private val eventStore = eventKit.eventStore
 
     override suspend fun getCalendars(): List<CalendarEntity> {
-        return withContext(Dispatchers.Default) {
+        return withContext(Dispatchers.IO) {
             suspendCancellableCoroutine { continuation ->
                 eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
                     if (granted) {
@@ -79,6 +83,45 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
             options = 0u
         )
         return threeYearsInFuture ?: NSDate()
+    }
+
+    @OptIn(ExperimentalForeignApi::class)
+    override suspend fun addEvent(
+        title: String,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        allDay: Boolean
+    ): Boolean {
+        return withContext(Dispatchers.IO) {
+            suspendCancellableCoroutine { continuation ->
+                try {
+                    val calendar = eventStore.defaultCalendarForNewEvents()
+
+                    if (calendar == null) {
+                        continuation.resume(false)
+                    }
+
+                    val newEvent = EKEvent.eventWithEventStore(eventStore)
+                    newEvent.title = title
+                    newEvent.startDate = startTime.toEKEventDate()
+                    newEvent.endDate = endTime.toEKEventDate()
+                    newEvent.allDay = allDay
+                    newEvent.calendar = calendar
+
+                    eventStore.saveEvent(
+                        event = newEvent,
+                        span = EKSpan.EKSpanThisEvent,
+                        commit = true,
+                        error = null
+                    )
+
+                    continuation.resume(true)
+                } catch (e: Exception) {
+                    println(e)
+                    continuation.resume(false)
+                }
+            }
+        }
     }
 
     override suspend fun getAllEvents(): List<EventEntity> {

@@ -13,12 +13,13 @@ val today: LocalDate
 val nowInMillis: Long
     get() = Clock.System.now().toEpochMilliseconds()
 
-val currentHour: Int
-    get() = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()).hour
-
 val nextHour: Int
     get() {
-        val newTime = nowInMillis + (60 * 60 * 1000)
-        return Instant.fromEpochMilliseconds(newTime)
-            .toLocalDateTime(TimeZone.currentSystemDefault()).hour
+        val date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+        val newHour = date.time.hour + 1
+        return if (newHour > 24) {
+            24
+        } else {
+            newHour
+        }
     }

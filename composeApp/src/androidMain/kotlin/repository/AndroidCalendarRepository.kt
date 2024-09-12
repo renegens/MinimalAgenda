@@ -11,6 +11,7 @@ import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import java.text.SimpleDateFormat
@@ -152,6 +153,15 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
             return@withContext events
         }
+    }
+
+    override suspend fun addEvent(
+        title: String,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        allDay: Boolean
+    ): Boolean {
+        return false
     }
 }
 

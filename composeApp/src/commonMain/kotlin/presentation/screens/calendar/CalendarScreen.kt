@@ -92,7 +92,10 @@ fun CalendarScreen(appThemeMode: AppThemeMode) {
     if (shouldShowNewEventScreen) {
         AddEventScreen(
             onCancel = { shouldShowNewEventScreen = false },
-            onSave = {})
+            onSave = {
+                viewModel.setEvent(Event.LoadData)
+                shouldShowNewEventScreen = false
+            })
         return
     }
 

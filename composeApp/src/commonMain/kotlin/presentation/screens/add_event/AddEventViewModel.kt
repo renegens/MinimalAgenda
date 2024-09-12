@@ -1,21 +1,25 @@
 package presentation.screens.add_event
 
-import extensions.currentHour
+import androidx.lifecycle.viewModelScope
+import domain.model.EventTime
 import extensions.nextHour
 import extensions.nowInMillis
+import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.add_event.AddEventContract.Effect
 import presentation.screens.add_event.AddEventContract.Event
 import presentation.screens.add_event.AddEventContract.State
+import repository.CalendarRepository
 
-class AddEventViewModel : BaseViewModel<Event, State, Effect>() {
+class AddEventViewModel(private val repository: CalendarRepository) :
+    BaseViewModel<Event, State, Effect>() {
 
     override fun createInitialState(): State {
         val state = State(
             startDate = nowInMillis,
-            startHours = currentHour,
-            endDate = nowInMillis,
-            endHours = nextHour,
+            startHours = nextHour,
+            startMinutes = 0,
+            durationInMinutes = 60
         )
         return state
     }
@@ -23,7 +27,60 @@ class AddEventViewModel : BaseViewModel<Event, State, Effect>() {
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.ToggleAllDay -> setState { copy(allDay = event.isChecked) }
-            else -> {}
+            is Event.OnSave -> viewModelScope.launch {
+                val eventTime = EventTime(
+                    startTimestampInMillis = uiState.value.startDate,
+                    startHours = uiState.value.startHours,
+                    startMinutes = uiState.value.startMinutes,
+                    durationInMinutes = uiState.value.durationInMinutes
+                )
+                val didSave = repository.addEvent(
+                    title = uiState.value.title,
+                    startTime = eventTime.getStarDateTime(),
+                    endTime = eventTime.getEndDateTime(),
+                    allDay = uiState.value.allDay
+                )
+
+                if (didSave) {
+                    setState { createInitialState() }
+                    setEffect { Effect.OnSave }
+                }
+            }
+
+            is Event.OnStartEntered -> setState {
+                copy(
+                    startMinutes = event.minutes,
+                    startDate = event.timestamp,
+                    startHours = event.hours
+                )
+            }
+
+            is Event.OnDurationEntered -> {
+                val error = validateDurationTime(event.duration, uiState.value.startHours)
+
+                if (error == null) {
+                    setState {
+                        copy(
+                            durationError = null,
+                            durationInMinutes = event.duration.toInt()
+                        )
+                    }
+                } else {
+                    setState { copy(durationError = error) }
+                }
+            }
+
+            is Event.OnTitleEntered -> setState { copy(title = event.title) }
+        }
+    }
+
+    private fun validateDurationTime(input: String, currentHours: Int): String? {
+        val time = input.toIntOrNull()
+        return when {
+            time == null || time == 0 -> "Please enter a valid number"
+            time < 0 -> "We can't time travel yet. Time cannot be negative"
+            (time / 60) + currentHours > 24 -> "Durations must be in the same day"
+            else -> null // valid input
         }
     }
 }

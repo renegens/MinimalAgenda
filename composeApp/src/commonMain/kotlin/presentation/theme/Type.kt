@@ -171,9 +171,10 @@ val TextFieldStyleAddEvent: TextStyle
 val TextFieldStyleDateAndTime: TextStyle
     @Composable
     get() = TextStyle(
-        color = MaterialTheme.colorScheme.secondary,
+        color = MaterialTheme.colorScheme.tertiary,
         fontFamily = DMSans18MediumFamily,
         fontWeight = FontWeight.Medium,
+        textAlign = TextAlign.Center,
         fontSize = 16.sp,
         letterSpacing = (-1).sp
     )
