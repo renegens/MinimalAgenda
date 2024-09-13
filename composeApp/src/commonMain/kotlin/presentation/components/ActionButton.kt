@@ -15,6 +15,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import platform.CalendarPermissionHandler
 import presentation.screens.calendar.CalendarContract.Section
 import presentation.theme.CustomColor
 import presentation.theme.DMSans18Regular
@@ -26,7 +27,8 @@ fun ActionButton(
     nowClicked: () -> Unit,
     toggleActive: () -> Unit,
     onAdd: () -> Unit,
-    showAll: Boolean
+    showAll: Boolean,
+    calendarPermission: CalendarPermissionHandler.State
 ) {
     if (currentSection == Section.Settings) return
     Column(modifier = Modifier.padding(end = 16.dp)) {
@@ -58,18 +60,20 @@ fun ActionButton(
                 modifier = Modifier.wrapContentHeight(unbounded = true)
             )
         }
-        Box(
-            modifier = Modifier.size(56.dp)
-                .background(color = CustomColor.Black_200, shape = CircleShape)
-                .clickable { onAdd.invoke() },
-            contentAlignment = Alignment.Center
-        ) {
-            Text(
-                "+",
-                color = CustomColor.White_500,
-                style = DMSans18Regular,
-                modifier = Modifier.wrapContentHeight(unbounded = true).offset(y = (-2).dp)
-            )
+        if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
+            Box(
+                modifier = Modifier.size(56.dp)
+                    .background(color = CustomColor.Black_500, shape = CircleShape)
+                    .clickable { onAdd.invoke() },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "+",
+                    color = CustomColor.White_500,
+                    style = DMSans18Regular,
+                    modifier = Modifier.wrapContentHeight(unbounded = true).offset(y = (-2).dp)
+                )
+            }
         }
     }
 }

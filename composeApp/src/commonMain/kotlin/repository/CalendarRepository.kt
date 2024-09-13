@@ -9,8 +9,9 @@ interface CalendarRepository {
     suspend fun getAllEvents(): List<EventEntity>
     suspend fun addEvent(
         title: String,
+        location: String,
         startTime: LocalDateTime,
         endTime: LocalDateTime,
-        allDay: Boolean = false
+        allDay: Boolean = false,
     ): Boolean
 }

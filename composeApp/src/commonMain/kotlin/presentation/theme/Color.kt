@@ -53,6 +53,6 @@ fun getDarkColorScheme(primaryColor: Color): ColorScheme {
         secondaryContainer = CustomColor.Black_900,
         inversePrimary = CustomColor.White_500,
         inverseSurface = CustomColor.Black_900,
-        surfaceVariant = CustomColor.Sepia_100
+        surfaceVariant = CustomColor.Black_200
     )
 }

@@ -53,7 +53,7 @@ fun CalendarScreen(appThemeMode: AppThemeMode) {
 
     var shouldShowNotificationPermission by remember { mutableStateOf(false) }
 
-    var shouldShowNewEventScreen by remember { mutableStateOf(true) }
+    var shouldShowNewEventScreen by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -159,6 +159,7 @@ fun CalendarScreen(appThemeMode: AppThemeMode) {
         ) {
             ActionButton(
                 currentSection = Section.fromInt(pagerState.currentPage),
+                calendarPermission = state.calendarPermission,
                 showAll = state.showAll,
                 nowClicked = {
                     viewModel.setEvent(

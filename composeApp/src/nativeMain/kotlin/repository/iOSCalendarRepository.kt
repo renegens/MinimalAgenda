@@ -88,6 +88,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun addEvent(
         title: String,
+        location: String,
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         allDay: Boolean
@@ -103,6 +104,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
                     val newEvent = EKEvent.eventWithEventStore(eventStore)
                     newEvent.title = title
+                    newEvent.location = location
                     newEvent.startDate = startTime.toEKEventDate()
                     newEvent.endDate = endTime.toEKEventDate()
                     newEvent.allDay = allDay

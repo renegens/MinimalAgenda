@@ -6,12 +6,12 @@ import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -27,6 +27,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -50,9 +52,13 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -73,30 +79,52 @@ fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
             when (it) {
-                AddEventContract.Effect.OnSave -> onSave.invoke()
+                AddEventContract.Effect.Save -> onSave.invoke()
+                AddEventContract.Effect.Cancel -> onCancel.invoke()
             }
         }
     }
 
+    val focusRequester = remember { FocusRequester() }
+    val focusManager = LocalFocusManager.current
+    val scrollState = rememberScrollState()
+
+    if (scrollState.isScrollInProgress) {
+        focusManager.clearFocus()
+    }
+
     Column(
-        modifier = Modifier.fillMaxSize().statusBarsPadding().verticalScroll(rememberScrollState())
+        modifier = Modifier.fillMaxSize().statusBarsPadding().verticalScroll(scrollState)
     ) {
-        Header(onCancel,
-            isEnabled = state.title.isNotEmpty() && state.durationError == null,
+        Header(onCancel = { viewModel.setEvent(AddEventContract.Event.OnCancel) },
+            isEnabled = state.isSaveEnabled(),
             onSave = { viewModel.setEvent(AddEventContract.Event.OnSave) })
         Spacer(modifier = Modifier.height(16.dp))
-        TitleInput(eventTitle = state.title,
-            onUpdate = { viewModel.setEvent(AddEventContract.Event.OnTitleEntered(it)) })
-        Spacer(modifier = Modifier.height(16.dp))
+        Input(
+            placeholder = "Title",
+            content = state.title,
+            onUpdate = { viewModel.setEvent(AddEventContract.Event.OnTitleEntered(it)) },
+            focusRequester = focusRequester
+        )
+        Spacer(modifier = Modifier.height(4.dp))
+        Input(
+            placeholder = "Location",
+            content = state.location,
+            onUpdate = { viewModel.setEvent(AddEventContract.Event.OnLocationEntered(it)) },
+            focusRequester = focusRequester
+        )
+
+        Spacer(modifier = Modifier.height(24.dp))
 
         Details(startDate = state.startDate,
             startHours = state.startHours,
-            isChecked = state.allDay,
+            allDay = state.allDay,
             startMinutes = state.startMinutes,
             durationInMinutes = state.durationInMinutes,
             onDurationEntered = { viewModel.setEvent(AddEventContract.Event.OnDurationEntered(it)) },
             checkChange = { viewModel.setEvent(AddEventContract.Event.ToggleAllDay(it)) },
             durationError = state.durationError,
+            focusManager = focusManager,
             onTimeUpdate = {
                 viewModel.setEvent(
                     AddEventContract.Event.OnStartEntered(
@@ -110,20 +138,23 @@ fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
             "New events are added to the default calendar",
             modifier = Modifier.padding(horizontal = 16.dp)
         )
+        Spacer(modifier = Modifier.height(64.dp))
     }
 }
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun Details(
     startDate: Long,
     startHours: Int,
     startMinutes: Int,
-    durationInMinutes: Int,
-    isChecked: Boolean,
+    durationInMinutes: String,
+    allDay: Boolean,
     checkChange: (Boolean) -> Unit,
     onDurationEntered: (String) -> Unit,
     onTimeUpdate: (Triple<Long, Int, Int>) -> Unit,
-    durationError: String?
+    durationError: String?,
+    focusManager: FocusManager
 ) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)
@@ -132,62 +163,79 @@ private fun Details(
         DetailsItemRow {
             BodyText("All Day")
             Spacer(modifier = Modifier.weight(1F))
-            AppSwitch(checked = isChecked, onCheckedChange = checkChange)
+            AppSwitch(checked = allDay, onCheckedChange = checkChange)
         }
 
         DetailsDivider()
 
         DateAndTime(
             label = "Starts",
-            isChecked = isChecked,
+            isChecked = allDay,
             hours = startHours,
             date = startDate,
             minutes = startMinutes,
-            onTimeUpdate = onTimeUpdate
+            onTimeUpdate = onTimeUpdate,
+            focusManager = focusManager
         )
 
-        DetailsDivider()
+        if (allDay.not()) {
+            DetailsDivider()
 
-        DetailsItemRow {
-            BodyText("Event duration in minutes")
-            Spacer(Modifier.weight(1F))
-            DurationInput(
-                durationInMinutes = durationInMinutes,
-                onValueChange = { onDurationEntered.invoke(it) }
-            )
-        }
-        if (durationError != null) {
-            Text(
-                text = durationError,
-                style = DMSans18Medium,
-                fontSize = 16.sp,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(top = 4.dp, start = 16.dp, bottom = 8.dp)
-            )
+            DetailsItemRow {
+                BodyText("Event duration in minutes")
+                Spacer(Modifier.weight(1F))
+                DurationInput(durationInMinutes = durationInMinutes,
+                    onValueChange = { onDurationEntered.invoke(it) })
+            }
+
+            val durations = listOf(10, 15, 30, 60, 90, 120)
+
+            FlowRow(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                durations.forEach { duration ->
+                    AssistChip(
+                        onClick = {
+                            focusManager.clearFocus()
+                            onDurationEntered.invoke(duration.toString())
+                        },
+                        label = { BodyText("${duration}m") },
+                        colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+                        border = null
+                    )
+                }
+            }
+            if (durationError != null) {
+                Text(
+                    text = durationError,
+                    style = DMSans18Medium,
+                    fontSize = 16.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(top = 4.dp, start = 16.dp, bottom = 8.dp)
+                )
+            }
         }
     }
 }
 
 @Composable
 private fun DurationInput(
-    durationInMinutes: Int,
-    onValueChange: (String) -> Unit
+    durationInMinutes: String, onValueChange: (String) -> Unit,
 ) {
-    var text by remember { mutableStateOf(durationInMinutes.toString()) }
 
     Box(
         modifier = Modifier.width(64.dp).height(40.dp).background(
-            color = MaterialTheme.colorScheme.surfaceVariant,
-            shape = RoundedCornerShape(8.dp)
+            color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp)
         ), contentAlignment = Alignment.CenterEnd
     ) {
         BasicTextField(
             cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
             textStyle = TextFieldStyleDateAndTime,
-            value = text,
+            value = durationInMinutes,
             onValueChange = {
                 onValueChange.invoke(it)
-                text = it
+                //text = it
             },
             singleLine = true,
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
@@ -204,7 +252,8 @@ private fun ColumnScope.DateAndTime(
     date: Long,
     hours: Int,
     minutes: Int,
-    onTimeUpdate: (Triple<Long, Int, Int>) -> Unit
+    onTimeUpdate: (Triple<Long, Int, Int>) -> Unit,
+    focusManager: FocusManager
 ) {
 
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
@@ -227,6 +276,10 @@ private fun ColumnScope.DateAndTime(
         Spacer(Modifier.weight(1F))
         TemporalDisplay(selectedDate) {
             showDatePicker = !showDatePicker
+
+            if (showDatePicker) {
+                focusManager.clearFocus()
+            }
             showTimePicker = false
         }
 
@@ -234,6 +287,11 @@ private fun ColumnScope.DateAndTime(
             Spacer(modifier = Modifier.width(8.dp))
             TemporalDisplay(selectedTime) {
                 showTimePicker = !showTimePicker
+
+                if (showTimePicker) {
+                    focusManager.clearFocus()
+                }
+
                 showDatePicker = false
             }
         }
@@ -251,12 +309,15 @@ private fun ColumnScope.DateAndTime(
     AnimatedVisibility(
         visible = showTimePicker, enter = expandVertically(), exit = shrinkVertically()
     ) {
-        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
-            TimePicker(
-                state = timePickerState,
-                colors = TimePickerDefaults.colors(timeSelectorSelectedContentColor = MaterialTheme.colorScheme.primary)
-            )
-        }
+        TimePicker(
+            state = timePickerState,
+            colors = TimePickerDefaults.colors(
+                timeSelectorSelectedContentColor = MaterialTheme.colorScheme.primary,
+                timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+            ),
+            modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+        )
     }
 }
 
@@ -279,15 +340,20 @@ private fun TemporalDisplay(content: String, onClick: () -> Unit) {
 }
 
 @Composable
-private fun TitleInput(eventTitle: String, onUpdate: (String) -> Unit) {
+private fun Input(
+    placeholder: String,
+    content: String,
+    onUpdate: (String) -> Unit,
+    focusRequester: FocusRequester
+) {
     OutlinedTextField(
-        value = eventTitle,
+        value = content,
         onValueChange = {
             onUpdate.invoke(it)
         },
-        placeholder = { BodyText("Title") },
+        placeholder = { BodyText(label = placeholder, color = MaterialTheme.colorScheme.surfaceVariant) },
         trailingIcon = {
-            if (eventTitle.isNotEmpty()) {
+            if (content.isNotEmpty()) {
                 IconButton(onClick = { onUpdate.invoke("") }) {
                     Icon(
                         Icons.Default.Clear,
@@ -305,7 +371,8 @@ private fun TitleInput(eventTitle: String, onUpdate: (String) -> Unit) {
         ),
         textStyle = TextFieldStyleAddEvent,
         shape = RectangleShape,
-        modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxWidth().height(56.dp).padding(horizontal = 16.dp)
+            .focusRequester(focusRequester),
     )
 }
 

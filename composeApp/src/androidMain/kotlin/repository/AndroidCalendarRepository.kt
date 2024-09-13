@@ -157,6 +157,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
     override suspend fun addEvent(
         title: String,
+        location: String,
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         allDay: Boolean

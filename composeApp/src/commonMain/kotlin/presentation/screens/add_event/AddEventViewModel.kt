@@ -19,7 +19,7 @@ class AddEventViewModel(private val repository: CalendarRepository) :
             startDate = nowInMillis,
             startHours = nextHour,
             startMinutes = 0,
-            durationInMinutes = 60
+            durationInMinutes = "60"
         )
         return state
     }
@@ -27,15 +27,21 @@ class AddEventViewModel(private val repository: CalendarRepository) :
     override fun handleEvent(event: Event) {
         when (event) {
             is Event.ToggleAllDay -> setState { copy(allDay = event.isChecked) }
+            is Event.OnCancel -> {
+                setState { createInitialState() }
+                setEffect { Effect.Cancel }
+            }
+
             is Event.OnSave -> viewModelScope.launch {
                 val eventTime = EventTime(
                     startTimestampInMillis = uiState.value.startDate,
                     startHours = uiState.value.startHours,
                     startMinutes = uiState.value.startMinutes,
-                    durationInMinutes = uiState.value.durationInMinutes
+                    durationInMinutes = uiState.value.durationInMinutes.toInt()
                 )
                 val didSave = repository.addEvent(
                     title = uiState.value.title,
+                    location = uiState.value.location,
                     startTime = eventTime.getStarDateTime(),
                     endTime = eventTime.getEndDateTime(),
                     allDay = uiState.value.allDay
@@ -43,7 +49,7 @@ class AddEventViewModel(private val repository: CalendarRepository) :
 
                 if (didSave) {
                     setState { createInitialState() }
-                    setEffect { Effect.OnSave }
+                    setEffect { Effect.Save }
                 }
             }
 
@@ -56,21 +62,18 @@ class AddEventViewModel(private val repository: CalendarRepository) :
             }
 
             is Event.OnDurationEntered -> {
+                println("Duration ${event.duration}")
+                setState { copy(durationInMinutes = event.duration) }
                 val error = validateDurationTime(event.duration, uiState.value.startHours)
-
                 if (error == null) {
-                    setState {
-                        copy(
-                            durationError = null,
-                            durationInMinutes = event.duration.toInt()
-                        )
-                    }
+                    setState { copy(durationError = null) }
                 } else {
                     setState { copy(durationError = error) }
                 }
             }
 
             is Event.OnTitleEntered -> setState { copy(title = event.title) }
+            is Event.OnLocationEntered -> setState { copy(location = event.location) }
         }
     }
 
