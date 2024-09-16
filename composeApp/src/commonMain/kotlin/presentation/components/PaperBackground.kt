@@ -31,7 +31,7 @@ fun PaperBackground(
         Image(
             painter = painterResource(res),
             contentDescription = "paper_texture",
-            contentScale = ContentScale.None,
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier.matchParentSize()
         )
         content.invoke()
@@ -52,7 +52,7 @@ fun PaperBackgroundColumn(
         Image(
             painter = painterResource(res),
             contentDescription = "paper_texture",
-            contentScale = ContentScale.None,
+            contentScale = ContentScale.FillBounds,
             modifier = Modifier.matchParentSize()
         )
         Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
