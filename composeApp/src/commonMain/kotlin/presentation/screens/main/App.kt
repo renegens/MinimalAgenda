@@ -5,12 +5,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.screens.calendar.CalendarScreen
-import presentation.screens.paywall.PaywallScreen
 import presentation.theme.AppTheme
 
-@OptIn(KoinExperimentalAPI::class)
 @Composable
 fun App() {
     KoinContext {
@@ -19,16 +16,17 @@ fun App() {
 
         state.appTheme?.let { (color, theme) ->
             AppTheme(
-                appThemeMode = theme,
-                appColor = color
+                appThemeMode = theme, appColor = color
             ) {
-                if (state.isSubscribed) {
-                    CalendarScreen(appThemeMode = theme)
-                } else {
-                    PaywallScreen(onPurchaseComplete = {
-                        viewModel.setEvent(AppContract.Event.OnPurchaseCompleted)
+                CalendarScreen(appThemeMode = theme,
+                    reloadEvents = state.shouldReloadEvents,
+                    onAddEvent = {
+                        viewModel.setEvent(AppContract.Event.NewEvent)
+                    },
+                    onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
+                    notEligible = {
+                        viewModel.setEvent(AppContract.Event.NotEligible)
                     })
-                }
             }
         }
     }

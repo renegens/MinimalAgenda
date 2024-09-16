@@ -1,5 +1,6 @@
 package presentation.screens.settings.components
 
+import AppSwitch
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -20,11 +21,7 @@ internal fun SwitchSettingItem(
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         ItemText(label = title)
-        Switch(
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = MaterialTheme.colorScheme.secondaryContainer,
-                checkedTrackColor = MaterialTheme.colorScheme.primary
-            ),
+        AppSwitch(
             checked = isChecked,
             onCheckedChange = onCheckedChange,
         )

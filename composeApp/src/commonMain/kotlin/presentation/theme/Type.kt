@@ -158,6 +158,27 @@ val TextFieldStyle: TextStyle
         letterSpacing = (-1).sp
     )
 
+val TextFieldStyleAddEvent: TextStyle
+    @Composable
+    get() = TextStyle(
+        color = MaterialTheme.colorScheme.tertiary,
+        fontFamily = DMSans18MediumFamily,
+        fontWeight = FontWeight.Medium,
+        fontSize = 20.sp,
+        letterSpacing = (-1).sp
+    )
+
+val TextFieldStyleDateAndTime: TextStyle
+    @Composable
+    get() = TextStyle(
+        color = MaterialTheme.colorScheme.tertiary,
+        fontFamily = DMSans18MediumFamily,
+        fontWeight = FontWeight.Medium,
+        textAlign = TextAlign.Center,
+        fontSize = 16.sp,
+        letterSpacing = (-1).sp
+    )
+
 val displayLarge: TextStyle
     @Composable
     get() = TextStyle(

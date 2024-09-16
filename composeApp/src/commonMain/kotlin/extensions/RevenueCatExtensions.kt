@@ -20,3 +20,14 @@ fun initializeRevenueCat(debug: Boolean = false) {
     val config = PurchasesConfiguration(apiKey = REVENUECAT_API_KEY)
     Purchases.configure(configuration = config)
 }
+
+fun guardPremium(onSubscribed: () -> Unit, onPaywall: () -> Unit) {
+    Purchases.sharedInstance.getCustomerInfo(onError = { error -> onPaywall.invoke() },
+        onSuccess = { customerInfo ->
+            if (customerInfo.isSubscribed()) {
+                onSubscribed.invoke()
+            } else {
+                onPaywall.invoke()
+            }
+        })
+}

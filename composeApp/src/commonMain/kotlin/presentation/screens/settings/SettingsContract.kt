@@ -16,7 +16,9 @@ class SettingsContract {
         val notificationTime: Int = 5
     ) : UiState
 
-    sealed class Effect : UiEffect {}
+    sealed class Effect : UiEffect {
+        object NotEligible: Effect()
+    }
 
     sealed class Event : UiEvent {
         object Load : Event()

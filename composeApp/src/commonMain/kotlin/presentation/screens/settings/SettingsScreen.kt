@@ -5,7 +5,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.PaperBackgroundColumn
 import presentation.components.SettingsHeader
@@ -18,9 +21,22 @@ import presentation.screens.settings.components.NotificationTimeInput
 import presentation.screens.settings.components.SwitchSettingItem
 
 @Composable
-fun SettingsScreen() {
+fun SettingsScreen(notEligible: () -> Unit) {
     val viewModel: SettingsViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest {
+            when (it) {
+                Effect.NotEligible -> {
+                    focusManager.clearFocus()
+                    notEligible.invoke()
+                }
+            }
+        }
+    }
 
     Column(
         modifier = Modifier.fillMaxSize().statusBarsPadding()
@@ -40,15 +56,18 @@ fun SettingsScreen() {
                 isChecked = state.privateNotifications,
                 onCheckedChange = { viewModel.setEvent(Event.OnTogglePrivateNotifications(it)) })
             ExplanationText(
-                "When enabled, notifications will use a generic title.",
+                "When enabled, notifications will use a generic title. (Premium)",
             )
             Spacer(modifier = Modifier.height(32.dp))
         }
 
         PaperBackgroundColumn(state.appThemeMode) {
-            NotificationTimeInput(time = state.notificationTime, onTimeEntered = {
-                viewModel.setEvent(Event.OnNotificationTimeEntered(it))
-            })
+            NotificationTimeInput(
+                focusRequester = focusRequester,
+                time = state.notificationTime,
+                onTimeEntered = {
+                    viewModel.setEvent(Event.OnNotificationTimeEntered(it))
+                })
             Spacer(modifier = Modifier.height(40.dp))
         }
 
@@ -62,7 +81,7 @@ fun SettingsScreen() {
         }
 
         Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-            ItemText("Select your preferred color")
+            ItemText("Select your preferred color (Premium)")
             Spacer(modifier = Modifier.height(16.dp))
             ColorSelection(state.appColor) { viewModel.setEvent(Event.OnColorSelected(it)) }
             Spacer(modifier = Modifier.height(48.dp))

@@ -10,7 +10,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.MaterialTheme
@@ -22,6 +21,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -29,7 +30,7 @@ import presentation.theme.DMSans18Medium
 import presentation.theme.TextFieldStyle
 
 @Composable
-internal fun NotificationTimeInput(time: Int, onTimeEntered: (Int) -> Unit) {
+internal fun NotificationTimeInput(focusRequester: FocusRequester, time: Int, onTimeEntered: (Int) -> Unit) {
     var notificationTime by remember { mutableStateOf(time.toString()) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
     Column {
@@ -42,10 +43,7 @@ internal fun NotificationTimeInput(time: Int, onTimeEntered: (Int) -> Unit) {
 
             Box(
                 modifier = Modifier.width(64.dp).height(32.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.secondaryContainer,
-                        shape = RoundedCornerShape(4.dp)
-                    ),
+                    .background(color = MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.CenterEnd
             ) {
                 BasicTextField(
@@ -61,7 +59,7 @@ internal fun NotificationTimeInput(time: Int, onTimeEntered: (Int) -> Unit) {
                     },
                     singleLine = true,
                     keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().focusRequester(focusRequester),
                 )
             }
         }
@@ -75,7 +73,7 @@ internal fun NotificationTimeInput(time: Int, onTimeEntered: (Int) -> Unit) {
             Spacer(modifier = Modifier.height(8.dp))
         }
         Spacer(modifier = Modifier.height(4.dp))
-        ExplanationText(label = "Set the notification time in minutes. Enter 0 to receive a notification at the event start time.")
+        ExplanationText(label = "Set the notification time in minutes. Enter 0 to receive a notification at the event start time. (Premium)")
     }
 }
 

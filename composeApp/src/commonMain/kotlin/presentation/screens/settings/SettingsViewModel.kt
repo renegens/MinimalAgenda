@@ -1,9 +1,12 @@
 package presentation.screens.settings
 
 import androidx.lifecycle.viewModelScope
+import domain.model.AppColor
+import domain.model.AppThemeMode
 import domain.model.Settings
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
+import extensions.guardPremium
 import kotlinx.coroutines.launch
 import platform.Browser
 import presentation.base.BaseViewModel
@@ -25,37 +28,18 @@ class SettingsViewModel(
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.OnModeSelected -> {
-                viewModelScope.launch {
-                    val currentSettings = uiState.value.toSettings()
-                    saveSettingsUseCase.invoke(currentSettings.copy(appThemeMode = event.appThemeMode))
-                    setState { copy(appThemeMode = event.appThemeMode) }
-                }
-            }
+            is Event.OnModeSelected -> setAppThemeMode(event.appThemeMode)
+            is Event.OnColorSelected -> guardPremium(
+                onSubscribed = { setAppColor(event.appColor) }, onPaywall = ::showPaywall
+            )
 
-            is Event.OnColorSelected -> {
-                viewModelScope.launch {
-                    val currentSettings = uiState.value.toSettings()
-                    saveSettingsUseCase.invoke(currentSettings.copy(appColor = event.appColor))
-                    setState { copy(appColor = event.appColor) }
-                }
-            }
+            is Event.OnTogglePrivateNotifications -> guardPremium(
+                onSubscribed = { setPrivateNotification(event.checked) }, onPaywall = ::showPaywall
+            )
 
-            is Event.OnTogglePrivateNotifications -> {
-                viewModelScope.launch {
-                    val currentSettings = uiState.value.toSettings()
-                    saveSettingsUseCase.invoke(currentSettings.copy(privateNotifications = event.checked))
-                    setState { copy(privateNotifications = event.checked) }
-                }
-            }
-
-            is Event.OnNotificationTimeEntered -> {
-                viewModelScope.launch {
-                    val currentSettings = uiState.value.toSettings()
-                    saveSettingsUseCase.invoke(currentSettings.copy(notificationTimeInMinutes = event.time))
-                    setState { copy(notificationTime = event.time) }
-                }
-            }
+            is Event.OnNotificationTimeEntered -> guardPremium(
+                onSubscribed = { setNotificationTime(event.time) }, onPaywall = ::showPaywall
+            )
 
             Event.OnSentFeedback -> TODO()
             Event.Load -> {
@@ -73,6 +57,42 @@ class SettingsViewModel(
                 }
             }
         }
+    }
+
+    private fun setPrivateNotification(isChecked: Boolean) {
+        viewModelScope.launch {
+            val currentSettings = uiState.value.toSettings()
+            saveSettingsUseCase.invoke(currentSettings.copy(privateNotifications = isChecked))
+            setState { copy(privateNotifications = isChecked) }
+        }
+    }
+
+    private fun setAppThemeMode(appThemeMode: AppThemeMode) {
+        viewModelScope.launch {
+            val currentSettings = uiState.value.toSettings()
+            saveSettingsUseCase.invoke(currentSettings.copy(appThemeMode = appThemeMode))
+            setState { copy(appThemeMode = appThemeMode) }
+        }
+    }
+
+    private fun setAppColor(appColor: AppColor) {
+        viewModelScope.launch {
+            val currentSettings = uiState.value.toSettings()
+            saveSettingsUseCase.invoke(currentSettings.copy(appColor = appColor))
+            setState { copy(appColor = appColor) }
+        }
+    }
+
+    private fun setNotificationTime(time: Int) {
+        viewModelScope.launch {
+            val currentSettings = uiState.value.toSettings()
+            saveSettingsUseCase.invoke(currentSettings.copy(notificationTimeInMinutes = time))
+            setState { copy(notificationTime = time) }
+        }
+    }
+
+    private fun showPaywall() {
+        setEffect { Effect.NotEligible }
     }
 
     private fun State.toSettings(): Settings {

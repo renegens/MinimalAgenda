@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.AppAlertDialog
 import presentation.components.DotsPulsing
+import presentation.components.clickableWithOpaqueText
 import presentation.screens.paywall.PaywallContract.Effect
 import presentation.screens.paywall.PaywallContract.Event
 import presentation.theme.DMSans18Medium
@@ -41,7 +42,7 @@ import presentation.theme.DMSans24Medium60
 import presentation.theme.DMSansBlack250
 
 @Composable
-fun PaywallScreen(onPurchaseComplete: () -> Unit, ) {
+fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
     val viewModel: PaywallViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
 
@@ -67,14 +68,22 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, ) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
             // Header
             Text(
-                text = "Unlock Papely",
+                text = "Cancel",
+                style = DMSans24Medium60,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Start,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.clickableWithOpaqueText(onCancel).align(Alignment.Start)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Unlock Papely Premium",
                 style = DMSansBlack250,
                 fontSize = 30.sp,
                 letterSpacing = (-1).sp,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.tertiary,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -86,11 +95,19 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, ) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 BenefitItem("See only important events")
-                BenefitItem("Clean, eye-friendly interface")
-                BenefitItem("Event notification without hassle")
-                BenefitItem("Integrated with your calendars")
-                BenefitItem("Clutter-free daily view")
-                BenefitItem("Less stress and fewer notifications")
+                BenefitItem("Set alert time")
+                BenefitItem("Add and Edit Events")
+                BenefitItem("Pick your favorite theme color")
+                BenefitItem("Private Notifications")
+                BenefitItem("Support Papely Development.")
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start,
+                    text = "Papely is made by one person with no investors or corporate owner.",
+                    style = DMSans24Medium60,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -195,7 +212,7 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, ) {
             Spacer(modifier = Modifier.height(24.dp))
 
             // Terms and Conditions
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),) {
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Start,

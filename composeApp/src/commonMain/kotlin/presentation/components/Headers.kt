@@ -15,10 +15,12 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 import extensions.toShortName
 import kotlinx.datetime.LocalDate
+import presentation.theme.DMSans18Medium
 import presentation.theme.DMSansBlack250
 
 @Composable
@@ -99,4 +101,23 @@ fun SettingsHeader(label: String) {
             modifier = Modifier.wrapContentHeight(unbounded = true)
         )
     }
+}
+
+@Composable
+fun NewEventHeader(label: String) {
+    val label = buildAnnotatedString {
+        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
+            append(label)
+        }
+        withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary)) {
+            append("Event")
+        }
+    }
+    Text(
+        fontSize = 24.sp,
+        style = DMSans18Medium,
+        text = label,
+        modifier = Modifier.padding(bottom = 4.dp).wrapContentHeight(unbounded = true)
+    )
+
 }
