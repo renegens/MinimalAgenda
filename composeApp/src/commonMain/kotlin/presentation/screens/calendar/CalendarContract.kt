@@ -28,7 +28,9 @@ class CalendarContract {
         class GoToDay(val index: Int) : Effect()
         class GoToMonth(val agendaMonthYear: AgendaMonthYear) : Effect()
         class GoToYear(val agendaYear: AgendaYear) : Effect()
-        object NotificationPermissionMissing: Effect()
+        object ShowPaywall : Effect()
+        class ShowEdit(val agendaEvent: AgendaEvent): Effect()
+        object NotificationPermissionMissing : Effect()
     }
 
     sealed class Event : UiEvent {
@@ -38,9 +40,10 @@ class CalendarContract {
         class OnMonthClicked(val agendaMonthYear: AgendaMonthYear) : Event()
         class OnYearClicked(val agendaYear: AgendaYear) : Event()
         object OnRequestCalendarPermissionClicked : Event()
-        class ToggleEventVisibility(val agendaEvent: AgendaEvent): Event()
-        object ToggleActive: Event()
-        class Notify(val agendaEvent: AgendaEvent): Event()
+        class ToggleEventVisibility(val agendaEvent: AgendaEvent) : Event()
+        class OnEditEvent(val agendaEvent: AgendaEvent) : Event()
+        object ToggleActive : Event()
+        class Notify(val agendaEvent: AgendaEvent) : Event()
     }
 
     enum class Section(val position: Int) {

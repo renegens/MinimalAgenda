@@ -1,18 +1,17 @@
 package presentation.screens.add_event
 
-import domain.model.AgendaEvent
+import extensions.nextHour
+import extensions.nowInMillis
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
 
 class AddEventContract {
-
     data class State(
-        val agendaEvent: AgendaEvent? = null,
-        val startDate: Long,
-        val startHours: Int,
-        val startMinutes: Int,
-        val durationInMinutes: String,
+        val startDate: Long = nowInMillis,
+        val startHours: Int = nextHour,
+        val startMinutes: Int = 0,
+        val durationInMinutes: String = "60",
         val allDay: Boolean = false,
         val title: String = "",
         val location: String = "",
@@ -30,7 +29,7 @@ class AddEventContract {
     }
 
     sealed class Event : UiEvent {
-        class ToggleAllDay(val isChecked: Boolean) : Event()
+        class ToggleAllDay(val isAllDay: Boolean) : Event()
         class OnTitleEntered(val title: String) : Event()
         class OnLocationEntered(val location: String) : Event()
         class OnStartEntered(val timestamp: Long, val hours: Int, val minutes: Int) : Event()

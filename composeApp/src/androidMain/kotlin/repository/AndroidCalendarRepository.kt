@@ -73,14 +73,29 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
     override suspend fun getAllEvents(): List<EventEntity> {
         val list = emptyList<EventEntity>().toMutableList()
 
-        for (i in 1..8) {
+        for (i in 1..8000) {
             val timestamp = getRandomTimestampWithinTwoYears()
             list.add(
                 EventEntity(
                     id = UUID.randomUUID().toString(),
                     title = UUID.randomUUID().toString(),
+                    location = "",
                     startTime = timestamp,
+                    endTime = timestamp + 6000,
                     allDay = false,
+                    isRecurring = false,
+                    format = dateFormatter(timestamp.toString())
+                )
+            )
+            list.add(
+                EventEntity(
+                    id = UUID.randomUUID().toString(),
+                    title = UUID.randomUUID().toString(),
+                    location = "",
+                    startTime = System.currentTimeMillis(),
+                    endTime = System.currentTimeMillis() + 60000,
+                    allDay = false,
+                    isRecurring = false,
                     format = dateFormatter(timestamp.toString())
                 )
             )
@@ -137,14 +152,15 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                     val startTime = it.getLong(startTimeIndex)
                     val endTime = it.getLong(endTimeIndex)
 
-
-
                     events.add(
                         EventEntity(
-                            id.toString(),
-                            title,
-                            startTime,
+                            id = id.toString(),
+                            title= title,
+                            location = "",
+                            startTime = startTime,
+                            endTime = startTime + 6000,
                             allDay = false,
+                            isRecurring = false,
                             epochDay = endTime.millisToEpochDay()
                         )
                     )
@@ -153,6 +169,10 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
             return@withContext events
         }
+    }
+
+    override suspend fun getEvent(id: String): EventEntity? {
+        TODO("Not yet implemented")
     }
 
     override suspend fun addEvent(

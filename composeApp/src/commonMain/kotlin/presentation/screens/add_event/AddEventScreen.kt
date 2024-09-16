@@ -46,6 +46,7 @@ import androidx.compose.material3.rememberTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,6 +68,7 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import platform.formatTimestamp
 import presentation.components.NewEventHeader
+import presentation.components.clickableWithOpaqueText
 import presentation.theme.DMSans18Medium
 import presentation.theme.TextFieldStyleAddEvent
 import presentation.theme.TextFieldStyleDateAndTime
@@ -94,9 +96,10 @@ fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().statusBarsPadding().verticalScroll(scrollState)
+        modifier = Modifier.fillMaxSize().statusBarsPadding().padding(top = 8.dp).verticalScroll(scrollState)
     ) {
-        Header(onCancel = { viewModel.setEvent(AddEventContract.Event.OnCancel) },
+        Header(label = "New",
+            onCancel = { viewModel.setEvent(AddEventContract.Event.OnCancel) },
             isEnabled = state.isSaveEnabled(),
             onSave = { viewModel.setEvent(AddEventContract.Event.OnSave) })
         Spacer(modifier = Modifier.height(16.dp))
@@ -255,8 +258,13 @@ private fun ColumnScope.DateAndTime(
     onTimeUpdate: (Triple<Long, Int, Int>) -> Unit,
     focusManager: FocusManager
 ) {
+    val derivedValue = remember {
+        derivedStateOf {
+            date
+        }
+    }
 
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
+    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = derivedValue.value)
     val timePickerState =
         rememberTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
     var showDatePicker by remember { mutableStateOf(false) }
@@ -310,13 +318,11 @@ private fun ColumnScope.DateAndTime(
         visible = showTimePicker, enter = expandVertically(), exit = shrinkVertically()
     ) {
         TimePicker(
-            state = timePickerState,
-            colors = TimePickerDefaults.colors(
+            state = timePickerState, colors = TimePickerDefaults.colors(
                 timeSelectorSelectedContentColor = MaterialTheme.colorScheme.primary,
                 timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
                 timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-            ),
-            modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+            ), modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
         )
     }
 }
@@ -341,17 +347,18 @@ private fun TemporalDisplay(content: String, onClick: () -> Unit) {
 
 @Composable
 private fun Input(
-    placeholder: String,
-    content: String,
-    onUpdate: (String) -> Unit,
-    focusRequester: FocusRequester
+    placeholder: String, content: String, onUpdate: (String) -> Unit, focusRequester: FocusRequester
 ) {
     OutlinedTextField(
         value = content,
         onValueChange = {
             onUpdate.invoke(it)
         },
-        placeholder = { BodyText(label = placeholder, color = MaterialTheme.colorScheme.surfaceVariant) },
+        placeholder = {
+            BodyText(
+                label = placeholder, color = MaterialTheme.colorScheme.surfaceVariant
+            )
+        },
         trailingIcon = {
             if (content.isNotEmpty()) {
                 IconButton(onClick = { onUpdate.invoke("") }) {
@@ -377,21 +384,21 @@ private fun Input(
 }
 
 @Composable
-private fun Header(onCancel: () -> Unit, onSave: () -> Unit, isEnabled: Boolean) {
+private fun Header(label: String, onCancel: () -> Unit, onSave: () -> Unit, isEnabled: Boolean) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically
     ) {
-        TextButton(onClick = onCancel) {
-            BodyText(
-                label = "Cancel", color = MaterialTheme.colorScheme.tertiary
-            )
-        }
-        NewEventHeader("New")
+        BodyText(
+            label = "Cancel",
+            color = MaterialTheme.colorScheme.tertiary,
+            modifier = Modifier.clickableWithOpaqueText(onCancel)
+        )
+        NewEventHeader(label)
         TextButton(onClick = onSave, enabled = isEnabled) {
             BodyText(
-                label = "Add",
+                label = "Save",
                 color = if (isEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.secondary
             )
         }

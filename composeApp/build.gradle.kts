@@ -66,6 +66,7 @@ kotlin {
             implementation(libs.kotlinx.datetime)
             implementation(libs.androidx.lifecycle.viewmodel)
             implementation(libs.kotlinx.serialization.json)
+            implementation(libs.navigation.compose)
             api(libs.androidx.datastore)
             api(libs.androidx.datastore.preferences)
             api(libs.koin.core)

@@ -85,6 +85,31 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         return threeYearsInFuture ?: NSDate()
     }
 
+    override suspend fun getEvent(id: String): EventEntity? {
+        return withContext(Dispatchers.IO) {
+            suspendCancellableCoroutine { continuation ->
+                val ekEvent = eventStore.eventWithIdentifier(id)
+                if (ekEvent == null) {
+                    continuation.resume(null)
+                }
+                ekEvent as EKEvent
+                val event = EventEntity(
+                    id = ekEvent.eventIdentifier,
+                    title = ekEvent.title,
+                    location = ekEvent.location,
+                    startTime = ekEvent.startDate?.timeIntervalSince1970?.toLong(),
+                    endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
+                    allDay = ekEvent.allDay,
+                    isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
+                    epochDay = null,
+                    format = formatUnixTimestamp(ekEvent.startDate?.timeIntervalSince1970)
+                )
+
+                continuation.resume(event)
+            }
+        }
+    }
+
     @OptIn(ExperimentalForeignApi::class)
     override suspend fun addEvent(
         title: String,
@@ -103,6 +128,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     }
 
                     val newEvent = EKEvent.eventWithEventStore(eventStore)
+
                     newEvent.title = title
                     newEvent.location = location
                     newEvent.startDate = startTime.toEKEventDate()
@@ -139,9 +165,12 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     EventEntity(
                         id = event.eventIdentifier,
                         title = event.title,
+                        location = event.location,
                         startTime = event.startDate?.timeIntervalSince1970?.toLong(),
+                        endTime = event.endDate?.timeIntervalSince1970?.toLong(),
                         allDay = event.allDay,
                         epochDay = null,
+                        isRecurring = event.recurrenceRules().isNullOrEmpty().not(),
                         format = formatUnixTimestamp(event.startDate?.timeIntervalSince1970)
                     )
                 }

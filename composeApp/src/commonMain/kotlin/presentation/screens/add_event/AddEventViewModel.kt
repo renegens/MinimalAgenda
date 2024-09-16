@@ -2,8 +2,6 @@ package presentation.screens.add_event
 
 import androidx.lifecycle.viewModelScope
 import domain.model.EventTime
-import extensions.nextHour
-import extensions.nowInMillis
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.add_event.AddEventContract.Effect
@@ -11,26 +9,18 @@ import presentation.screens.add_event.AddEventContract.Event
 import presentation.screens.add_event.AddEventContract.State
 import repository.CalendarRepository
 
-class AddEventViewModel(private val repository: CalendarRepository) :
+class AddEventViewModel(
+    private val repository: CalendarRepository
+) :
     BaseViewModel<Event, State, Effect>() {
 
-    override fun createInitialState(): State {
-        val state = State(
-            startDate = nowInMillis,
-            startHours = nextHour,
-            startMinutes = 0,
-            durationInMinutes = "60"
-        )
-        return state
-    }
+    override fun createInitialState() = State()
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.ToggleAllDay -> setState { copy(allDay = event.isChecked) }
-            is Event.OnCancel -> {
-                setState { createInitialState() }
-                setEffect { Effect.Cancel }
-            }
+            is Event.ToggleAllDay -> setState { copy(allDay = event.isAllDay) }
+
+            is Event.OnCancel -> setEffect { Effect.Cancel }
 
             is Event.OnSave -> viewModelScope.launch {
                 val eventTime = EventTime(
@@ -48,23 +38,45 @@ class AddEventViewModel(private val repository: CalendarRepository) :
                 )
 
                 if (didSave) {
-                    setState { createInitialState() }
                     setEffect { Effect.Save }
                 }
             }
 
-            is Event.OnStartEntered -> setState {
-                copy(
-                    startMinutes = event.minutes,
-                    startDate = event.timestamp,
-                    startHours = event.hours
+            is Event.OnStartEntered -> {
+                val error = validateDurationTime(
+                    uiState.value.durationInMinutes,
+                    event.hours,
+                    event.minutes
                 )
+                if (error == null) {
+                    setState {
+                        copy(
+                            durationError = null,
+                            startMinutes = event.minutes,
+                            startDate = event.timestamp,
+                            startHours = event.hours
+                        )
+                    }
+                } else {
+                    setState {
+                        copy(
+                            durationError = error,
+                            startMinutes = event.minutes,
+                            startDate = event.timestamp,
+                            startHours = event.hours
+                        )
+                    }
+                }
+
             }
 
             is Event.OnDurationEntered -> {
-                println("Duration ${event.duration}")
                 setState { copy(durationInMinutes = event.duration) }
-                val error = validateDurationTime(event.duration, uiState.value.startHours)
+                val error = validateDurationTime(
+                    event.duration,
+                    uiState.value.startHours,
+                    uiState.value.startMinutes
+                )
                 if (error == null) {
                     setState { copy(durationError = null) }
                 } else {
@@ -77,12 +89,16 @@ class AddEventViewModel(private val repository: CalendarRepository) :
         }
     }
 
-    private fun validateDurationTime(input: String, currentHours: Int): String? {
+    private fun validateDurationTime(
+        input: String,
+        currentHours: Int,
+        currentMinutes: Int
+    ): String? {
         val time = input.toIntOrNull()
         return when {
             time == null || time == 0 -> "Please enter a valid number"
             time < 0 -> "We can't time travel yet. Time cannot be negative"
-            (time / 60) + currentHours > 24 -> "Durations must be in the same day"
+            time + currentMinutes + (currentHours * 60) > 1440 -> "Durations must be in the same day"
             else -> null // valid input
         }
     }

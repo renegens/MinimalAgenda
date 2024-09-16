@@ -14,6 +14,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import platform.CalendarPermissionHandler
 import presentation.screens.calendar.CalendarContract.Section
@@ -31,11 +32,16 @@ fun ActionButton(
     calendarPermission: CalendarPermissionHandler.State
 ) {
     if (currentSection == Section.Settings) return
+    val haptic = LocalHapticFeedback.current
+
     Column(modifier = Modifier.padding(end = 16.dp)) {
         Box(
             modifier = Modifier.size(56.dp)
                 .background(color = CustomColor.Black_500, shape = CircleShape)
-                .clickable { toggleActive.invoke() },
+                .clickable {
+                    haptic.addHapticFeedback()
+                    toggleActive.invoke()
+                },
             contentAlignment = Alignment.Center
         ) {
             val label = if (showAll) "Active" else "All"
@@ -49,7 +55,10 @@ fun ActionButton(
         Box(
             modifier = Modifier.size(56.dp)
                 .background(color = MaterialTheme.colorScheme.primary, shape = CircleShape)
-                .clickable { nowClicked.invoke() },
+                .clickable {
+                    haptic.addHapticFeedback()
+                    nowClicked.invoke()
+                },
             contentAlignment = Alignment.Center
 
         ) {
@@ -64,7 +73,10 @@ fun ActionButton(
             Box(
                 modifier = Modifier.size(56.dp)
                     .background(color = CustomColor.Black_500, shape = CircleShape)
-                    .clickable { onAdd.invoke() },
+                    .clickable {
+                        haptic.addHapticFeedback()
+                        onAdd.invoke()
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Text(
