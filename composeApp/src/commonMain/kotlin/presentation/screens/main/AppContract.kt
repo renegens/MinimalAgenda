@@ -1,5 +1,7 @@
 package presentation.screens.main
 
+import domain.model.AgendaEvent
+import domain.model.AppTheme
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
@@ -7,14 +9,15 @@ import presentation.base.UiState
 class AppContract {
 
     data class State(
-        val isSubscribed: Boolean = false
+        val shouldReloadEvents: Int = 0,
+        val appTheme: AppTheme? = null,
     ) : UiState
 
-    sealed class Effect : UiEffect {
-
-    }
+    sealed class Effect : UiEffect
 
     sealed class Event : UiEvent {
-        object OnPurchaseCompleted: Event()
+        class EditExternal(val agendaEvent: AgendaEvent): Event()
+        object NewEvent: Event()
+        object NotEligible: Event()
     }
 }

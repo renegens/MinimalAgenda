@@ -14,31 +14,45 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
+import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
+import domain.model.AppThemeMode
+import extensions.guardPremium
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
-import org.koin.core.annotation.KoinExperimentalAPI
 import presentation.components.ActionButton
 import presentation.components.ComposableLifecycle
 import presentation.components.NotificationPermissionDialog
+import presentation.components.addHapticFeedbackProminent
+import presentation.screens.calendar.CalendarContract.Effect
+import presentation.screens.calendar.CalendarContract.Event
+import presentation.screens.calendar.CalendarContract.Section
 import presentation.screens.calendar.day.DayScreen
 import presentation.screens.calendar.months.MonthsScreen
 import presentation.screens.calendar.years.YearsScreen
-import presentation.screens.calendar.CalendarContract.*
+import presentation.screens.settings.SettingsScreen
 
-@OptIn(KoinExperimentalAPI::class)
 @Composable
-fun CalendarScreen() {
+fun CalendarScreen(
+    appThemeMode: AppThemeMode,
+    onAddEvent: () -> Unit,
+    onEditEvent: (AgendaEvent) -> Unit,
+    notEligible: () -> Unit,
+    reloadEvents: Int
+) {
     val viewModel: CalendarViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
     val pagerState = rememberPagerState(
         pageCount = { Section.entries.size },
-        initialPage = Section.Day.position
+        initialPage = Section.Day.position,
     )
+    val haptic = LocalHapticFeedback.current
 
     var isScrolledToToday by remember { mutableStateOf(true) }
     var isScrolledToMonth by remember { mutableStateOf(true) }
@@ -49,6 +63,12 @@ fun CalendarScreen() {
     var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
 
     var shouldShowNotificationPermission by remember { mutableStateOf(false) }
+
+    LaunchedEffect(pagerState) {
+        snapshotFlow { pagerState.currentPage }.collect { page ->
+            haptic.addHapticFeedbackProminent()
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -74,6 +94,9 @@ fun CalendarScreen() {
                 is Effect.NotificationPermissionMissing -> {
                     shouldShowNotificationPermission = true
                 }
+
+                is Effect.ShowPaywall -> notEligible.invoke()
+                is Effect.ShowEdit -> onEditEvent.invoke(it.agendaEvent)
             }
         }
     }
@@ -84,8 +107,11 @@ fun CalendarScreen() {
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+    LaunchedEffect(reloadEvents) {
+        viewModel.setEvent(Event.LoadData)
+    }
 
+    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
         if (shouldShowNotificationPermission) {
             NotificationPermissionDialog(onDismissRequest = {
                 shouldShowNotificationPermission = false
@@ -93,7 +119,7 @@ fun CalendarScreen() {
         }
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
             when (page) {
-                CalendarContract.Section.Day.position -> DayScreen(
+                CalendarContract.Section.Day.position -> DayScreen(appThemeMode = appThemeMode,
                     days = state.days,
                     currentDate = state.currentDate,
                     onNowClicked = isScrolledToToday,
@@ -103,12 +129,12 @@ fun CalendarScreen() {
                     showAll = state.showAll,
                     onNotify = { viewModel.setEvent(Event.Notify(it)) },
                     onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
+                    onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
                     onRequestCalendarPermission = {
                         viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                    }
-                )
+                    })
 
-                CalendarContract.Section.Month.position -> MonthsScreen(
+                CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
                     days = state.days,
                     events = state.agendaEvents,
                     currentDate = state.currentDate,
@@ -120,10 +146,10 @@ fun CalendarScreen() {
                     },
                     onYearClicked = {
                         viewModel.setEvent(Event.OnYearClicked(it))
-                    }
-                )
+                    })
 
                 CalendarContract.Section.Year.position -> YearsScreen(
+                    appThemeMode = appThemeMode,
                     days = state.days,
                     events = state.agendaEvents,
                     showAll = state.showAll,
@@ -132,21 +158,26 @@ fun CalendarScreen() {
                     onNowClicked = isScrolledToYear,
                     scrollToYear = yearScrollPosition
                 )
+
+                CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
             }
         }
         Row(
             modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
         ) {
-            ActionButton(
+            ActionButton(currentSection = Section.fromInt(pagerState.currentPage),
+                calendarPermission = state.calendarPermission,
                 showAll = state.showAll,
                 nowClicked = {
                     viewModel.setEvent(
                         Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
                     )
-                }, toggleActive = {
+                },
+                toggleActive = {
                     viewModel.setEvent(Event.ToggleActive)
-                }, onAdd = {
-
+                },
+                onAdd = {
+                    guardPremium(onSubscribed = onAddEvent, onPaywall = notEligible)
                 })
         }
     }

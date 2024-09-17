@@ -10,7 +10,7 @@ DEPENDENCIES:
   - PurchasesHybridCommon (= 10.10.0)
 
 SPEC REPOS:
-  https://github.com/CocoaPods/Specs.git:
+  trunk:
     - PurchasesHybridCommon
     - RevenueCat
 

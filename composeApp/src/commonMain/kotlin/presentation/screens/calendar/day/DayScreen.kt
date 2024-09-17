@@ -28,9 +28,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaDay
 import domain.model.AgendaEvent
+import domain.model.AppThemeMode
 import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
@@ -38,12 +40,14 @@ import presentation.components.CalendarPermission
 import presentation.components.DayHeader
 import presentation.components.PaperBackground
 import presentation.components.SectionDivider
+import presentation.components.addHapticFeedback
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSansBlack36
 
 @Composable
 fun DayScreen(
+    appThemeMode: AppThemeMode,
     days: List<AgendaDay>,
     eventsByDay: Map<Int, List<AgendaEvent>>,
     onNowClicked: Boolean,
@@ -53,7 +57,8 @@ fun DayScreen(
     onHide: (AgendaEvent) -> Unit,
     calendarPermission: CalendarPermissionHandler.State,
     onRequestCalendarPermission: () -> Unit,
-    onNotify: (AgendaEvent) -> Unit
+    onNotify: (AgendaEvent) -> Unit,
+    onEdit: (AgendaEvent) -> Unit
 ) {
     if (days.isEmpty()) return
 
@@ -87,7 +92,7 @@ fun DayScreen(
 
         itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
             val isToday = day.epochDay == currentEpochDay
-            PaperBackground {
+            PaperBackground(appThemeMode = appThemeMode) {
                 Column {
                     Spacer(modifier = Modifier.height(24.dp))
                     DayHeader(
@@ -103,7 +108,8 @@ fun DayScreen(
                         onNotify = onNotify,
                         showAll = showAll,
                         selectedItem = selectedAgendaItem,
-                        onItemSelected = { selectedAgendaItem = it }
+                        onItemSelected = { selectedAgendaItem = it },
+                        onEdit = onEdit
                     )
                     Spacer(modifier = Modifier.height(32.dp))
                     SectionDivider(isCurrent = isToday)
@@ -118,6 +124,7 @@ fun Entries(
     agendaEvents: List<AgendaEvent>,
     onNotify: (AgendaEvent) -> Unit,
     onHide: (AgendaEvent) -> Unit,
+    onEdit: (AgendaEvent) -> Unit,
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean
@@ -132,6 +139,7 @@ fun Entries(
         EmptyDay()
         return
     }
+    val haptic = LocalHapticFeedback.current
 
     items.sortedBy { it.startTime }.forEach {
         Row(
@@ -142,6 +150,7 @@ fun Entries(
                 modifier = Modifier.fillMaxWidth().background(
                     color = if (selectedItem == it) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
                 ).clickable {
+                    haptic.addHapticFeedback()
                     if (selectedItem == it) {
                         onItemSelected.invoke(null)
                     } else {
@@ -175,6 +184,12 @@ fun Entries(
                             onItemSelected.invoke(null)
                         }) {
                             Text("Notify".uppercase(), style = DMSansBlack36)
+                        }
+                        TextButton(onClick = {
+                            onEdit.invoke(it)
+                            onItemSelected.invoke(null)
+                        }) {
+                            Text("Edit".uppercase(), style = DMSansBlack36)
                         }
                     }
                 }

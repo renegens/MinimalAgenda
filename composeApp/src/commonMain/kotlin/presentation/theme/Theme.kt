@@ -1,21 +1,33 @@
 package presentation.theme
 
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import domain.model.AppColor
+import domain.model.AppThemeMode
+import platform.setStatusBarTheme
+import presentation.components.PaperBackground
 
 @Composable
 fun AppTheme(
-    darkTheme: Boolean,
+    appThemeMode: AppThemeMode,
+    appColor: AppColor,
     content: @Composable () -> Unit
 ) {
-    val colorScheme = when {
-        darkTheme -> DarkColorScheme
-        else -> LightColorScheme
+
+    val darkColorScheme = getDarkColorScheme(primaryColor = appColor.color)
+    val lightColorScheme = getLightColorScheme(primaryColor = appColor.color)
+
+    val colorScheme = when (appThemeMode) {
+        AppThemeMode.DefaultDark -> darkColorScheme
+        AppThemeMode.DefaultLight -> lightColorScheme
+        AppThemeMode.FollowSystem -> if (isSystemInDarkTheme()) darkColorScheme else lightColorScheme
     }
 
-    MaterialTheme(
-        colorScheme = colorScheme,
-        typography = typography,
-        content = content
-    )
+    setStatusBarTheme(appThemeMode)
+    PaperBackground(appThemeMode) {
+        MaterialTheme(
+            colorScheme = colorScheme, typography = typography, content = content
+        )
+    }
 }

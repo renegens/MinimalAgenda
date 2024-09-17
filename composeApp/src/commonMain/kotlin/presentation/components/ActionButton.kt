@@ -4,6 +4,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.wrapContentHeight
@@ -13,22 +14,34 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
+import platform.CalendarPermissionHandler
+import presentation.screens.calendar.CalendarContract.Section
 import presentation.theme.CustomColor
+import presentation.theme.DMSans18Regular
 import presentation.theme.DMSansBlack36
 
 @Composable
 fun ActionButton(
+    currentSection: Section,
     nowClicked: () -> Unit,
     toggleActive: () -> Unit,
     onAdd: () -> Unit,
-    showAll: Boolean
+    showAll: Boolean,
+    calendarPermission: CalendarPermissionHandler.State
 ) {
+    if (currentSection == Section.Settings) return
+    val haptic = LocalHapticFeedback.current
+
     Column(modifier = Modifier.padding(end = 16.dp)) {
         Box(
             modifier = Modifier.size(56.dp)
                 .background(color = CustomColor.Black_500, shape = CircleShape)
-                .clickable { toggleActive.invoke() },
+                .clickable {
+                    haptic.addHapticFeedback()
+                    toggleActive.invoke()
+                },
             contentAlignment = Alignment.Center
         ) {
             val label = if (showAll) "Active" else "All"
@@ -42,7 +55,10 @@ fun ActionButton(
         Box(
             modifier = Modifier.size(56.dp)
                 .background(color = MaterialTheme.colorScheme.primary, shape = CircleShape)
-                .clickable { nowClicked.invoke() },
+                .clickable {
+                    haptic.addHapticFeedback()
+                    nowClicked.invoke()
+                },
             contentAlignment = Alignment.Center
 
         ) {
@@ -53,19 +69,23 @@ fun ActionButton(
                 modifier = Modifier.wrapContentHeight(unbounded = true)
             )
         }
-        // TODO: enable with add
-//        Box(
-//            modifier = Modifier.size(56.dp)
-//                .background(color = CustomColor.Black_200, shape = CircleShape)
-//                .clickable { onAdd.invoke() },
-//            contentAlignment = Alignment.Center
-//        ) {
-//            Text(
-//                "+",
-//                color = CustomColor.White_500,
-//                style = DMSans18Regular,
-//                modifier = Modifier.wrapContentHeight(unbounded = true).offset(y = (-2).dp)
-//            )
-//        }
+        if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
+            Box(
+                modifier = Modifier.size(56.dp)
+                    .background(color = CustomColor.Black_500, shape = CircleShape)
+                    .clickable {
+                        haptic.addHapticFeedback()
+                        onAdd.invoke()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    "+",
+                    color = CustomColor.White_500,
+                    style = DMSans18Regular,
+                    modifier = Modifier.wrapContentHeight(unbounded = true).offset(y = (-2).dp)
+                )
+            }
+        }
     }
 }

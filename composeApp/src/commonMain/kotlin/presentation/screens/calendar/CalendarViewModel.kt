@@ -1,6 +1,7 @@
 package presentation.screens.calendar
 
 import androidx.lifecycle.viewModelScope
+import domain.model.AgendaEvent
 import domain.use_case.CalendarGenerator
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
@@ -8,6 +9,7 @@ import presentation.screens.calendar.CalendarContract.*
 import domain.use_case.GetAllEventsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
+import extensions.guardPremium
 import platform.CalendarPermissionHandler
 
 class CalendarViewModel(
@@ -15,7 +17,7 @@ class CalendarViewModel(
     private val permissionHandler: CalendarPermissionHandler,
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
-    private val scheduleNotificationUseCase: ScheduleNotificationUseCase
+    private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
 ) :
     BaseViewModel<Event, State, Effect>() {
 
@@ -54,6 +56,8 @@ class CalendarViewModel(
                 Section.Year -> setEffect {
                     Effect.ScrollYearToToday
                 }
+
+                Section.Settings -> {}
             }
 
             //todo remove the index from here?
@@ -87,28 +91,22 @@ class CalendarViewModel(
                 }
             }
 
-            is Event.ToggleEventVisibility -> viewModelScope.launch {
-                when (val state = toggleEventVisibilityUseCase(agendaEvent = event.agendaEvent)) {
-                    is ToggleEventVisibilityUseCase.State.Success -> {
-                        val events = uiState.value.agendaEvents.toMutableList()
-                        events.remove(event.agendaEvent)
-                        events.add(state.agendaEvent)
-                        setState { copy(agendaEvents = events) }
-                    }
-                }
-            }
+            is Event.ToggleEventVisibility ->
+                guardPremium(
+                    onSubscribed = { toggleEventVisibility(event.agendaEvent) },
+                    onPaywall = { setEffect { Effect.ShowPaywall } }
+                )
 
-            is Event.Notify -> viewModelScope.launch {
-                when (scheduleNotificationUseCase(agendaEvent = event.agendaEvent)) {
-                    ScheduleNotificationUseCase.State.Fail -> {}
-                    ScheduleNotificationUseCase.State.PermissionMissing -> setEffect {
-                        Effect.NotificationPermissionMissing
-                    }
+            is Event.Notify -> guardPremium(
+                onSubscribed = { notifyEvent(event.agendaEvent) },
+                onPaywall = { setEffect { Effect.ShowPaywall } }
+            )
 
-                    ScheduleNotificationUseCase.State.Success -> {}
-                }
-            }
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
+            is Event.OnEditEvent -> guardPremium(
+                onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
+                onPaywall = { setEffect { Effect.ShowPaywall } }
+            )
         }
     }
 
@@ -120,6 +118,33 @@ class CalendarViewModel(
                     days = calendarGenerator.calendar,
                     calendarPermission = CalendarPermissionHandler.State.FullAccess
                 )
+            }
+        }
+    }
+
+    private fun toggleEventVisibility(agendaEvent: AgendaEvent) {
+        viewModelScope.launch {
+            when (val state =
+                toggleEventVisibilityUseCase(agendaEvent = agendaEvent)) {
+                is ToggleEventVisibilityUseCase.State.Success -> {
+                    val events = uiState.value.agendaEvents.toMutableList()
+                    events.remove(agendaEvent)
+                    events.add(state.agendaEvent)
+                    setState { copy(agendaEvents = events) }
+                }
+            }
+        }
+    }
+
+    private fun notifyEvent(agendaEvent: AgendaEvent) {
+        viewModelScope.launch {
+            when (scheduleNotificationUseCase(agendaEvent = agendaEvent)) {
+                ScheduleNotificationUseCase.State.Fail -> {}
+                ScheduleNotificationUseCase.State.PermissionMissing -> setEffect {
+                    Effect.NotificationPermissionMissing
+                }
+
+                ScheduleNotificationUseCase.State.Success -> {}
             }
         }
     }

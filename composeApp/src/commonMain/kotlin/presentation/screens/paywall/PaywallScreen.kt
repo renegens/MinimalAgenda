@@ -2,7 +2,6 @@ package presentation.screens.paywall
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,9 +32,9 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.AppAlertDialog
 import presentation.components.DotsPulsing
+import presentation.components.clickableWithOpaqueText
 import presentation.screens.paywall.PaywallContract.Effect
 import presentation.screens.paywall.PaywallContract.Event
-import presentation.theme.CustomColor
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSans24Black100
 import presentation.theme.DMSans24Medium120
@@ -43,9 +42,7 @@ import presentation.theme.DMSans24Medium60
 import presentation.theme.DMSansBlack250
 
 @Composable
-fun PaywallScreen(
-    onPurchaseComplete: () -> Unit,
-) {
+fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
     val viewModel: PaywallViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
 
@@ -71,14 +68,22 @@ fun PaywallScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Spacer(modifier = Modifier.height(32.dp))
             // Header
             Text(
-                text = "Unlock Papely",
+                text = "Cancel",
+                style = DMSans24Medium60,
+                fontSize = 16.sp,
+                textAlign = TextAlign.Start,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.clickableWithOpaqueText(onCancel).align(Alignment.Start)
+            )
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "Unlock Papely Premium",
                 style = DMSansBlack250,
                 fontSize = 30.sp,
                 letterSpacing = (-1).sp,
-                color = MaterialTheme.colorScheme.tertiary
+                color = MaterialTheme.colorScheme.tertiary,
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -90,11 +95,19 @@ fun PaywallScreen(
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 BenefitItem("See only important events")
-                BenefitItem("Clean, eye-friendly interface")
-                BenefitItem("Event notification without hassle")
-                BenefitItem("Integrated with your calendars")
-                BenefitItem("Clutter-free daily view")
-                BenefitItem("Less stress and fewer notifications")
+                BenefitItem("Set alert time")
+                BenefitItem("Add and Edit Events")
+                BenefitItem("Pick your favorite theme color")
+                BenefitItem("Private Notifications")
+                BenefitItem("Support Papely Development.")
+                Text(
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Start,
+                    text = "Papely is made by one person with no investors or corporate owner.",
+                    style = DMSans24Medium60,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.secondary
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -171,12 +184,6 @@ fun PaywallScreen(
 
             // Call to Action Button
 
-            val colors = if (isSystemInDarkTheme()) {
-                CustomColor.White_500 to CustomColor.Black_900
-            } else {
-                CustomColor.Black_900 to CustomColor.White_500
-            }
-
             Button(
                 onClick = {
                     viewModel.setEvent(Event.OnPurchaseItemClicked(state.offerings.first()))
@@ -186,13 +193,13 @@ fun PaywallScreen(
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 10.dp,
                 ),
-                colors = ButtonDefaults.buttonColors(containerColor = colors.first)
+                colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.inversePrimary)
             ) {
                 Text(
                     text = "Start Your Free Trial",
                     style = DMSans24Black100,
                     fontSize = 20.sp,
-                    color = colors.second
+                    color = MaterialTheme.colorScheme.inverseSurface
                 )
             }
             Text(
@@ -205,7 +212,7 @@ fun PaywallScreen(
             Spacer(modifier = Modifier.height(24.dp))
 
             // Terms and Conditions
-            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),) {
+            Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
                 Text(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Start,
