@@ -10,7 +10,7 @@ class AppContract {
 
     data class State(
         val shouldReloadEvents: Int = 0,
-        val appTheme: AppTheme? = null,
+        val appTheme: AppTheme = AppTheme.Default
     ) : UiState
 
     sealed class Effect : UiEffect

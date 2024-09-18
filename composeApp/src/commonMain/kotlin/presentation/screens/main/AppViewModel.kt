@@ -2,10 +2,8 @@ package presentation.screens.main
 
 import androidx.lifecycle.viewModelScope
 import com.revenuecat.purchases.kmp.Purchases
-import domain.model.AppColor
-import domain.model.AppTheme
-import domain.model.AppThemeMode
 import domain.use_case.AppThemeListenerUseCase
+import extensions.guardPremium
 import presentation.base.BaseViewModel
 import presentation.screens.main.AppContract.*
 import extensions.initializeRevenueCat
@@ -40,22 +38,20 @@ class AppViewModel(
                     onSave = { setState { copy(shouldReloadEvents = uiState.value.shouldReloadEvents + 1) } })
             }
 
-            Event.NewEvent -> {
-                modalPresenter.presentAddEvent(
-                    appTheme = uiState.value.appTheme ?: AppTheme(
-                        appColor = AppColor.Red,
-                        appThemeMode = AppThemeMode.FollowSystem
-                    ),
-                    onCompletion = { setState { copy(shouldReloadEvents = uiState.value.shouldReloadEvents + 1) } })
-            }
+            Event.NewEvent ->
+                guardPremium(
+                    onSubscribed = ::showNewEventScreen,
+                    onPaywall = { setEvent(Event.NotEligible) })
 
-            Event.NotEligible -> modalPresenter.presentPaywall(appTheme = uiState.value.appTheme
-                ?: AppTheme(
-                    appColor = AppColor.Red,
-                    appThemeMode = AppThemeMode.FollowSystem
-                ),
-                {}
-            )
+            Event.NotEligible -> {
+                modalPresenter.presentPaywall(appTheme = uiState.value.appTheme, onCompletion = {})
+            }
         }
+    }
+
+    private fun showNewEventScreen() {
+        modalPresenter.presentAddEvent(
+            appTheme = uiState.value.appTheme,
+            onCompletion = { setState { copy(shouldReloadEvents = uiState.value.shouldReloadEvents + 1) } })
     }
 }

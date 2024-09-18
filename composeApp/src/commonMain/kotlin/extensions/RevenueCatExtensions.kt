@@ -22,7 +22,7 @@ fun initializeRevenueCat(debug: Boolean = false) {
 }
 
 fun guardPremium(onSubscribed: () -> Unit, onPaywall: () -> Unit) {
-    Purchases.sharedInstance.getCustomerInfo(onError = { error -> onPaywall.invoke() },
+    Purchases.sharedInstance.getCustomerInfo(onError = { onPaywall.invoke() },
         onSuccess = { customerInfo ->
             if (customerInfo.isSubscribed()) {
                 onSubscribed.invoke()

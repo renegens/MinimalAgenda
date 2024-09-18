@@ -1,12 +1,9 @@
 package presentation.screens.calendar
 
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -15,15 +12,12 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.unit.dp
 import androidx.lifecycle.Lifecycle
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AppThemeMode
-import extensions.guardPremium
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.ActionButton
@@ -111,7 +105,24 @@ fun CalendarScreen(
         viewModel.setEvent(Event.LoadData)
     }
 
-    Box(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
+    Scaffold(
+        modifier = Modifier.statusBarsPadding(),
+        floatingActionButton = {
+            ActionButton(
+                currentSection = Section.fromInt(pagerState.currentPage),
+                calendarPermission = state.calendarPermission,
+                showAll = state.showAll,
+                nowClicked = {
+                    viewModel.setEvent(
+                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                    )
+                },
+                toggleActive = {
+                    viewModel.setEvent(Event.ToggleActive)
+                },
+                onAdd = onAddEvent
+            )
+        }) {
         if (shouldShowNotificationPermission) {
             NotificationPermissionDialog(onDismissRequest = {
                 shouldShowNotificationPermission = false
@@ -161,24 +172,6 @@ fun CalendarScreen(
 
                 CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
             }
-        }
-        Row(
-            modifier = Modifier.align(Alignment.BottomEnd).padding(vertical = 64.dp),
-        ) {
-            ActionButton(currentSection = Section.fromInt(pagerState.currentPage),
-                calendarPermission = state.calendarPermission,
-                showAll = state.showAll,
-                nowClicked = {
-                    viewModel.setEvent(
-                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                    )
-                },
-                toggleActive = {
-                    viewModel.setEvent(Event.ToggleActive)
-                },
-                onAdd = {
-                    guardPremium(onSubscribed = onAddEvent, onPaywall = notEligible)
-                })
         }
     }
 }

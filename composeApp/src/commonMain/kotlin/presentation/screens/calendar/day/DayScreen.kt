@@ -108,7 +108,11 @@ fun DayScreen(
                         onNotify = onNotify,
                         showAll = showAll,
                         selectedItem = selectedAgendaItem,
-                        onItemSelected = { selectedAgendaItem = it },
+                        onItemSelected = {
+                            if (listState.isScrollInProgress.not()) {
+                                selectedAgendaItem = it
+                            }
+                        },
                         onEdit = onEdit
                     )
                     Spacer(modifier = Modifier.height(32.dp))
