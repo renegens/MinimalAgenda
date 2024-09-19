@@ -35,7 +35,7 @@ class AppViewModel(
         when (event) {
             is Event.EditExternal -> viewModelScope.launch {
                 eventEditViewHandler.openEdit(agendaEvent = event.agendaEvent,
-                    onSave = { setState { copy(shouldReloadEvents = uiState.value.shouldReloadEvents + 1) } })
+                    onSave = { setState { copy(forceEventLoad = uiState.value.forceEventLoad + 1) } })
             }
 
             Event.NewEvent ->
@@ -52,6 +52,6 @@ class AppViewModel(
     private fun showNewEventScreen() {
         modalPresenter.presentAddEvent(
             appTheme = uiState.value.appTheme,
-            onCompletion = { setState { copy(shouldReloadEvents = uiState.value.shouldReloadEvents + 1) } })
+            onCompletion = { setState { copy(forceEventLoad = uiState.value.forceEventLoad + 1) } })
     }
 }

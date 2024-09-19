@@ -38,7 +38,7 @@ fun CalendarScreen(
     onAddEvent: () -> Unit,
     onEditEvent: (AgendaEvent) -> Unit,
     notEligible: () -> Unit,
-    reloadEvents: Int
+    forceEventLoad: Int
 ) {
     val viewModel: CalendarViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
@@ -101,8 +101,8 @@ fun CalendarScreen(
         }
     }
 
-    LaunchedEffect(reloadEvents) {
-        if (reloadEvents > 0) {
+    LaunchedEffect(forceEventLoad) {
+        if (forceEventLoad > 0) {
             viewModel.setEvent(Event.LoadData)
         }
     }

@@ -18,7 +18,7 @@ fun App() {
             appThemeMode = state.appTheme.appThemeMode, appColor = state.appTheme.appColor
         ) {
             CalendarScreen(appThemeMode = state.appTheme.appThemeMode,
-                reloadEvents = state.shouldReloadEvents,
+                forceEventLoad = state.forceEventLoad,
                 onAddEvent = {
                     viewModel.setEvent(AppContract.Event.NewEvent)
                 },

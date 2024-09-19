@@ -9,7 +9,7 @@ import presentation.base.UiState
 class AppContract {
 
     data class State(
-        val shouldReloadEvents: Int = 0,
+        val forceEventLoad: Int = 0,
         val appTheme: AppTheme = AppTheme.Default
     ) : UiState
 
