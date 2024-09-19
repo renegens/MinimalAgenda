@@ -102,7 +102,9 @@ fun CalendarScreen(
     }
 
     LaunchedEffect(reloadEvents) {
-        viewModel.setEvent(Event.LoadData)
+        if (reloadEvents > 0) {
+            viewModel.setEvent(Event.LoadData)
+        }
     }
 
     Scaffold(
