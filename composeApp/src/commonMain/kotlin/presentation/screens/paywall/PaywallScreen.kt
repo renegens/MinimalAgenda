@@ -26,8 +26,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.revenuecat.purchases.kmp.models.price
-import com.revenuecat.purchases.kmp.storeProduct
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.AppAlertDialog
@@ -75,7 +73,13 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
                 fontSize = 16.sp,
                 textAlign = TextAlign.Start,
                 color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.clickableWithOpaqueText(onCancel).align(Alignment.Start)
+                modifier = Modifier.clickableWithOpaqueText {
+                    if (state.isProcessing) {
+                        return@clickableWithOpaqueText
+                    } else {
+                        onCancel.invoke()
+                    }
+                }.align(Alignment.Start)
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(

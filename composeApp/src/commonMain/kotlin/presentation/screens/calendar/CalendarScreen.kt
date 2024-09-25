@@ -13,6 +13,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.Lifecycle
 import domain.model.AgendaEvent
@@ -72,7 +73,7 @@ fun CalendarScreen(
                 Effect.ScrollYearToToday -> isScrolledToYear = !isScrolledToYear
                 is Effect.GoToDay -> {
                     pagerState.animateScrollToPage(page = Section.Day.position)
-                    dayScrollPosition = it.index
+                    dayScrollPosition = it.epochDay
                 }
 
                 is Effect.GoToMonth -> {
@@ -108,6 +109,7 @@ fun CalendarScreen(
     }
 
     Scaffold(
+        containerColor = Color.Transparent,
         modifier = Modifier.statusBarsPadding(),
         floatingActionButton = {
             ActionButton(
@@ -133,11 +135,10 @@ fun CalendarScreen(
         HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
             when (page) {
                 CalendarContract.Section.Day.position -> DayScreen(appThemeMode = appThemeMode,
-                    days = state.days,
+                    items = state.flatDaysAndEvents,
                     currentDate = state.currentDate,
                     onNowClicked = isScrolledToToday,
                     scrollToDay = dayScrollPosition,
-                    eventsByDay = state.agendaEvents.groupBy { it.epochDay!! },
                     calendarPermission = state.calendarPermission,
                     showAll = state.showAll,
                     onNotify = { viewModel.setEvent(Event.Notify(it)) },

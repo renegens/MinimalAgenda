@@ -103,7 +103,9 @@ fun CalendarDays(
                 val hasEvent = events.hasEvents(epochDay = gridItem.epochDay, showAll = showAll)
 
                 Box(modifier = Modifier.height(40.dp).width(48.dp)
-                    .clickable { onDayClicked.invoke(gridItem.epochDay) }) {
+                    .clickable {
+                        onDayClicked.invoke(gridItem.epochDay)
+                    }) {
                     Text(
                         text = gridItem.dayInMonth.toString(),
                         style = DMSans18SemiBold,

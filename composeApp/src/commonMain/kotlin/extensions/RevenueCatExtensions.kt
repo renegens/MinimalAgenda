@@ -4,9 +4,6 @@ import com.revenuecat.purchases.kmp.CustomerInfo
 import com.revenuecat.purchases.kmp.LogLevel
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.PurchasesConfiguration
-import com.revenuecat.purchases.kmp.entitlements
-import com.revenuecat.purchases.kmp.get
-import com.revenuecat.purchases.kmp.isActive
 
 private val entitlementIdentifier = "Unlocked"
 val REVENUECAT_API_KEY = "appl_yNbwOFpPkxlEQiXtVZmDQpMsMBt"

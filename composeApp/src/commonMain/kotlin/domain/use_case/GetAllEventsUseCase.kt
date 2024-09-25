@@ -1,8 +1,8 @@
 package domain.use_case
 
 import data.calendar.toEvent
-import data.local.HiddenEventEntity
 import domain.model.AgendaEvent
+import domain.model.DayListViewType
 import kotlinx.datetime.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.offsetIn
@@ -11,26 +11,48 @@ import repository.HiddenEventsRepository
 
 class GetAllEventsUseCase(
     private val calendarRepository: CalendarRepository,
-    private val hiddenEventsRepository: HiddenEventsRepository
+    private val hiddenEventsRepository: HiddenEventsRepository,
+    private val calendarGenerator: CalendarGenerator
 ) {
 
     sealed class State {
         class Success(
             val agendaEvents: List<AgendaEvent>,
+            val dayListViewTypes: List<DayListViewType>
         ) : State()
     }
 
     suspend operator fun invoke(): State {
+        val flatDayWithEvents = mutableListOf<DayListViewType>()
         val allEvents = calendarRepository.getAllEvents().map { it.toEvent() }
-        val timeOffset = getTimeZoneOffsetInSeconds()
         val hiddenEvents = hiddenEventsRepository.getEvents()
-        val groupedHiddenEvents = hiddenEvents.groupBy { it.epochDay }
-        allEvents.map { agendaEvent ->
-            agendaEvent.epochDay = secondsToEpochDays(agendaEvent.startTime, timeOffset)
-            agendaEvent.isHidden =
-                groupedHiddenEvents[agendaEvent.epochDay]?.any { it.eventId == agendaEvent.id } == true
+        val timeOffset = getTimeZoneOffsetInSeconds()
+
+        // Create a lookup set of hidden event IDs by epochDay for faster checks
+        val hiddenEventIdsByEpochDay = hiddenEvents.groupBy { it.epochDay }
+            .mapValues { entry -> entry.value.map { it.eventId }.toSet() }  // Set for O(1) lookups
+
+        // Iterate through events and update them in a single loop
+        allEvents.forEach { agendaEvent ->
+            val epochDay = secondsToEpochDays(agendaEvent.startTime, timeOffset)
+            agendaEvent.epochDay = epochDay
+
+            // Check if the event is hidden by looking up in the set
+            agendaEvent.isHidden = hiddenEventIdsByEpochDay[epochDay]?.contains(agendaEvent.id) == true
         }
-        return State.Success(agendaEvents = allEvents)
+
+        val grouped = allEvents.groupBy { it.epochDay }
+        calendarGenerator.calendar.forEach { calendarItem ->
+            flatDayWithEvents.add(DayListViewType.Header(calendarItem))
+            grouped[calendarItem.epochDay]?.let { events ->
+                events.sortedBy { it.startTime }.forEach { event ->
+                    flatDayWithEvents.add(DayListViewType.Event(event))
+                }
+            }
+            flatDayWithEvents.add(DayListViewType.Divider(calendarItem.epochDay))
+        }
+
+        return State.Success(agendaEvents = allEvents, dayListViewTypes = flatDayWithEvents)
     }
 
     private fun secondsToEpochDays(seconds: Long, timeZoneOffsetInSeconds: Int): Int {

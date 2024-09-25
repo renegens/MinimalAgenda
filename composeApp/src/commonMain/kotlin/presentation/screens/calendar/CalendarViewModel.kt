@@ -9,6 +9,7 @@ import presentation.screens.calendar.CalendarContract.*
 import domain.use_case.GetAllEventsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
+import domain.model.DayListViewType
 import extensions.guardPremium
 import platform.CalendarPermissionHandler
 
@@ -18,8 +19,7 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-) :
-    BaseViewModel<Event, State, Effect>() {
+) : BaseViewModel<Event, State, Effect>() {
 
     private fun loadData() {
         when (val permissionState = permissionHandler.getPermissionState()) {
@@ -27,13 +27,11 @@ class CalendarViewModel(
                 loadEvents()
             }
 
-            else ->
-                setState {
-                    State(
-                        days = calendarGenerator.calendar,
-                        calendarPermission = permissionState
-                    )
-                }
+            else -> setState {
+                State(
+                    days = calendarGenerator.calendar, calendarPermission = permissionState
+                )
+            }
         }
     }
 
@@ -60,53 +58,40 @@ class CalendarViewModel(
                 Section.Settings -> {}
             }
 
-            //todo remove the index from here?
-            is Event.OnDayClicked -> {
-                setEffect {
-                    Effect.GoToDay(index = getIndex(event.epochDay))
-                }
+            is Event.OnDayClicked -> setEffect {
+                Effect.GoToDay(epochDay = event.epochDay)
             }
 
-            is Event.OnMonthClicked -> {
-                setEffect {
-                    Effect.GoToMonth(event.agendaMonthYear)
-                }
+            is Event.OnMonthClicked -> setEffect {
+                Effect.GoToMonth(event.agendaMonthYear)
             }
 
-            is Event.OnYearClicked -> {
-                setEffect { Effect.GoToYear(event.agendaYear) }
-            }
+            is Event.OnYearClicked -> setEffect { Effect.GoToYear(event.agendaYear) }
 
-            Event.OnRequestCalendarPermissionClicked -> {
-                viewModelScope.launch {
-                    when (val state = permissionHandler.requestCalendarPermission()) {
-                        CalendarPermissionHandler.State.FullAccess -> loadEvents()
-                        else -> setState {
-                            copy(
-                                agendaEvents = emptyList(),
-                                calendarPermission = state
-                            )
-                        }
+            Event.OnRequestCalendarPermissionClicked -> viewModelScope.launch {
+                when (val state = permissionHandler.requestCalendarPermission()) {
+                    CalendarPermissionHandler.State.FullAccess -> loadEvents()
+                    else -> setState {
+                        copy(
+                            agendaEvents = emptyList(), calendarPermission = state
+                        )
                     }
                 }
             }
 
-            is Event.ToggleEventVisibility ->
-                guardPremium(
-                    onSubscribed = { toggleEventVisibility(event.agendaEvent) },
-                    onPaywall = { setEffect { Effect.ShowPaywall } }
+            is Event.ToggleEventVisibility -> guardPremium(onSubscribed = {
+                toggleEventVisibility(
+                    event.agendaEvent
                 )
+            },
+                onPaywall = { setEffect { Effect.ShowPaywall } })
 
-            is Event.Notify -> guardPremium(
-                onSubscribed = { notifyEvent(event.agendaEvent) },
-                onPaywall = { setEffect { Effect.ShowPaywall } }
-            )
+            is Event.Notify -> guardPremium(onSubscribed = { notifyEvent(event.agendaEvent) },
+                onPaywall = { setEffect { Effect.ShowPaywall } })
 
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
-            is Event.OnEditEvent -> guardPremium(
-                onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
-                onPaywall = { setEffect { Effect.ShowPaywall } }
-            )
+            is Event.OnEditEvent -> guardPremium(onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
+                onPaywall = { setEffect { Effect.ShowPaywall } })
         }
     }
 
@@ -114,6 +99,7 @@ class CalendarViewModel(
         when (val state = getAllEventsUseCase()) {
             is GetAllEventsUseCase.State.Success -> setState {
                 State(
+                    flatDaysAndEvents = state.dayListViewTypes,
                     agendaEvents = state.agendaEvents,
                     days = calendarGenerator.calendar,
                     calendarPermission = CalendarPermissionHandler.State.FullAccess
@@ -124,13 +110,14 @@ class CalendarViewModel(
 
     private fun toggleEventVisibility(agendaEvent: AgendaEvent) {
         viewModelScope.launch {
-            when (val state =
-                toggleEventVisibilityUseCase(agendaEvent = agendaEvent)) {
+            when (val state = toggleEventVisibilityUseCase(agendaEvent = agendaEvent)) {
                 is ToggleEventVisibilityUseCase.State.Success -> {
-                    val events = uiState.value.agendaEvents.toMutableList()
-                    events.remove(agendaEvent)
-                    events.add(state.agendaEvent)
-                    setState { copy(agendaEvents = events) }
+                    val events = uiState.value.flatDaysAndEvents.toMutableList()
+                    val index = events.indexOfFirst { it is DayListViewType.Event && it.event == agendaEvent }
+                    events.removeAt(index)
+                    events.add(index, DayListViewType.Event(state.agendaEvent))
+
+                    setState { copy(flatDaysAndEvents = events) }
                 }
             }
         }
@@ -148,7 +135,4 @@ class CalendarViewModel(
             }
         }
     }
-
-    private fun getIndex(epochDay: Int): Int =
-        uiState.value.days.indexOfFirst { it.epochDay == epochDay }
 }

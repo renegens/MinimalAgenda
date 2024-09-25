@@ -28,11 +28,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.dp
-import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AppThemeMode
+import domain.model.DayListViewType
 import extensions.scrollToNowIfNeeded
 import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
@@ -47,9 +48,8 @@ import presentation.theme.DMSansBlack36
 
 @Composable
 fun DayScreen(
+    items: List<DayListViewType>,
     appThemeMode: AppThemeMode,
-    days: List<AgendaDay>,
-    eventsByDay: Map<Int, List<AgendaEvent>>,
     onNowClicked: Boolean,
     scrollToDay: Int,
     currentDate: LocalDate,
@@ -60,10 +60,10 @@ fun DayScreen(
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit
 ) {
-    if (days.isEmpty()) return
+    if (items.isEmpty()) return
 
     val currentEpochDay = currentDate.toEpochDays()
-    val todayIndex by mutableStateOf(days.indexOfFirst { it.epochDay == currentEpochDay })
+    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay))
 
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex)
 
@@ -77,46 +77,72 @@ fun DayScreen(
 
     LaunchedEffect(scrollToDay) {
         if (scrollToDay > 0) {
-            listState.scrollToItem(scrollToDay)
+            val index = items.findIndexOf(scrollToDay)
+            listState.scrollToItem(index)
         }
     }
-    var selectedAgendaItem by remember { mutableStateOf<AgendaEvent?>(null) }
 
-    LazyColumn(
-        state = listState, modifier = Modifier.fillMaxSize()
-    ) {
+    var selectedItem by remember { mutableStateOf<AgendaEvent?>(null) }
+    val hapticFeedback = LocalHapticFeedback.current
+    val eventsByEpochDay: Map<Int, List<DayListViewType.Event>> =
+        items.filterIsInstance<DayListViewType.Event>().groupBy { it.event.epochDay!! }
 
+    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
         CalendarPermission(
             onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
         )
 
-        itemsIndexed(items = days, key = { index, day -> day.epochDay }) { index, day ->
-            val isToday = day.epochDay == currentEpochDay
+        itemsIndexed(
+            items = items,
+            contentType = { _, item ->
+                when (item) {
+                    is DayListViewType.Header -> "header"
+                    is DayListViewType.Divider -> "divider"
+                    is DayListViewType.Event -> "event"
+                }
+            },
+        ) { _, item ->
             PaperBackground(appThemeMode = appThemeMode) {
-                Column {
-                    Spacer(modifier = Modifier.height(24.dp))
-                    DayHeader(
-                        day = day.dayInWeek.short,
-                        dayInMonth = day.dayOfMonth,
-                        month = day.agendaMonthYear.agendaMonth.number,
-                        isToday = isToday
-                    )
-                    Spacer(modifier = Modifier.height(16.dp))
-                    Entries(
-                        agendaEvents = eventsByDay[day.epochDay] ?: emptyList(),
-                        onHide = onHide,
-                        onNotify = onNotify,
-                        showAll = showAll,
-                        selectedItem = selectedAgendaItem,
-                        onItemSelected = {
-                            if (listState.isScrollInProgress.not()) {
-                                selectedAgendaItem = it
-                            }
-                        },
-                        onEdit = onEdit
-                    )
-                    Spacer(modifier = Modifier.height(32.dp))
-                    SectionDivider(isCurrent = isToday)
+                when (item) {
+                    is DayListViewType.Header -> {
+                        Column {
+                            Spacer(modifier = Modifier.height(24.dp))
+                            DayHeader(
+                                day = item.agendaDay.dayInWeek.short,
+                                dayInMonth = item.agendaDay.dayOfMonth,
+                                month = item.agendaDay.agendaMonthYear.agendaMonth.number,
+                                isToday = item.agendaDay.epochDay == currentEpochDay
+                            )
+                            Spacer(modifier = Modifier.height(16.dp))
+                            EmptyDay(
+                                eventsByEpochDay = eventsByEpochDay,
+                                epochDay = item.agendaDay.epochDay,
+                                showAll = showAll
+                            )
+                        }
+                    }
+
+                    is DayListViewType.Event -> {
+                        Event(
+                            event = item.event,
+                            onNotify = onNotify,
+                            onHide = onHide,
+                            onEdit = onEdit,
+                            selectedItem = selectedItem,
+                            onItemSelected = {
+                                selectedItem = it
+                            },
+                            showAll = showAll,
+                            hapticFeedback = hapticFeedback
+                        )
+                    }
+
+                    is DayListViewType.Divider -> {
+                        Column {
+                            Spacer(modifier = Modifier.height(32.dp))
+                            SectionDivider(isCurrent = item.epochDay == currentEpochDay)
+                        }
+                    }
                 }
             }
         }
@@ -124,81 +150,88 @@ fun DayScreen(
 }
 
 @Composable
-fun Entries(
-    agendaEvents: List<AgendaEvent>,
+fun EmptyDay(eventsByEpochDay: Map<Int, List<DayListViewType.Event>>, epochDay: Int, showAll: Boolean) {
+    if (eventsByEpochDay[epochDay] == null) {
+        Spacer(modifier = Modifier.height(16.dp))
+        EmptyMessage()
+    } else {
+
+        if (showAll) {
+            return
+        }
+
+        val hasAllEventsHidden =
+            eventsByEpochDay[epochDay]?.none { it.event.isHidden.not() }
+        if (hasAllEventsHidden == true) {
+            EmptyMessage()
+        }
+    }
+}
+
+@Composable
+fun Event(
+    event: AgendaEvent,
     onNotify: (AgendaEvent) -> Unit,
     onHide: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
-    showAll: Boolean
+    showAll: Boolean,
+    hapticFeedback: HapticFeedback
 ) {
-    val items = if (showAll) {
-        agendaEvents
-    } else {
-        agendaEvents.filterNot { it.isHidden }
-    }
+    if (showAll.not() && event.isHidden) return
 
-    if (items.isEmpty()) {
-        EmptyDay()
-        return
-    }
-    val haptic = LocalHapticFeedback.current
-
-    items.sortedBy { it.startTime }.forEach {
-        Row(
-            modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 16.dp)
-        ) {
-            Time(agendaEvent = it, showAll = showAll)
-            Column(
-                modifier = Modifier.fillMaxWidth().background(
-                    color = if (selectedItem == it) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
-                ).clickable {
-                    haptic.addHapticFeedback()
-                    if (selectedItem == it) {
-                        onItemSelected.invoke(null)
-                    } else {
-                        onItemSelected.invoke(it)
-                    }
+    Row(
+        modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 16.dp)
+    ) {
+        Time(agendaEvent = event, showAll = showAll)
+        Column(
+            modifier = Modifier.fillMaxWidth().background(
+                color = if (selectedItem == event) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
+            ).clickable {
+                hapticFeedback.addHapticFeedback()
+                if (selectedItem == event) {
+                    onItemSelected.invoke(null)
+                } else {
+                    onItemSelected.invoke(event)
                 }
-            ) {
-                Text(
-                    modifier = Modifier.padding(start = 8.dp),
-                    text = it.title,
-                    style = DMSans18Medium,
-                    color = it.getTextColor(showAll),
-                )
-                AnimatedVisibility(visible = selectedItem == it) {
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                    ) {
-                        TextButton(onClick = {
-                            onHide.invoke(it)
-                            onItemSelected.invoke(null)
-                        }) {
-                            val text = if (it.isHidden) {
-                                "Show"
-                            } else {
-                                "Hide"
-                            }
-                            Text(text.uppercase(), style = DMSansBlack36)
+            }
+        ) {
+            Text(
+                modifier = Modifier.padding(start = 8.dp),
+                text = event.title,
+                style = DMSans18Medium,
+                color = event.getTextColor(false),
+            )
+            AnimatedVisibility(visible = selectedItem == event) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                ) {
+                    TextButton(onClick = {
+                        onHide.invoke(event)
+                        onItemSelected.invoke(null)
+                    }) {
+                        val text = if (event.isHidden) {
+                            "Show"
+                        } else {
+                            "Hide"
                         }
-                        TextButton(onClick = {
-                            onNotify.invoke(it)
-                            onItemSelected.invoke(null)
-                        }) {
-                            Text("Notify".uppercase(), style = DMSansBlack36)
-                        }
-                        TextButton(onClick = {
-                            onEdit.invoke(it)
-                            onItemSelected.invoke(null)
-                        }) {
-                            Text("Edit".uppercase(), style = DMSansBlack36)
-                        }
+                        Text(text.uppercase(), style = DMSansBlack36)
+                    }
+                    TextButton(onClick = {
+                        onNotify.invoke(event)
+                        onItemSelected.invoke(null)
+                    }) {
+                        Text("Notify".uppercase(), style = DMSansBlack36)
+                    }
+                    TextButton(onClick = {
+                        onEdit.invoke(event)
+                        onItemSelected.invoke(null)
+                    }) {
+                        Text("Edit".uppercase(), style = DMSansBlack36)
                     }
                 }
             }
-            Spacer(modifier = Modifier.height(32.dp))
         }
     }
 }
@@ -213,7 +246,7 @@ private fun AgendaEvent.getTextColor(showAll: Boolean): Color {
 }
 
 @Composable
-fun EmptyDay() {
+fun EmptyMessage() {
     Box(
         modifier = Modifier.height(56.dp).fillMaxWidth().padding(horizontal = 24.dp),
         contentAlignment = Alignment.CenterStart
@@ -250,5 +283,11 @@ fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
                 color = agendaEvent.getTextColor(showAll)
             )
         }
+    }
+}
+
+private fun List<DayListViewType>.findIndexOf(epochDay: Int): Int {
+    return indexOfFirst {
+        (it is DayListViewType.Header) && it.agendaDay.epochDay == epochDay
     }
 }

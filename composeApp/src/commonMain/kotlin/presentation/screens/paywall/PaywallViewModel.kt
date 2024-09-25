@@ -5,8 +5,6 @@ import com.revenuecat.purchases.kmp.Package
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.PurchasesError
 import com.revenuecat.purchases.kmp.PurchasesErrorCode
-import com.revenuecat.purchases.kmp.availablePackages
-import com.revenuecat.purchases.kmp.current
 import domain.model.PRIVACY_URL
 import domain.model.TERMS_OF_USE_URL
 import extensions.isSubscribed

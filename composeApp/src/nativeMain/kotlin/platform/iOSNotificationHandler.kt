@@ -2,6 +2,7 @@ package platform
 
 import kotlinx.coroutines.suspendCancellableCoroutine
 import platform.UserNotifications.UNMutableNotificationContent
+import platform.UserNotifications.UNNotificationInterruptionLevel
 import platform.UserNotifications.UNNotificationRequest
 import platform.UserNotifications.UNNotificationSound
 import platform.UserNotifications.UNTimeIntervalNotificationTrigger
@@ -21,6 +22,7 @@ class iOSNotificationHandler : NotificationHandler {
             val content = UNMutableNotificationContent().apply {
                 setTitle(title)
                 setBody(body)
+                setInterruptionLevel(UNNotificationInterruptionLevel.UNNotificationInterruptionLevelTimeSensitive)
                 setSound(UNNotificationSound.defaultSound())
             }
 
