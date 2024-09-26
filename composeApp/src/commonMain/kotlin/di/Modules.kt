@@ -4,6 +4,7 @@ import data.local.HiddenEventsLocalDataSource
 import data.local.SettingsLocalDataSource
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.CalendarGenerator
+import domain.use_case.FlatCalendarViewFactory
 import domain.use_case.GetAllEventsUseCase
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
@@ -42,6 +43,8 @@ val sharedModule = module {
     factoryOf(::SaveSettingsUseCase)
     factoryOf(::ScheduleNotificationUseCase)
     singleOf(::AppThemeListenerUseCase)
+
+    factoryOf(::FlatCalendarViewFactory)
 
     single { HiddenEventsLocalDataSource(get()) }
     single { HiddenEventsRepositoryImpl(get()) }.bind<HiddenEventsRepository>()

@@ -39,12 +39,14 @@ import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
 import presentation.components.DayHeader
-import presentation.components.PaperBackground
+import presentation.components.ScrollablePaperBackground
 import presentation.components.SectionDivider
 import presentation.components.addHapticFeedback
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSansBlack36
+
+private val STICKY_HEADER_INDEX = 1
 
 @Composable
 fun DayScreen(
@@ -63,7 +65,12 @@ fun DayScreen(
     if (items.isEmpty()) return
 
     val currentEpochDay = currentDate.toEpochDays()
-    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay))
+
+    val todayIndex by if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
+        mutableStateOf(items.findIndexOf(currentEpochDay))
+    } else {
+        mutableStateOf(items.findIndexOf(currentEpochDay) - STICKY_HEADER_INDEX)
+    }
 
     val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex)
 
@@ -87,22 +94,25 @@ fun DayScreen(
     val eventsByEpochDay: Map<Int, List<DayListViewType.Event>> =
         items.filterIsInstance<DayListViewType.Event>().groupBy { it.event.epochDay!! }
 
-    LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-        CalendarPermission(
-            onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
-        )
+    ScrollablePaperBackground(appThemeMode, listState) {
 
-        itemsIndexed(
-            items = items,
-            contentType = { _, item ->
-                when (item) {
-                    is DayListViewType.Header -> "header"
-                    is DayListViewType.Divider -> "divider"
-                    is DayListViewType.Event -> "event"
-                }
-            },
-        ) { _, item ->
-            PaperBackground(appThemeMode = appThemeMode) {
+        LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
+
+            CalendarPermission(
+                onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
+            )
+
+            itemsIndexed(
+                items = items,
+                key = { _, item -> item.hashCode() },
+                contentType = { _, item ->
+                    when (item) {
+                        is DayListViewType.Header -> "header"
+                        is DayListViewType.Divider -> "divider"
+                        is DayListViewType.Event -> "event"
+                    }
+                },
+            ) { _, item ->
                 when (item) {
                     is DayListViewType.Header -> {
                         Column {
@@ -150,7 +160,11 @@ fun DayScreen(
 }
 
 @Composable
-fun EmptyDay(eventsByEpochDay: Map<Int, List<DayListViewType.Event>>, epochDay: Int, showAll: Boolean) {
+fun EmptyDay(
+    eventsByEpochDay: Map<Int, List<DayListViewType.Event>>,
+    epochDay: Int,
+    showAll: Boolean
+) {
     if (eventsByEpochDay[epochDay] == null) {
         Spacer(modifier = Modifier.height(16.dp))
         EmptyMessage()

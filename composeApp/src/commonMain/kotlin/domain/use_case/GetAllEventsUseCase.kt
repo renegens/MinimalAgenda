@@ -12,7 +12,7 @@ import repository.HiddenEventsRepository
 class GetAllEventsUseCase(
     private val calendarRepository: CalendarRepository,
     private val hiddenEventsRepository: HiddenEventsRepository,
-    private val calendarGenerator: CalendarGenerator
+    private val flatCalendarViewFactory: FlatCalendarViewFactory
 ) {
 
     sealed class State {
@@ -23,7 +23,6 @@ class GetAllEventsUseCase(
     }
 
     suspend operator fun invoke(): State {
-        val flatDayWithEvents = mutableListOf<DayListViewType>()
         val allEvents = calendarRepository.getAllEvents().map { it.toEvent() }
         val hiddenEvents = hiddenEventsRepository.getEvents()
         val timeOffset = getTimeZoneOffsetInSeconds()
@@ -41,18 +40,9 @@ class GetAllEventsUseCase(
             agendaEvent.isHidden = hiddenEventIdsByEpochDay[epochDay]?.contains(agendaEvent.id) == true
         }
 
-        val grouped = allEvents.groupBy { it.epochDay }
-        calendarGenerator.calendar.forEach { calendarItem ->
-            flatDayWithEvents.add(DayListViewType.Header(calendarItem))
-            grouped[calendarItem.epochDay]?.let { events ->
-                events.sortedBy { it.startTime }.forEach { event ->
-                    flatDayWithEvents.add(DayListViewType.Event(event))
-                }
-            }
-            flatDayWithEvents.add(DayListViewType.Divider(calendarItem.epochDay))
-        }
+        val data = flatCalendarViewFactory.build(allEvents)
 
-        return State.Success(agendaEvents = allEvents, dayListViewTypes = flatDayWithEvents)
+        return State.Success(agendaEvents = allEvents, dayListViewTypes = data)
     }
 
     private fun secondsToEpochDays(seconds: Long, timeZoneOffsetInSeconds: Int): Int {

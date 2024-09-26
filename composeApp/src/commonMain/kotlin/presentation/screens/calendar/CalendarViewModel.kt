@@ -10,6 +10,7 @@ import domain.use_case.GetAllEventsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
+import domain.use_case.FlatCalendarViewFactory
 import extensions.guardPremium
 import platform.CalendarPermissionHandler
 
@@ -19,17 +20,20 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
+    private val flatCalendarViewFactory: FlatCalendarViewFactory
 ) : BaseViewModel<Event, State, Effect>() {
 
     private fun loadData() {
         when (val permissionState = permissionHandler.getPermissionState()) {
             CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
-                loadEvents()
+                loadCalendarAndEvents()
             }
 
             else -> setState {
                 State(
-                    days = calendarGenerator.calendar, calendarPermission = permissionState
+                    days = calendarGenerator.calendar,
+                    flatDaysAndEvents = flatCalendarViewFactory.build(),
+                    calendarPermission = permissionState
                 )
             }
         }
@@ -70,7 +74,7 @@ class CalendarViewModel(
 
             Event.OnRequestCalendarPermissionClicked -> viewModelScope.launch {
                 when (val state = permissionHandler.requestCalendarPermission()) {
-                    CalendarPermissionHandler.State.FullAccess -> loadEvents()
+                    CalendarPermissionHandler.State.FullAccess -> loadCalendarAndEvents()
                     else -> setState {
                         copy(
                             agendaEvents = emptyList(), calendarPermission = state
@@ -95,7 +99,7 @@ class CalendarViewModel(
         }
     }
 
-    private suspend fun loadEvents() {
+    private suspend fun loadCalendarAndEvents() {
         when (val state = getAllEventsUseCase()) {
             is GetAllEventsUseCase.State.Success -> setState {
                 State(
@@ -113,7 +117,8 @@ class CalendarViewModel(
             when (val state = toggleEventVisibilityUseCase(agendaEvent = agendaEvent)) {
                 is ToggleEventVisibilityUseCase.State.Success -> {
                     val events = uiState.value.flatDaysAndEvents.toMutableList()
-                    val index = events.indexOfFirst { it is DayListViewType.Event && it.event == agendaEvent }
+                    val index =
+                        events.indexOfFirst { it is DayListViewType.Event && it.event == agendaEvent }
                     events.removeAt(index)
                     events.add(index, DayListViewType.Event(state.agendaEvent))
 

@@ -145,7 +145,6 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
                     continuation.resume(true)
                 } catch (e: Exception) {
-                    println(e)
                     continuation.resume(false)
                 }
             }
