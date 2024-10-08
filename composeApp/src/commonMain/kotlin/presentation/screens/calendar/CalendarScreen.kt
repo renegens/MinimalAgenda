@@ -24,6 +24,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.ActionButton
 import presentation.components.ComposableLifecycle
 import presentation.components.NotificationPermissionDialog
+import presentation.components.SafeTransparentNavigationContainer
 import presentation.components.addHapticFeedbackProminent
 import presentation.screens.calendar.CalendarContract.Effect
 import presentation.screens.calendar.CalendarContract.Event
@@ -98,13 +99,13 @@ fun CalendarScreen(
 
     ComposableLifecycle {
         if (it == Lifecycle.Event.ON_START) {
-            viewModel.setEvent(Event.LoadData)
+            viewModel.setEvent(Event.InitialDataLoad)
         }
     }
 
     LaunchedEffect(forceEventLoad) {
         if (forceEventLoad > 0) {
-            viewModel.setEvent(Event.LoadData)
+            viewModel.setEvent(Event.ForceReload)
         }
     }
 
@@ -132,48 +133,51 @@ fun CalendarScreen(
                 shouldShowNotificationPermission = false
             })
         }
-        HorizontalPager(state = pagerState, beyondViewportPageCount = 1) { page ->
-            when (page) {
-                CalendarContract.Section.Day.position -> DayScreen(appThemeMode = appThemeMode,
-                    items = state.flatDaysAndEvents,
-                    currentDate = state.currentDate,
-                    onNowClicked = isScrolledToToday,
-                    scrollToDay = dayScrollPosition,
-                    calendarPermission = state.calendarPermission,
-                    showAll = state.showAll,
-                    onNotify = { viewModel.setEvent(Event.Notify(it)) },
-                    onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
-                    onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
-                    onRequestCalendarPermission = {
-                        viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                    })
+        SafeTransparentNavigationContainer {
+            HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
+                when (page) {
+                    CalendarContract.Section.Day.position -> DayScreen(appThemeMode = appThemeMode,
+                        items = state.flatDaysAndEvents,
+                        currentDate = state.currentDate,
+                        scrollToNow = state.scrollToNow,
+                        onNowClicked = isScrolledToToday,
+                        scrollToDay = dayScrollPosition,
+                        calendarPermission = state.calendarPermission,
+                        showAll = state.showAll,
+                        onNotify = { viewModel.setEvent(Event.Notify(it)) },
+                        onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
+                        onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
+                        onRequestCalendarPermission = {
+                            viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
+                        })
 
-                CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
-                    days = state.days,
-                    events = state.agendaEvents,
-                    currentDate = state.currentDate,
-                    onNowClicked = isScrolledToMonth,
-                    scrollToMonth = monthScrollPosition,
-                    showAll = state.showAll,
-                    onDayClicked = {
-                        viewModel.setEvent(Event.OnDayClicked(epochDay = it))
-                    },
-                    onYearClicked = {
-                        viewModel.setEvent(Event.OnYearClicked(it))
-                    })
+                    CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
+                        days = state.days,
+                        events = state.agendaEvents,
+                        currentDate = state.currentDate,
+                        onNowClicked = isScrolledToMonth,
+                        scrollToMonth = monthScrollPosition,
+                        showAll = state.showAll,
+                        onDayClicked = {
+                            viewModel.setEvent(Event.OnDayClicked(epochDay = it))
+                        },
+                        onYearClicked = {
+                            viewModel.setEvent(Event.OnYearClicked(it))
+                        })
 
-                CalendarContract.Section.Year.position -> YearsScreen(
-                    appThemeMode = appThemeMode,
-                    days = state.days,
-                    events = state.agendaEvents,
-                    showAll = state.showAll,
-                    currentDate = state.currentDate,
-                    onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
-                    onNowClicked = isScrolledToYear,
-                    scrollToYear = yearScrollPosition
-                )
+                    CalendarContract.Section.Year.position -> YearsScreen(
+                        appThemeMode = appThemeMode,
+                        days = state.days,
+                        events = state.agendaEvents,
+                        showAll = state.showAll,
+                        currentDate = state.currentDate,
+                        onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
+                        onNowClicked = isScrolledToYear,
+                        scrollToYear = yearScrollPosition
+                    )
 
-                CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
+                    CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
+                }
             }
         }
     }

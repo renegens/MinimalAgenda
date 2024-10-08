@@ -19,6 +19,7 @@ class CalendarContract {
         val agendaEvents: List<AgendaEvent> = emptyList(),
         val flatDaysAndEvents: List<DayListViewType> = emptyList(),
         val showAll: Boolean = false,
+        val scrollToNow: Boolean = true,
         val currentDate: LocalDate = today,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
     ) : UiState
@@ -36,7 +37,8 @@ class CalendarContract {
     }
 
     sealed class Event : UiEvent {
-        object LoadData : Event()
+        object InitialDataLoad : Event()
+        object ForceReload : Event()
         class OnNowClicked(val section: Section) : Event()
         class OnDayClicked(val epochDay: Int) : Event()
         class OnMonthClicked(val agendaMonthYear: AgendaMonthYear) : Event()

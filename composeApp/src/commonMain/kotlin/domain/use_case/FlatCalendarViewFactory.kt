@@ -13,8 +13,9 @@ class FlatCalendarViewFactory(
         val grouped = allEvents?.groupBy { it.epochDay }
         calendarGenerator.calendar.forEach { calendarItem ->
             flatDayWithEvents.add(DayListViewType.Header(calendarItem))
+
             grouped?.get(calendarItem.epochDay)?.let { events ->
-                events.sortedBy { it.startTime }.forEach { event ->
+                events.sortedWith(compareBy({ it.startTimeInUTC }, { it.title })).forEach { event ->
                     flatDayWithEvents.add(DayListViewType.Event(event))
                 }
             }

@@ -3,6 +3,6 @@ package platform
 import domain.model.AppTheme
 
 interface ModalPresenter {
-    fun presentAddEvent(appTheme: AppTheme, onCompletion: () -> Unit)
+    fun presentAddEvent(appTheme: AppTheme, onSave: () -> Unit)
     fun presentPaywall(appTheme: AppTheme, onCompletion: () -> Unit)
 }

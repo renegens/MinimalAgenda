@@ -23,27 +23,12 @@ class CalendarViewModel(
     private val flatCalendarViewFactory: FlatCalendarViewFactory
 ) : BaseViewModel<Event, State, Effect>() {
 
-    private fun loadData() {
-        when (val permissionState = permissionHandler.getPermissionState()) {
-            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
-                loadCalendarAndEvents()
-            }
-
-            else -> setState {
-                State(
-                    days = calendarGenerator.calendar,
-                    flatDaysAndEvents = flatCalendarViewFactory.build(),
-                    calendarPermission = permissionState
-                )
-            }
-        }
-    }
-
     override fun createInitialState() = State()
 
     override fun handleEvent(event: Event) {
         when (event) {
-            Event.LoadData -> loadData()
+            Event.InitialDataLoad -> loadData()
+            Event.ForceReload -> reloadData()
             is Event.OnNowClicked -> when (event.section) {
                 Section.Day -> {
                     setEffect {
@@ -74,7 +59,7 @@ class CalendarViewModel(
 
             Event.OnRequestCalendarPermissionClicked -> viewModelScope.launch {
                 when (val state = permissionHandler.requestCalendarPermission()) {
-                    CalendarPermissionHandler.State.FullAccess -> loadCalendarAndEvents()
+                    CalendarPermissionHandler.State.FullAccess -> loadEventsFastAndSlow(scrollToNow = true)
                     else -> setState {
                         copy(
                             agendaEvents = emptyList(), calendarPermission = state
@@ -99,15 +84,89 @@ class CalendarViewModel(
         }
     }
 
-    private suspend fun loadCalendarAndEvents() {
-        when (val state = getAllEventsUseCase()) {
-            is GetAllEventsUseCase.State.Success -> setState {
+    private fun loadData() {
+        when (val permissionState = permissionHandler.getPermissionState()) {
+            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
+
+                val eventsUIList = uiState.value.flatDaysAndEvents
+
+                if (eventsUIList.isEmpty()) {
+                    loadEventsFastAndSlow(scrollToNow = true)
+                    return@launch
+                }
+
+                when (val slowIteration = getAllEventsUseCase(24)) {
+
+                    is GetAllEventsUseCase.State.Success -> {
+                        setState {
+                            copy(
+                                flatDaysAndEvents = slowIteration.dayListViewTypes,
+                                agendaEvents = slowIteration.agendaEvents,
+                                scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size
+                            )
+                        }
+                    }
+                }
+            }
+
+            else -> setState {
                 State(
-                    flatDaysAndEvents = state.dayListViewTypes,
-                    agendaEvents = state.agendaEvents,
                     days = calendarGenerator.calendar,
-                    calendarPermission = CalendarPermissionHandler.State.FullAccess
+                    flatDaysAndEvents = flatCalendarViewFactory.build(),
+                    calendarPermission = permissionState
                 )
+            }
+        }
+    }
+
+    private fun reloadData() {
+        when (val permissionState = permissionHandler.getPermissionState()) {
+            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
+                when (val slowIteration = getAllEventsUseCase(24)) {
+                    is GetAllEventsUseCase.State.Success -> {
+                        setState {
+                            copy(
+                                flatDaysAndEvents = slowIteration.dayListViewTypes,
+                                agendaEvents = slowIteration.agendaEvents,
+                                scrollToNow = false
+                            )
+                        }
+                    }
+                }
+            }
+
+            else -> setState {
+                State(
+                    days = calendarGenerator.calendar,
+                    flatDaysAndEvents = flatCalendarViewFactory.build(),
+                    calendarPermission = permissionState
+                )
+            }
+        }
+    }
+
+    private suspend fun loadEventsFastAndSlow(scrollToNow: Boolean) {
+        when (val fastIteration = getAllEventsUseCase(1)) {
+            is GetAllEventsUseCase.State.Success -> {
+                setState {
+                    copy(
+                        days = calendarGenerator.calendar,
+                        flatDaysAndEvents = fastIteration.dayListViewTypes,
+                        agendaEvents = fastIteration.agendaEvents,
+                        calendarPermission = CalendarPermissionHandler.State.FullAccess,
+                        scrollToNow = scrollToNow
+                    )
+                }
+                when (val slowIteration = getAllEventsUseCase(24)) {
+                    is GetAllEventsUseCase.State.Success -> {
+                        setState {
+                            copy(
+                                flatDaysAndEvents = slowIteration.dayListViewTypes,
+                                agendaEvents = slowIteration.agendaEvents,
+                            )
+                        }
+                    }
+                }
             }
         }
     }
@@ -121,8 +180,7 @@ class CalendarViewModel(
                         events.indexOfFirst { it is DayListViewType.Event && it.event == agendaEvent }
                     events.removeAt(index)
                     events.add(index, DayListViewType.Event(state.agendaEvent))
-
-                    setState { copy(flatDaysAndEvents = events) }
+                    setState { copy(flatDaysAndEvents = events, scrollToNow = false) }
                 }
             }
         }

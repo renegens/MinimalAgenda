@@ -14,13 +14,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -30,11 +31,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.hapticfeedback.HapticFeedback
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaEvent
 import domain.model.AppThemeMode
 import domain.model.DayListViewType
 import extensions.scrollToNowIfNeeded
+import extensions.today
 import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
@@ -56,6 +59,7 @@ fun DayScreen(
     scrollToDay: Int,
     currentDate: LocalDate,
     showAll: Boolean,
+    scrollToNow: Boolean,
     onHide: (AgendaEvent) -> Unit,
     calendarPermission: CalendarPermissionHandler.State,
     onRequestCalendarPermission: () -> Unit,
@@ -72,11 +76,7 @@ fun DayScreen(
         mutableStateOf(items.findIndexOf(currentEpochDay) - STICKY_HEADER_INDEX)
     }
 
-    val listState = rememberLazyListState(initialFirstVisibleItemIndex = todayIndex)
-
-    LaunchedEffect(todayIndex) {
-        listState.scrollToNowIfNeeded(todayIndex)
-    }
+    val listState = rememberLazyListState()
 
     LaunchedEffect(onNowClicked) {
         listState.scrollToNowIfNeeded(todayIndex, shouldAnimate = true)
@@ -86,6 +86,12 @@ fun DayScreen(
         if (scrollToDay > 0) {
             val index = items.findIndexOf(scrollToDay)
             listState.scrollToItem(index)
+        }
+    }
+
+    SideEffect {
+        if (scrollToNow) {
+            listState.requestScrollToItem(index = todayIndex)
         }
     }
 
@@ -102,34 +108,28 @@ fun DayScreen(
                 onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
             )
 
-            itemsIndexed(
-                items = items,
-                key = { _, item -> item.hashCode() },
-                contentType = { _, item ->
-                    when (item) {
-                        is DayListViewType.Header -> "header"
-                        is DayListViewType.Divider -> "divider"
-                        is DayListViewType.Event -> "event"
-                    }
-                },
-            ) { _, item ->
+            items(items = items, key = { item -> item.uniqueId }, contentType = { item ->
+                when (item) {
+                    is DayListViewType.Header -> "header"
+                    is DayListViewType.Divider -> "divider"
+                    is DayListViewType.Event -> "event"
+                }
+            }) { item ->
                 when (item) {
                     is DayListViewType.Header -> {
-                        Column {
-                            Spacer(modifier = Modifier.height(24.dp))
-                            DayHeader(
-                                day = item.agendaDay.dayInWeek.short,
-                                dayInMonth = item.agendaDay.dayOfMonth,
-                                month = item.agendaDay.agendaMonthYear.agendaMonth.number,
-                                isToday = item.agendaDay.epochDay == currentEpochDay
-                            )
-                            Spacer(modifier = Modifier.height(16.dp))
-                            EmptyDay(
-                                eventsByEpochDay = eventsByEpochDay,
-                                epochDay = item.agendaDay.epochDay,
-                                showAll = showAll
-                            )
-                        }
+                        Spacer(modifier = Modifier.height(24.dp))
+                        DayHeader(
+                            day = item.agendaDay.dayInWeek.short,
+                            dayInMonth = item.agendaDay.dayOfMonth,
+                            month = item.agendaDay.agendaMonthYear.agendaMonth.number,
+                            isToday = item.agendaDay.epochDay == currentEpochDay
+                        )
+                        Spacer(modifier = Modifier.height(16.dp))
+                        EmptyDay(
+                            eventsByEpochDay = eventsByEpochDay,
+                            epochDay = item.agendaDay.epochDay,
+                            showAll = showAll
+                        )
                     }
 
                     is DayListViewType.Event -> {
@@ -211,12 +211,19 @@ fun Event(
                 }
             }
         ) {
+            val style = if (event.allDay.not() && event.hasPassedForToday(today.toEpochDays())) {
+                DMSans18Medium.copy(textDecoration = TextDecoration.LineThrough)
+            } else {
+                DMSans18Medium
+            }
+
             Text(
                 modifier = Modifier.padding(start = 8.dp),
                 text = event.title,
-                style = DMSans18Medium,
-                color = event.getTextColor(false),
+                style = style,
+                color = event.getTextColor(showAll),
             )
+
             AnimatedVisibility(visible = selectedItem == event) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),

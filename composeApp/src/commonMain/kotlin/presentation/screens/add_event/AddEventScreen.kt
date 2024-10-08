@@ -62,6 +62,7 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
@@ -142,11 +143,22 @@ fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
             checkChange = { viewModel.setEvent(AddEventContract.Event.ToggleAllDay(it)) },
             durationError = state.durationError,
             focusManager = focusManager,
-            onTimeUpdate = { viewModel.setEvent(AddEventContract.Event.OnStartEntered(it.first, it.second, it.third)) }
+            onTimeUpdate = {
+                viewModel.setEvent(
+                    AddEventContract.Event.OnStartEntered(
+                        it.first,
+                        it.second,
+                        it.third
+                    )
+                )
+            }
         )
 
         Spacer(modifier = Modifier.height(24.dp))
-        BodyText("New events are added to the default calendar", modifier = Modifier.padding(horizontal = 16.dp))
+        BodyText(
+            "New events are added to the default calendar",
+            modifier = Modifier.padding(horizontal = 16.dp)
+        )
         Spacer(modifier = Modifier.height(64.dp))
     }
 }
@@ -194,7 +206,10 @@ private fun Details(
             DetailsItemRow {
                 BodyText("Event duration in minutes")
                 Spacer(Modifier.weight(1f))
-                DurationInput(durationInMinutes = durationInMinutes, onValueChange = onDurationEntered)
+                DurationInput(
+                    durationInMinutes = durationInMinutes,
+                    onValueChange = onDurationEntered
+                )
             }
 
             DurationChips(
@@ -281,14 +296,16 @@ private fun ColumnScope.DateAndTime(
     var showTimePicker by remember { mutableStateOf(false) }
 
     val datePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
-    val timePickerState = rememberTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
+    val timePickerState =
+        rememberTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
 
     val selectedDate = datePickerState.selectedDateMillis?.let {
         onTimeUpdate(Triple(it, timePickerState.hour, timePickerState.minute))
         formatTimestamp(it)
     } ?: ""
 
-    val selectedTime = "${timePickerState.hour}:${timePickerState.minute.toString().padStart(2, '0')}"
+    val selectedTime =
+        "${timePickerState.hour}:${timePickerState.minute.toString().padStart(2, '0')}"
 
     DetailsItemRow {
         BodyText(label)
@@ -389,6 +406,7 @@ private fun Input(
                 }
             }
         },
+        keyboardOptions = KeyboardOptions(capitalization = KeyboardCapitalization.Sentences),
         colors = TextFieldDefaults.colors(
             unfocusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
             focusedContainerColor = MaterialTheme.colorScheme.secondaryContainer,

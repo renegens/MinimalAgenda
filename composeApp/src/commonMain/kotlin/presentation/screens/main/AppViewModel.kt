@@ -52,6 +52,6 @@ class AppViewModel(
     private fun showNewEventScreen() {
         modalPresenter.presentAddEvent(
             appTheme = uiState.value.appTheme,
-            onCompletion = { setState { copy(forceEventLoad = uiState.value.forceEventLoad + 1) } })
+            onSave = { setState { copy(forceEventLoad = uiState.value.forceEventLoad + 1) } })
     }
 }

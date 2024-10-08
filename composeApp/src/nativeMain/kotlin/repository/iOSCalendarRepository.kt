@@ -7,7 +7,10 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toLocalDateTime
 import platform.EventKit
 import platform.EventKit.EKCalendar
 import platform.EventKit.EKEntityType
@@ -65,10 +68,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         val calendar = NSCalendar.currentCalendar
         val currentDate = NSDate()
         val threeYearsAgo = calendar.dateByAddingUnit(
-            NSCalendarUnitMonth,
-            value = months * (-1).toLong(),
-            toDate = currentDate,
-            options = 0u
+            NSCalendarUnitMonth, value = months * (-1).toLong(), toDate = currentDate, options = 0u
         )
         return threeYearsAgo ?: NSDate()  // Fallback to current date if something goes wrong
     }
@@ -77,10 +77,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         val calendar = NSCalendar.currentCalendar
         val currentDate = NSDate()
         val threeYearsInFuture = calendar.dateByAddingUnit(
-            NSCalendarUnitMonth,
-            value = months.toLong(),
-            toDate = currentDate,
-            options = 0u
+            NSCalendarUnitMonth, value = months.toLong(), toDate = currentDate, options = 0u
         )
         return threeYearsInFuture ?: NSDate()
     }
@@ -101,7 +98,9 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
                     allDay = ekEvent.allDay,
                     isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
-                    epochDay = null,
+                    epochDay = calculateEpochDay(
+                        ekEvent.startDate?.timeIntervalSince1970?.toLong(), TimeZone.currentSystemDefault()
+                    ),
                     format = formatUnixTimestamp(ekEvent.startDate?.timeIntervalSince1970)
                 )
 
@@ -137,10 +136,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     newEvent.calendar = calendar
 
                     eventStore.saveEvent(
-                        event = newEvent,
-                        span = EKSpan.EKSpanThisEvent,
-                        commit = true,
-                        error = null
+                        event = newEvent, span = EKSpan.EKSpanThisEvent, commit = true, error = null
                     )
 
                     continuation.resume(true)
@@ -151,12 +147,14 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         }
     }
 
-    override suspend fun getAllEvents(): List<EventEntity> {
+    override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
         return withContext(Dispatchers.IO) {
             suspendCancellableCoroutine { continuation ->
+
+                val timeZone = TimeZone.currentSystemDefault()
                 val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
-                val startDate = nsStartDateForCalendar(24)
-                val endDate = nsEndDateForCalendar(24)
+                val startDate = nsStartDateForCalendar(durationInMonths)
+                val endDate = nsEndDateForCalendar(durationInMonths)
                 val predicate =
                     eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
                 val events = eventStore.eventsMatchingPredicate(predicate).map { event ->
@@ -168,7 +166,9 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                         startTime = event.startDate?.timeIntervalSince1970?.toLong(),
                         endTime = event.endDate?.timeIntervalSince1970?.toLong(),
                         allDay = event.allDay,
-                        epochDay = null,
+                        epochDay = calculateEpochDay(
+                            event.startDate?.timeIntervalSince1970?.toLong(), timeZone
+                        ),
                         isRecurring = event.recurrenceRules().isNullOrEmpty().not(),
                         format = formatUnixTimestamp(event.startDate?.timeIntervalSince1970)
                     )
@@ -177,6 +177,10 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                 continuation.resume(events)
             }
         }
+    }
+
+    private fun calculateEpochDay(starTime: Long?, timeZone: TimeZone): Int {
+        return Instant.fromEpochSeconds(starTime ?: 0).toLocalDateTime(timeZone).date.toEpochDays()
     }
 
     private fun formatUnixTimestamp(unixTimestamp: NSTimeInterval?): String {
