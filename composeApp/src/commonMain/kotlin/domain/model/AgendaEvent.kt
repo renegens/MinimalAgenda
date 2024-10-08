@@ -43,7 +43,7 @@ data class AgendaEvent(
 
     fun hasPassedForToday(today: Int): Boolean {
         if (epochDay != today) return false
-        val eventDate = Instant.fromEpochSeconds(startTimeInUTC).toLocalDateTime(TimeZone.currentSystemDefault())
+        val eventDate = Instant.fromEpochSeconds(endTime ?: 0).toLocalDateTime(TimeZone.currentSystemDefault())
         val currentLocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         return eventDate < currentLocalDateTime
     }
