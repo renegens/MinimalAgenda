@@ -12,6 +12,7 @@ import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
 import domain.use_case.FlatCalendarViewFactory
 import extensions.guardPremium
+import extensions.today
 import platform.CalendarPermissionHandler
 
 class CalendarViewModel(
@@ -100,6 +101,7 @@ class CalendarViewModel(
                     is GetAllEventsUseCase.State.Success -> {
                         setState {
                             copy(
+                                currentDate = today,
                                 flatDaysAndEvents = slowIteration.dayListViewTypes,
                                 agendaEvents = slowIteration.agendaEvents,
                                 scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size
@@ -150,6 +152,7 @@ class CalendarViewModel(
             is GetAllEventsUseCase.State.Success -> {
                 setState {
                     copy(
+                        currentDate = today,
                         days = calendarGenerator.calendar,
                         flatDaysAndEvents = fastIteration.dayListViewTypes,
                         agendaEvents = fastIteration.agendaEvents,
