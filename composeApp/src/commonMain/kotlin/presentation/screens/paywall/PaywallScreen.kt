@@ -1,6 +1,5 @@
 package presentation.screens.paywall
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,10 +10,15 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Notifications
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -23,6 +27,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -30,14 +37,15 @@ import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.AppAlertDialog
 import presentation.components.DotsPulsing
-import presentation.components.clickableWithOpaqueText
 import presentation.screens.paywall.PaywallContract.Effect
 import presentation.screens.paywall.PaywallContract.Event
+import presentation.theme.CustomColor
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSans24Black100
-import presentation.theme.DMSans24Medium120
-import presentation.theme.DMSans24Medium60
-import presentation.theme.DMSansBlack250
+import presentation.theme.iosBody
+import presentation.theme.iosFootnote
+import presentation.theme.iosTitle1
+import presentation.theme.iosTitle3
 
 @Composable
 fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
@@ -66,28 +74,14 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.SpaceBetween
         ) {
-            // Header
             Text(
-                text = "Cancel",
-                style = DMSans24Medium60,
-                fontSize = 16.sp,
-                textAlign = TextAlign.Start,
-                color = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.clickableWithOpaqueText {
-                    if (state.isProcessing) {
-                        return@clickableWithOpaqueText
-                    } else {
-                        onCancel.invoke()
-                    }
-                }.align(Alignment.Start)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "Unlock Papely Premium",
-                style = DMSansBlack250,
-                fontSize = 30.sp,
-                letterSpacing = (-1).sp,
-                color = MaterialTheme.colorScheme.tertiary,
+                text = "How your free \ntrial works",
+                modifier = Modifier.padding(horizontal = 32.dp),
+                style = iosTitle1.copy(
+                    color = MaterialTheme.colorScheme.inversePrimary,
+                    fontWeight = FontWeight.SemiBold
+                ),
+                textAlign = TextAlign.Center
             )
 
             Spacer(modifier = Modifier.height(8.dp))
@@ -96,124 +90,79 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
             Column(
                 modifier = Modifier.padding(start = 16.dp),
                 horizontalAlignment = Alignment.Start,
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(24.dp)
             ) {
-                BenefitItem("See only important events")
-                BenefitItem("Set alert time")
-                BenefitItem("Add and Edit Events")
-                BenefitItem("Pick your favorite theme color")
-                BenefitItem("Private Notifications")
-                BenefitItem("Support Papely Development.")
-                Text(
-                    modifier = Modifier.fillMaxWidth(),
-                    textAlign = TextAlign.Start,
-                    text = "Papely is made by one person with no investors or corporate owner.",
-                    style = DMSans24Medium60,
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.secondary
+                BenefitItem(
+                    title = "Today",
+                    description = "Get instant access to all features and get back control of your time",
+                    icon = Icons.Default.Lock,
+                    iconColor = MaterialTheme.colorScheme.inversePrimary,
+                )
+                BenefitItem(
+                    title = "Day 5",
+                    description = "You will get a notification that your trial is ending",
+                    icon = Icons.Default.Notifications,
+                    iconColor = MaterialTheme.colorScheme.inversePrimary
+                )
+                BenefitItem(
+                    title = "Day 7",
+                    description = "Your subscription starts, cancel anytime before",
+                    icon = Icons.Default.CheckCircle,
+                    iconColor = CustomColor.Mint_500
                 )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Free Trial Promotion
-            Box(
-                modifier = Modifier.fillMaxWidth().height(60.dp).background(
-                    MaterialTheme.colorScheme.secondaryContainer, RoundedCornerShape(4.dp)
-                ).padding(16.dp), contentAlignment = Alignment.Center
-            ) {
-                if (state.isProcessing) {
-                    DotsPulsing()
-                } else {
-
-                    if (state.needsReload) {
-                        Text(
-                            modifier = Modifier.clickable { viewModel.setEvent(Event.GetOfferings) },
-                            text = "Please reload",
-                            style = DMSansBlack250,
-                            letterSpacing = (0).sp,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
-                    } else {
-                        Text(
-                            text = "Try Papely free for 1 week!",
-                            style = DMSansBlack250,
-                            letterSpacing = (0).sp,
-                            fontSize = 18.sp,
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                }
-            }
-            Text(
-                text = "No commitment.\nCancel anytime before your trial ends in the AppStore.",
-                style = DMSans24Medium60,
-                fontSize = 14.sp,
-                textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary
-            )
-            Spacer(modifier = Modifier.height(24.dp))
-
             // Subscription Details
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
                 if (state.offerings.isEmpty()) {
                     Spacer(modifier = Modifier.height(40.dp))
                 } else {
                     val price = state.offerings.first().storeProduct.price
-
-                    //todo price per month
-                    val pricePerMonth =
-                        ((price.formatted.filter { it.isDigit() }.toDouble() / 100) / 12)
-
                     Text(
-                        text = "${price.formatted}/year after your free trial",
+                        text = "First week free, then ${price.formatted}/yr",
                         style = DMSans18Medium,
                         fontSize = 20.sp,
                         color = MaterialTheme.colorScheme.tertiary
-
                     )
-//                    Text(
-//                        text = "That’s less than ${price.currencyCode}${pricePerMonth}/month!",
-//                        style = DMSans18Medium,
-//                        fontSize = 16.sp,
-//                        color = MaterialTheme.colorScheme.secondary
-//                    )
                 }
             }
             Spacer(modifier = Modifier.height(32.dp))
 
             // Call to Action Button
-
             Button(
                 onClick = {
-                    viewModel.setEvent(Event.OnPurchaseItemClicked(state.offerings.first()))
+                    if (state.needsReload || state.offerings.isEmpty()) {
+                        viewModel.setEvent(Event.GetOfferings)
+                    } else {
+                        viewModel.setEvent(Event.OnPurchaseItemClicked(state.offerings.first()))
+                    }
                 },
-                enabled = state.offerings.isNotEmpty() && state.isProcessing.not() && state.needsReload.not(),
+                enabled = state.isProcessing.not(),
                 modifier = Modifier.fillMaxWidth().height(56.dp),
                 elevation = ButtonDefaults.buttonElevation(
                     defaultElevation = 10.dp,
                 ),
                 colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.inversePrimary)
             ) {
-                Text(
-                    text = "Start Your Free Trial",
-                    style = DMSans24Black100,
-                    fontSize = 20.sp,
-                    color = MaterialTheme.colorScheme.inverseSurface
-                )
+
+                if (state.isProcessing) {
+                    DotsPulsing()
+                } else {
+                    val text =
+                        if (state.needsReload || state.offerings.isEmpty()) "Please reload" else "Start Your Free Trial"
+                    Text(
+                        text = text,
+                        style = DMSans24Black100,
+                        fontSize = 20.sp,
+                        color = MaterialTheme.colorScheme.inverseSurface
+                    )
+                }
             }
-            Text(
-                modifier = Modifier.clickable { viewModel.setEvent(Event.RestorePurchases) },
-                text = "Restore Purchases",
-                style = DMSans24Medium60,
-                fontSize = 12.sp,
-                color = MaterialTheme.colorScheme.secondary
-            )
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Terms and Conditions
             Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
@@ -221,8 +170,7 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = TextAlign.Start,
                     text = "Subscription unlock for one year renews automatically unless canceled. By subscribing you are agreeing to our EULA",
-                    style = DMSans24Medium60,
-                    fontSize = 12.sp,
+                    style = iosFootnote,
                     color = MaterialTheme.colorScheme.secondary
                 )
 
@@ -231,17 +179,43 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
                     horizontalArrangement = Arrangement.SpaceBetween
                 ) {
                     Text(
-                        modifier = Modifier.clickable { viewModel.setEvent(Event.OpenPrivacy) },
-                        text = "Privacy Policy",
-                        style = DMSans24Medium60,
+                        modifier = Modifier.clickable { viewModel.setEvent(Event.AllPlans) },
+                        text = "All Plans",
+                        style = iosFootnote,
                         fontSize = 12.sp,
                         color = MaterialTheme.colorScheme.secondary
                     )
                     Text(
+                        text = "•",
+                        style = iosFootnote,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        modifier = Modifier.clickable { viewModel.setEvent(Event.RestorePurchases) },
+                        text = "Restore",
+                        style = iosFootnote,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = "•",
+                        style = iosFootnote,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        modifier = Modifier.clickable { viewModel.setEvent(Event.OpenPrivacy) },
+                        text = "Privacy",
+                        style = iosFootnote,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
+                        text = "•",
+                        style = iosFootnote,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                    Text(
                         modifier = Modifier.clickable { viewModel.setEvent(Event.OpenTermsOfUse) },
-                        text = "Terms of Use",
-                        style = DMSans24Medium60,
-                        fontSize = 12.sp,
+                        text = "Terms & Conditions",
+                        style = iosFootnote,
                         color = MaterialTheme.colorScheme.secondary
                     )
                 }
@@ -252,24 +226,31 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
 }
 
 @Composable
-private fun BenefitItem(text: String) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = "•",
-            style = DMSans24Medium120,
-            fontSize = 20.sp,
-            letterSpacing = 0.sp,
-            color = MaterialTheme.colorScheme.tertiary
+private fun BenefitItem(
+    title: String,
+    description: String,
+    icon: ImageVector,
+    iconColor: Color = MaterialTheme.colorScheme.secondary
+) {
+    Row(verticalAlignment = Alignment.CenterVertically) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = iconColor,
+            modifier = Modifier.size(48.dp)
         )
         Spacer(modifier = Modifier.width(8.dp))
-        Text(
-            text = text,
-            style = DMSans24Medium120,
-            fontSize = 20.sp,
-            letterSpacing = 0.sp,
-            color = MaterialTheme.colorScheme.tertiary
-        )
+        Column {
+            Text(
+                text = title,
+                style = iosTitle3.copy(fontWeight = FontWeight.SemiBold),
+                color = MaterialTheme.colorScheme.inversePrimary,
+            )
+            Text(
+                text = description,
+                style = iosBody,
+                color = MaterialTheme.colorScheme.inversePrimary
+            )
+        }
     }
 }

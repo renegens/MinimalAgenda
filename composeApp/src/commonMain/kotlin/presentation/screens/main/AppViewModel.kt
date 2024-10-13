@@ -43,9 +43,8 @@ class AppViewModel(
                     onSubscribed = ::showNewEventScreen,
                     onPaywall = { setEvent(Event.NotEligible) })
 
-            Event.NotEligible -> {
-                modalPresenter.presentPaywall(appTheme = uiState.value.appTheme, onCompletion = {})
-            }
+            Event.NotEligible -> setState { copy(showPaywall = true) }
+            Event.DismissPaywall -> setState { copy(showPaywall = false) }
         }
     }
 

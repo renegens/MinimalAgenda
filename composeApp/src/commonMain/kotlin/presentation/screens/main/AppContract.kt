@@ -10,7 +10,8 @@ class AppContract {
 
     data class State(
         val forceEventLoad: Int = 0,
-        val appTheme: AppTheme = AppTheme.Default
+        val appTheme: AppTheme = AppTheme.Default,
+        val showPaywall: Boolean = false
     ) : UiState
 
     sealed class Effect : UiEffect
@@ -19,5 +20,6 @@ class AppContract {
         class EditExternal(val agendaEvent: AgendaEvent): Event()
         object NewEvent: Event()
         object NotEligible: Event()
+        object DismissPaywall: Event()
     }
 }

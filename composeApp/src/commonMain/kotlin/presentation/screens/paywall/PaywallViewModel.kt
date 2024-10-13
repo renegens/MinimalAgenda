@@ -28,7 +28,7 @@ class PaywallViewModel(private val browser: Browser) :
                 copy(
                     isProcessing = false,
                     error = null,
-                    needsReload = false,
+                    needsReload = true,
                 )
             }
 
@@ -36,6 +36,7 @@ class PaywallViewModel(private val browser: Browser) :
             Event.RestorePurchases -> restorePurchases()
             Event.OpenPrivacy -> browser.openUrl(PRIVACY_URL)
             Event.OpenTermsOfUse -> browser.openUrl(TERMS_OF_USE_URL)
+            Event.AllPlans -> TODO()
         }
     }
 
