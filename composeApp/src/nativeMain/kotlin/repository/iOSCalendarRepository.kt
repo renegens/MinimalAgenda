@@ -20,8 +20,11 @@ import platform.Foundation.NSCalendar
 import platform.Foundation.NSCalendarUnitMonth
 import platform.Foundation.NSDate
 import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSDateFormatterShortStyle
+import platform.Foundation.NSLocale
 import platform.Foundation.NSTimeInterval
 import platform.Foundation.NSTimeZone
+import platform.Foundation.currentLocale
 import platform.Foundation.localTimeZone
 import platform.Foundation.timeIntervalSince1970
 import platform.toEKEventDate
@@ -188,10 +191,9 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         val nsDateFormatter = NSDateFormatter()
 
         nsDateFormatter.timeZone = NSTimeZone.localTimeZone
-        nsDateFormatter.dateFormat = "HH mm"
-
+        nsDateFormatter.locale = NSLocale.currentLocale
+        nsDateFormatter.timeStyle = NSDateFormatterShortStyle
         val localTimeString = nsDateFormatter.stringFromDate(nsDate)
-
         return localTimeString
     }
 }

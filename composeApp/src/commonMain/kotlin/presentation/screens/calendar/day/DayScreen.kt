@@ -218,7 +218,6 @@ fun Event(
             }
 
             Text(
-                modifier = Modifier.padding(start = 8.dp),
                 text = event.title,
                 style = style,
                 color = event.getTextColor(showAll),
@@ -282,8 +281,18 @@ fun EmptyMessage() {
 
 @Composable
 fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
-    Row(modifier = Modifier.width(82.dp)) {
-        val time = agendaEvent.formattedTime.split(" ")
+    //we are adding the padding only when at the end of the time
+    //we have appended am/pm
+
+    val is24HourEnabled = agendaEvent.formattedTime.last().isDigit()
+    val dimensions = if (is24HourEnabled) {
+        Triple(88.dp, 0.dp, 28.dp)
+    } else {
+        Triple(100.dp, 8.dp, 20.dp)
+    }
+
+    Row(modifier = Modifier.width(dimensions.first).padding(end = dimensions.second)) {
+        val time = agendaEvent.formattedTime.split(":")
 
         if (agendaEvent.allDay) {
             Text(
@@ -293,7 +302,7 @@ fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
             )
         } else {
             Text(
-                modifier = Modifier.width(30.dp),
+                modifier = Modifier.width(dimensions.third),
                 text = time[0],
                 style = DMSans18Bold60,
                 color = agendaEvent.getTextColor(showAll)
