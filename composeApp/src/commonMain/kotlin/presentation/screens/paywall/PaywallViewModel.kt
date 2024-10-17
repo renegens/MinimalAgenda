@@ -36,7 +36,7 @@ class PaywallViewModel(private val browser: Browser) :
             Event.RestorePurchases -> restorePurchases()
             Event.OpenPrivacy -> browser.openUrl(PRIVACY_URL)
             Event.OpenTermsOfUse -> browser.openUrl(TERMS_OF_USE_URL)
-            Event.AllPlans -> TODO()
+            Event.AllPlans -> setState { copy(showAllPlans = !showAllPlans) }
         }
     }
 
@@ -66,7 +66,17 @@ class PaywallViewModel(private val browser: Browser) :
                 if (items.isNullOrEmpty()) {
                     setState { copy(needsReload = true, isProcessing = false) }
                 } else {
-                    setState { copy(offerings = items, isProcessing = false) }
+                    items.forEach {
+                        println(it)
+                    }
+                    val selectedItem = items.firstOrNull { it.identifier == "Unlocked" }
+                    setState {
+                        copy(
+                            offerings = items,
+                            isProcessing = false,
+                            selectedPackage = selectedItem
+                        )
+                    }
                 }
             })
     }

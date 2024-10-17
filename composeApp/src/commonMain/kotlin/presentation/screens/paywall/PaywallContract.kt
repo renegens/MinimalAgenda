@@ -12,7 +12,9 @@ class PaywallContract {
         val offerings: List<Package> = emptyList(),
         val isProcessing: Boolean = false,
         val error: PurchasesError? = null,
-        val needsReload: Boolean = false
+        val needsReload: Boolean = false,
+        val showAllPlans: Boolean = false,
+        val selectedPackage: Package? = null
     ) : UiState
 
     sealed class Effect : UiEffect {

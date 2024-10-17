@@ -2,6 +2,8 @@ package extensions
 
 import com.revenuecat.purchases.kmp.CustomerInfo
 import com.revenuecat.purchases.kmp.LogLevel
+import com.revenuecat.purchases.kmp.Package
+import com.revenuecat.purchases.kmp.PackageType
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.PurchasesConfiguration
 
@@ -27,4 +29,20 @@ fun guardPremium(onSubscribed: () -> Unit, onPaywall: () -> Unit) {
                 onPaywall.invoke()
             }
         })
+}
+
+fun Package.getOfferText(): String {
+    return when (packageType) {
+        PackageType.MONTHLY -> "Full access for just ${storeProduct.price.formatted}/mo"
+        PackageType.ANNUAL -> "First week free, then ${storeProduct.price.formatted}/yr"
+        PackageType.LIFETIME -> "Full access for just ${storeProduct.price.formatted}"
+        else -> ""
+    }
+}
+
+fun Package.getOfferContinueButtonText(): String {
+    return when (packageType) {
+        PackageType.ANNUAL -> "Start Your FREE Trial"
+        else -> "Continue"
+    }
 }

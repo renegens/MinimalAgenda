@@ -1,6 +1,7 @@
 package presentation.screens.main
 
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
@@ -32,18 +33,19 @@ fun App() {
                 notEligible = {
                     viewModel.setEvent(AppContract.Event.NotEligible)
                 })
-        }
 
-        if (state.showPaywall) {
-            ModalBottomSheet(
-                onDismissRequest = {
-                    viewModel.setEvent(AppContract.Event.DismissPaywall)
-                },
-                sheetState = sheetState
-            ) {
-                PaywallScreen(
-                    onPurchaseComplete = { viewModel.setEvent(AppContract.Event.DismissPaywall) },
-                    onCancel = { viewModel.setEvent(AppContract.Event.DismissPaywall) })
+            if (state.showPaywall) {
+                ModalBottomSheet(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    onDismissRequest = {
+                        viewModel.setEvent(AppContract.Event.DismissPaywall)
+                    },
+                    sheetState = sheetState
+                ) {
+                    PaywallScreen(
+                        onPurchaseComplete = { viewModel.setEvent(AppContract.Event.DismissPaywall) },
+                        onCancel = { viewModel.setEvent(AppContract.Event.DismissPaywall) })
+                }
             }
         }
     }
