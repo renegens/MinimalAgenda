@@ -99,18 +99,6 @@ private fun ColorSecondary(isCurrent: Boolean): Color {
 }
 
 @Composable
-fun SettingsHeader(label: String) {
-    Box(Modifier.height(100.dp).fillMaxWidth()) {
-        Text(
-            style = DMSansBlack250,
-            text = label,
-            color = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.wrapContentHeight(unbounded = true)
-        )
-    }
-}
-
-@Composable
 fun NewEventHeader(label: String) {
     val text = buildAnnotatedString {
         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.primary)) {
@@ -126,5 +114,4 @@ fun NewEventHeader(label: String) {
         text = text,
         modifier = Modifier.padding(bottom = 4.dp).wrapContentHeight(unbounded = true)
     )
-
 }

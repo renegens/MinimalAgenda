@@ -27,7 +27,7 @@ fun AppTheme(
     setStatusBarTheme(appThemeMode)
     PaperBackground(appThemeMode) {
         MaterialTheme(
-            colorScheme = colorScheme, typography = typography, content = content
+            colorScheme = colorScheme, content = content
         )
     }
 }
