@@ -15,8 +15,11 @@ koin = "4.0.0"
 koinComposeMultiplatform = "4.0.0"
 purchases-kmp = "1.0.0+13.2.0"
 purchases-common = "13.2.0"
+cupertino = "0.1.0-alpha04"
+
 
 [libraries]
+cupertino-theme = { module = "io.github.alexzhirkevich:cupertino", version.ref = "cupertino" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 kotlinx-datetime = {module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime"}
 kotlinx-serialization-json = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json"}
