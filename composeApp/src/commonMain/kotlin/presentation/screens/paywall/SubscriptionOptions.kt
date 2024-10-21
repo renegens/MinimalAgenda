@@ -1,27 +1,49 @@
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.selection.selectable
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Check
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.foundation.border
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import com.revenuecat.purchases.kmp.Package
-import com.revenuecat.purchases.kmp.PackageType
+import com.revenuecat.purchases.kmp.models.Package
+import com.revenuecat.purchases.kmp.models.PackageType
 import extensions.getOfferText
+import presentation.theme.CustomColor
 import presentation.theme.iosBody
+import presentation.theme.iosFootnote
 
 @Composable
-fun SubscriptionOptions(offerings: List<Package>) {
-    var selectedOption by remember { mutableStateOf(offerings.firstOrNull()?.identifier ?: "") }
+fun SubscriptionOptions(
+    offerings: List<Package>,
+    selectedOffering: Package?,
+    onOfferingSelected: (Package) -> Unit
+) {
+    var selectedOption by remember { mutableStateOf(selectedOffering?.identifier ?: "") }
 
     Column(modifier = Modifier.padding(16.dp)) {
         offerings.forEach { offering ->
@@ -35,44 +57,70 @@ fun SubscriptionOptions(offerings: List<Package>) {
                     .clip(RoundedCornerShape(8.dp))
                     .selectable(
                         selected = isSelected,
-                        onClick = { selectedOption = offering.identifier }
+                        onClick = {
+                            selectedOption = offering.identifier
+                            onOfferingSelected.invoke(offerings.first { it.identifier == offering.identifier })
+                        }
                     )
                     .border(
                         if (isSelected) 2.dp else 1.dp,
-                        if (isSelected) Color.Green else Color.LightGray,
+                        if (isSelected) MaterialTheme.colorScheme.inversePrimary else CustomColor.Gray_200,
                         shape = RoundedCornerShape(8.dp)
                     )
                     .padding(16.dp)
             ) {
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (isSelected) {
-                        Icon(
-                            Icons.Default.Check,
-                            contentDescription = "Selected",
-                            tint = Color.Green,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp) // Size of the circle
+                                .background(
+                                    color = MaterialTheme.colorScheme.inversePrimary,
+                                    shape = CircleShape
+                                )
+                        ) {
+                            Icon(
+                                Icons.Default.Check,
+                                contentDescription = "Selected",
+                                tint = MaterialTheme.colorScheme.surface,
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
+
                     } else {
-                        Spacer(modifier = Modifier.size(24.dp)) // Empty space for alignment
+                        Box(
+                            modifier = Modifier
+                                .size(24.dp) // Size of the circle
+                                .background(
+                                    color = CustomColor.Gray_200,
+                                    shape = CircleShape
+                                )
+                        )
                     }
 
                     Spacer(modifier = Modifier.width(8.dp))
 
                     Column {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween
+                        ) {
                             Text(
                                 text = offering.packageType.name,
                                 style = iosBody.copy(fontWeight = FontWeight.SemiBold),
+                                color = MaterialTheme.colorScheme.onSurface,
                             )
 
                             if (offering.packageType == PackageType.ANNUAL) {
-                                Spacer(modifier = Modifier.width(8.dp))
                                 Text(
                                     text = "63% OFF",
-                                    color = Color.Green,
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.Bold,
+                                    color = MaterialTheme.colorScheme.inverseSurface,
+                                    style = iosFootnote,
                                     modifier = Modifier
+                                        .wrapContentWidth()
+                                        .wrapContentHeight()
+                                        .background(color = MaterialTheme.colorScheme.inversePrimary)
                                         .clip(RoundedCornerShape(4.dp))
                                         .padding(horizontal = 8.dp, vertical = 4.dp)
                                 )

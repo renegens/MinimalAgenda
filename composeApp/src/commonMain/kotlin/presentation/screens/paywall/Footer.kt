@@ -15,20 +15,16 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.revenuecat.purchases.kmp.Package
+import com.revenuecat.purchases.kmp.models.Package
 import extensions.getOfferContinueButtonText
 import extensions.getOfferText
 import presentation.components.DotsPulsing
 import presentation.screens.paywall.PaywallContract.Event
-import presentation.theme.DMSans18Medium
-import presentation.theme.DMSans24Black100
 import presentation.theme.iosBody
 import presentation.theme.iosFootnote
 import presentation.theme.iosHeadline
@@ -41,11 +37,12 @@ fun Footer(
     onActionButtonClicked: () -> Unit,
     onFooterItemClicked: (Event) -> Unit,
     showAllPans: Boolean,
-    selectedOffering: Package? = null
+    selectedOffering: Package? = null,
+    onOfferingSelected: (Package) -> Unit
 ) {
 
     Column(
-        modifier = Modifier.background(MaterialTheme.colorScheme.surface)
+        modifier = Modifier.background(MaterialTheme.colorScheme.surface).shadow(elevation = 1.dp)
             .padding(horizontal = 16.dp)
     ) {
 
@@ -54,10 +51,9 @@ fun Footer(
         if (offerings.isEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
         } else {
-            val offering = offerings.first()
             Text(
                 modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = offering.getOfferText(),
+                text = selectedOffering?.getOfferText() ?: "",
                 style = iosBody,
                 color = MaterialTheme.colorScheme.onSurface
             )
@@ -66,7 +62,11 @@ fun Footer(
         }
 
         if (showAllPans && offerings.isNotEmpty()) {
-            SubscriptionOptions(offerings)
+            SubscriptionOptions(
+                offerings = offerings,
+                onOfferingSelected = onOfferingSelected,
+                selectedOffering = selectedOffering
+            )
         }
 
         // Call to Action Button
@@ -104,9 +104,7 @@ fun Footer(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "•",
-                style = iosFootnote,
-                color = MaterialTheme.colorScheme.onSurface
+                text = "•", style = iosFootnote, color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 modifier = Modifier.clickable { onFooterItemClicked(Event.RestorePurchases) },
@@ -115,9 +113,7 @@ fun Footer(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "•",
-                style = iosFootnote,
-                color = MaterialTheme.colorScheme.onSurface
+                text = "•", style = iosFootnote, color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 modifier = Modifier.clickable { onFooterItemClicked(Event.OpenPrivacy) },
@@ -126,9 +122,7 @@ fun Footer(
                 color = MaterialTheme.colorScheme.onSurface
             )
             Text(
-                text = "•",
-                style = iosFootnote,
-                color = MaterialTheme.colorScheme.onSurface
+                text = "•", style = iosFootnote, color = MaterialTheme.colorScheme.onSurface
             )
             Text(
                 modifier = Modifier.clickable { onFooterItemClicked(Event.OpenTermsOfUse) },

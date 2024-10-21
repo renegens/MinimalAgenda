@@ -32,6 +32,10 @@ kotlin {
             version = libs.versions.purchases.common.get()
             extraOpts += listOf("-compiler-option", "-fmodules")
         }
+        pod("PurchasesHybridCommonUI") {
+            version = libs.versions.purchases.common.get()
+            extraOpts += listOf("-compiler-option", "-fmodules")
+        }
         podfile = project.file("../iosApp/Podfile")
         framework {
             baseName = "ComposeApp"
@@ -73,6 +77,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.purchases.core)
+            implementation(libs.purchases.ui)
             implementation(libs.cupertino.theme)
         }
     }

@@ -13,10 +13,9 @@ kotlinx-serialization-json = "1.7.2"
 androidx-lifecycle-viewmodel = "2.8.5"
 koin = "4.0.0"
 koinComposeMultiplatform = "4.0.0"
-purchases-kmp = "1.0.0+13.2.0"
-purchases-common = "13.2.0"
+purchases-kmp = "1.2.0+13.6.0"
+purchases-common = "13.6.0"
 cupertino = "0.1.0-alpha04"
-
 
 [libraries]
 cupertino-theme = { module = "io.github.alexzhirkevich:cupertino", version.ref = "cupertino" }
@@ -32,6 +31,7 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", ver
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "purchases-kmp" }
+purchases-ui = { module = "com.revenuecat.purchases:purchases-kmp-ui", version.ref = "purchases-kmp" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
 
 

@@ -1,12 +1,11 @@
 package presentation.screens.paywall
 
-import com.revenuecat.purchases.kmp.CustomerInfo
-import com.revenuecat.purchases.kmp.Package
-import com.revenuecat.purchases.kmp.Purchases
-import com.revenuecat.purchases.kmp.PurchasesError
-import com.revenuecat.purchases.kmp.PurchasesErrorCode
-import data.PRIVACY_URL
-import data.TERMS_OF_USE_URL
+import com.revenuecat.purchases.kmp.models.CustomerInfo
+import com.revenuecat.purchases.kmp.models.Package
+import com.revenuecat.purchases.kmp.models.PurchasesError
+import com.revenuecat.purchases.kmp.models.PurchasesErrorCode
+import domain.model.PRIVACY_URL
+import domain.model.TERMS_OF_USE_URL
 import extensions.isSubscribed
 import platform.Browser
 import presentation.base.BaseViewModel
@@ -23,7 +22,7 @@ class PaywallViewModel(private val browser: Browser) :
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.OnPurchaseItemClicked -> handlePurchase(event.item)
+            is Event.OnOfferingSelected -> setState { copy(selectedPackage = event.offer) }
             Event.DismissErrorDialog -> setState {
                 copy(
                     isProcessing = false,
@@ -37,6 +36,7 @@ class PaywallViewModel(private val browser: Browser) :
             Event.OpenPrivacy -> browser.openUrl(PRIVACY_URL)
             Event.OpenTermsOfUse -> browser.openUrl(TERMS_OF_USE_URL)
             Event.AllPlans -> setState { copy(showAllPlans = !showAllPlans) }
+            Event.OnProceedButtonClicked -> handlePurchase(uiState.value.selectedPackage!!)
         }
     }
 
@@ -67,13 +67,14 @@ class PaywallViewModel(private val browser: Browser) :
                     setState { copy(needsReload = true, isProcessing = false) }
                 } else {
                     items.forEach {
-                        println(it)
+                        println(it.identifier)
                     }
-                    val selectedItem = items.firstOrNull { it.identifier == "Unlocked" }
+                    val selectedItem = items.firstOrNull { it.identifier == "\$rc_monthly" }
                     setState {
                         copy(
                             offerings = items,
                             isProcessing = false,
+                            needsReload = false,
                             selectedPackage = selectedItem
                         )
                     }
