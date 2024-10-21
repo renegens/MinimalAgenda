@@ -8,7 +8,8 @@ actual fun sendEmail(onError: () -> Unit) {
     val mailtoString = "mailto:${iosSupportEmail}?subject=Support for Papely ${getBuildVersion()}"
     val mailtoUrl = NSURL(string = mailtoString)
     if (UIApplication.sharedApplication.canOpenURL(mailtoUrl)) {
-        UIApplication.sharedApplication.openURL(mailtoUrl)
+        UIApplication.sharedApplication()
+            .openURL(url = mailtoUrl, options = emptyMap<Any?, Any>(), completionHandler = {})
     } else {
         onError.invoke()
     }

@@ -5,8 +5,8 @@ import com.revenuecat.purchases.kmp.Package
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.PurchasesError
 import com.revenuecat.purchases.kmp.PurchasesErrorCode
-import domain.model.PRIVACY_URL
-import domain.model.TERMS_OF_USE_URL
+import data.PRIVACY_URL
+import data.TERMS_OF_USE_URL
 import extensions.isSubscribed
 import platform.Browser
 import presentation.base.BaseViewModel

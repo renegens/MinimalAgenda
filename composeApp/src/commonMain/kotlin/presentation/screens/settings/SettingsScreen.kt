@@ -1,6 +1,5 @@
 package presentation.screens.settings
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +17,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import platform.sendEmail
 import presentation.components.AppAlertDialog
 import presentation.components.PaperBackground
+import presentation.components.noRippleClickable
 import presentation.screens.settings.SettingsContract.*
 import presentation.screens.settings.components.ColorSelection
 import presentation.screens.settings.components.ExplanationText
@@ -97,8 +97,6 @@ fun SettingsScreen(notEligible: () -> Unit) {
             ColorSelection(state.appColor) { viewModel.setEvent(Event.OnColorSelected(it)) }
         }
 
-
-
         SettingsItem(state.appThemeMode) {
             var showEmailError by remember { mutableStateOf(false) }
             if (showEmailError) {
@@ -111,7 +109,8 @@ fun SettingsScreen(notEligible: () -> Unit) {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 "Send Feedback",
-                Modifier.clickable { sendEmail { showEmailError = true } },
+                Modifier.padding(top = 8.dp, end = 8.dp, bottom = 8.dp)
+                    .noRippleClickable { sendEmail { showEmailError = true } },
                 style = iosBody,
                 color = MaterialTheme.colorScheme.primary
             )
