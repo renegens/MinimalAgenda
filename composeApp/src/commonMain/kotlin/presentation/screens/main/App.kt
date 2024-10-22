@@ -14,20 +14,18 @@ fun App() {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
 
-        state.appTheme?.let { (color, theme) ->
-            AppTheme(
-                appThemeMode = theme, appColor = color
-            ) {
-                CalendarScreen(appThemeMode = theme,
-                    reloadEvents = state.shouldReloadEvents,
-                    onAddEvent = {
-                        viewModel.setEvent(AppContract.Event.NewEvent)
-                    },
-                    onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
-                    notEligible = {
-                        viewModel.setEvent(AppContract.Event.NotEligible)
-                    })
-            }
+        AppTheme(
+            appThemeMode = state.appTheme.appThemeMode, appColor = state.appTheme.appColor
+        ) {
+            CalendarScreen(appThemeMode = state.appTheme.appThemeMode,
+                forceEventLoad = state.forceEventLoad,
+                onAddEvent = {
+                    viewModel.setEvent(AppContract.Event.NewEvent)
+                },
+                onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
+                notEligible = {
+                    viewModel.setEvent(AppContract.Event.NotEligible)
+                })
         }
     }
 }

@@ -72,7 +72,7 @@ val DMSansBlack250: TextStyle
     get() = TextStyle(
         fontFamily = DMSansBlackFamily,
         fontWeight = FontWeight.Black,
-        fontSize = 84.sp,
+        fontSize = 82.sp,
         letterSpacing = (-6).sp,
     )
 

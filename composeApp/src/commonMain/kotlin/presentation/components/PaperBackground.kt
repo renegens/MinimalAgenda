@@ -3,14 +3,13 @@ package presentation.components
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.IntOffset
 import domain.model.AppThemeMode
 import minimalagenda.composeapp.generated.resources.Res
 import minimalagenda.composeapp.generated.resources.tex_dark
@@ -31,7 +30,7 @@ fun PaperBackground(
         Image(
             painter = painterResource(res),
             contentDescription = "paper_texture",
-            contentScale = ContentScale.FillBounds,
+            contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize()
         )
         content.invoke()
@@ -39,10 +38,12 @@ fun PaperBackground(
 }
 
 @Composable
-fun PaperBackgroundColumn(
-    appThemeMode: AppThemeMode, content: @Composable () -> Unit
+fun ScrollablePaperBackground(
+    appThemeMode: AppThemeMode,
+    listState: LazyListState,
+    content: @Composable () -> Unit
 ) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box {
         val res = when (appThemeMode) {
             AppThemeMode.FollowSystem -> if (isSystemInDarkTheme()) Res.drawable.tex_dark else Res.drawable.tex_light
             AppThemeMode.DefaultLight -> Res.drawable.tex_light
@@ -52,11 +53,12 @@ fun PaperBackgroundColumn(
         Image(
             painter = painterResource(res),
             contentDescription = "paper_texture",
-            contentScale = ContentScale.FillBounds,
-            modifier = Modifier.matchParentSize()
+            contentScale = ContentScale.Crop,
+            modifier = Modifier.fillMaxSize()
+                .offset {
+                    IntOffset(0, -listState.firstVisibleItemScrollOffset)
+                }
         )
-        Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp)) {
-            content.invoke()
-        }
+        content.invoke()
     }
 }

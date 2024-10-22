@@ -5,18 +5,21 @@ android-minSdk = "24"
 android-targetSdk = "34"
 androidx-activityCompose = "1.9.2"
 androidx-datastore = "1.1.1"
-compose-plugin = "1.7.0-beta01"
-kotlin = "2.0.20"
+compose-plugin = "1.7.0"
+kotlin = "2.0.21"
 kotlinx-datetime = "0.6.0"
 navigation = "2.7.0-alpha07"
-kotlinx-serialization-json = "1.7.1"
+kotlinx-serialization-json = "1.7.2"
 androidx-lifecycle-viewmodel = "2.8.5"
-koin = "4.0.0-RC2"
-koinComposeMultiplatform = "4.0.0-RC2"
-purchases-kmp = "1.0.0-beta.1"
-purchases-common = "10.10.0"
+koin = "4.0.0"
+koinComposeMultiplatform = "4.0.0"
+purchases-kmp = "1.0.0+13.2.0"
+purchases-common = "13.2.0"
+cupertino = "0.1.0-alpha04"
+
 
 [libraries]
+cupertino-theme = { module = "io.github.alexzhirkevich:cupertino", version.ref = "cupertino" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 kotlinx-datetime = {module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime"}
 kotlinx-serialization-json = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json"}

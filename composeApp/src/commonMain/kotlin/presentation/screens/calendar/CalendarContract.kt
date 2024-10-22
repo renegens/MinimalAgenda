@@ -4,6 +4,7 @@ import domain.model.AgendaDay
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
+import domain.model.DayListViewType
 import extensions.today
 import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
@@ -16,7 +17,9 @@ class CalendarContract {
     data class State(
         val days: List<AgendaDay> = emptyList(),
         val agendaEvents: List<AgendaEvent> = emptyList(),
+        val flatDaysAndEvents: List<DayListViewType> = emptyList(),
         val showAll: Boolean = false,
+        val scrollToNow: Boolean = true,
         val currentDate: LocalDate = today,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
     ) : UiState
@@ -25,7 +28,7 @@ class CalendarContract {
         object ScrollDayToToday : Effect()
         object ScrollMonthToToday : Effect()
         object ScrollYearToToday : Effect()
-        class GoToDay(val index: Int) : Effect()
+        class GoToDay(val epochDay: Int) : Effect()
         class GoToMonth(val agendaMonthYear: AgendaMonthYear) : Effect()
         class GoToYear(val agendaYear: AgendaYear) : Effect()
         object ShowPaywall : Effect()
@@ -34,7 +37,8 @@ class CalendarContract {
     }
 
     sealed class Event : UiEvent {
-        object LoadData : Event()
+        object InitialDataLoad : Event()
+        object ForceReload : Event()
         class OnNowClicked(val section: Section) : Event()
         class OnDayClicked(val epochDay: Int) : Event()
         class OnMonthClicked(val agendaMonthYear: AgendaMonthYear) : Event()

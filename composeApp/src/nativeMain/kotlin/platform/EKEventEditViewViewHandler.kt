@@ -5,6 +5,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import platform.EventKit.EKEvent
 import platform.EventKitUI.EKEventEditViewAction
+import platform.EventKitUI.EKEventEditViewActionDeleted
+import platform.EventKitUI.EKEventEditViewActionSaved
 import platform.EventKitUI.EKEventEditViewController
 import platform.EventKitUI.EKEventEditViewDelegateProtocol
 import platform.EventKitUI.EKEventViewAction
@@ -47,7 +49,7 @@ class EKEventEditViewViewHandler(eventKit: EventKit) : EventEditViewHandler {
 
                 val rootVC = UIApplication.sharedApplication.keyWindow?.rootViewController
 
-                rootVC?.presentViewController(eventEditVC, animated = true, completion = null)
+                rootVC?.presentViewController(eventEditVC, animated = true, null)
             } else {
                 // Handle the case where the event is not found
                 //println("Event not found")
@@ -80,7 +82,12 @@ class EKEventEditViewViewHandler(eventKit: EventKit) : EventEditViewHandler {
             controller: EKEventEditViewController,
             didCompleteWithAction: EKEventEditViewAction
         ) {
-            controller.dismissViewControllerAnimated(true, onSave)
+            if (didCompleteWithAction == EKEventEditViewActionSaved || didCompleteWithAction == EKEventEditViewActionDeleted){
+                controller.dismissViewControllerAnimated(true, null)
+                onSave.invoke()
+            } else {
+                controller.dismissViewControllerAnimated(true, null)
+            }
         }
     }
 

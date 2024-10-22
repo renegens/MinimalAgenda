@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDateTime
 
 interface CalendarRepository {
     suspend fun getCalendars(): List<CalendarEntity>
-    suspend fun getAllEvents(): List<EventEntity>
+    suspend fun getEvents(durationInMonths: Int = 24): List<EventEntity>
     suspend fun getEvent(id: String): EventEntity?
     suspend fun addEvent(
         title: String,

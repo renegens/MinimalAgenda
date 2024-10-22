@@ -27,7 +27,7 @@ class ScheduleNotificationUseCase(
             val notificationAlert = settings.notificationTimeInMinutes
 
             var delayInSeconds =
-                agendaEvent.startTime - Clock.System.now().epochSeconds - notificationAlert.minutes.inWholeSeconds
+                agendaEvent.startTimeInUTC - Clock.System.now().epochSeconds - notificationAlert.minutes.inWholeSeconds
 
             if (delayInSeconds < 0) {
                 delayInSeconds = 1

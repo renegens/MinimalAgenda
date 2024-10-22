@@ -10,7 +10,7 @@ import presentation.theme.AppTheme
 @Suppress("ClassName")
 class iOSModalPresenter : ModalPresenter {
 
-    override fun presentAddEvent(appTheme: AppTheme, onCompletion: () -> Unit) {
+    override fun presentAddEvent(appTheme: AppTheme, onSave: () -> Unit) {
         val rootVC = UIApplication.sharedApplication.keyWindow?.rootViewController
         val s = ComposeUIViewController(
             content = {
@@ -18,13 +18,14 @@ class iOSModalPresenter : ModalPresenter {
                     AddEventScreen(onCancel = {
                         rootVC?.dismissViewControllerAnimated(
                             true,
-                            onCompletion
+                            completion = null
                         )
                     }, onSave = {
                         rootVC?.dismissViewControllerAnimated(
                             true,
-                            onCompletion
+                            completion = null
                         )
+                        onSave.invoke()
                     })
                 }
             }
@@ -40,12 +41,13 @@ class iOSModalPresenter : ModalPresenter {
                     PaywallScreen(onPurchaseComplete = {
                         rootVC?.dismissViewControllerAnimated(
                             true,
-                            onCompletion
+                            completion = null
                         )
+                        onCompletion.invoke()
                     }, onCancel = {
                         rootVC?.dismissViewControllerAnimated(
                             true,
-                            onCompletion
+                            completion = null
                         )
                     })
                 }

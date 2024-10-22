@@ -22,7 +22,7 @@ fun EventEntity.toEvent(): AgendaEvent {
         id = id!!,
         title = title!!,
         location = location,
-        startTime = startTime!!,
+        startTimeInUTC = startTime!!,
         endTime = endTime,
         allDay = allDay!!,
         isRecurring = isRecurring!!,

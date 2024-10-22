@@ -23,7 +23,7 @@ fun List<AgendaEvent>.hasEvents(epochDay: Int, showAll: Boolean): Boolean {
 
 fun List<AgendaEvent>.getEventsForMonth(agendaMonth: AgendaMonth, currentYear: Int): List<AgendaEvent> {
     return this.filter { event ->
-        val (month, year) = getMonthAndYearFromUnixTimestamp(event.startTime)
+        val (month, year) = getMonthAndYearFromUnixTimestamp(event.startTimeInUTC)
         month == agendaMonth.number && year == currentYear
     }
 }

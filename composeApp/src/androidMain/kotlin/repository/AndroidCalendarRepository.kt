@@ -10,10 +10,12 @@ import extensions.millisToEpochDay
 import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
+import kotlinx.datetime.toLocalDateTime
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -70,7 +72,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         return SimpleDateFormat("HH mm").format(Date(milliseconds.toLong())).toString()
     }
 
-    override suspend fun getAllEvents(): List<EventEntity> {
+    override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
         val list = emptyList<EventEntity>().toMutableList()
 
         for (i in 1..8000) {
@@ -83,18 +85,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                     startTime = timestamp,
                     endTime = timestamp + 6000,
                     allDay = false,
-                    isRecurring = false,
-                    format = dateFormatter(timestamp.toString())
-                )
-            )
-            list.add(
-                EventEntity(
-                    id = UUID.randomUUID().toString(),
-                    title = UUID.randomUUID().toString(),
-                    location = "",
-                    startTime = System.currentTimeMillis(),
-                    endTime = System.currentTimeMillis() + 60000,
-                    allDay = false,
+                    epochDay = calculateEpochDay(timestamp, TimeZone.currentSystemDefault()),
                     isRecurring = false,
                     format = dateFormatter(timestamp.toString())
                 )
@@ -155,7 +146,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                     events.add(
                         EventEntity(
                             id = id.toString(),
-                            title= title,
+                            title = title,
                             location = "",
                             startTime = startTime,
                             endTime = startTime + 6000,
@@ -183,6 +174,10 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         allDay: Boolean
     ): Boolean {
         return false
+    }
+
+    private fun calculateEpochDay(starTime: Long?, timeZone: TimeZone): Int {
+        return Instant.fromEpochSeconds(starTime ?: 0).toLocalDateTime(timeZone).date.toEpochDays()
     }
 }
 
