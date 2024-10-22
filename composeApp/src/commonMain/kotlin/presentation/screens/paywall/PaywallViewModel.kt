@@ -1,15 +1,17 @@
 package presentation.screens.paywall
 
+import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.models.CustomerInfo
-import com.revenuecat.purchases.kmp.models.Package
 import com.revenuecat.purchases.kmp.models.PurchasesError
 import com.revenuecat.purchases.kmp.models.PurchasesErrorCode
-import domain.model.PRIVACY_URL
-import domain.model.TERMS_OF_USE_URL
+import data.PRIVACY_URL
+import data.TERMS_OF_USE_URL
 import extensions.isSubscribed
 import platform.Browser
 import presentation.base.BaseViewModel
-import presentation.screens.paywall.PaywallContract.*
+import presentation.screens.paywall.PaywallContract.Effect
+import presentation.screens.paywall.PaywallContract.Event
+import presentation.screens.paywall.PaywallContract.State
 
 class PaywallViewModel(private val browser: Browser) :
     BaseViewModel<Event, State, Effect>() {
@@ -40,7 +42,7 @@ class PaywallViewModel(private val browser: Browser) :
         }
     }
 
-    private fun handlePurchase(packageItem: Package) {
+    private fun handlePurchase(packageItem: com.revenuecat.purchases.kmp.models.Package) {
         setState { copy(isProcessing = true) }
         Purchases.sharedInstance.purchase(
             packageToPurchase = packageItem,
