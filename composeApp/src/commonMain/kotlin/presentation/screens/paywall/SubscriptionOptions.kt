@@ -45,7 +45,7 @@ fun SubscriptionOptions(
 ) {
     var selectedOption by remember { mutableStateOf(selectedOffering?.identifier ?: "") }
 
-    Column(modifier = Modifier.padding(16.dp)) {
+    Column(modifier = Modifier.padding(vertical = 8.dp)) {
         offerings.forEach { offering ->
             val isSelected = offering.identifier == selectedOption
 
@@ -114,14 +114,14 @@ fun SubscriptionOptions(
 
                             if (offering.packageType == PackageType.ANNUAL) {
                                 Text(
-                                    text = "63% OFF",
+                                    text = "85% OFF",
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                     style = iosFootnote,
                                     modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
                                         .wrapContentWidth()
                                         .wrapContentHeight()
                                         .background(color = MaterialTheme.colorScheme.inversePrimary)
-                                        .clip(RoundedCornerShape(4.dp))
                                         .padding(horizontal = 8.dp, vertical = 4.dp)
                                 )
                             }

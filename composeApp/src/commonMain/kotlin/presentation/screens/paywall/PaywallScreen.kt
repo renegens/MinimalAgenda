@@ -26,6 +26,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.AppAlertDialog
 import presentation.screens.paywall.PaywallContract.Effect
 import presentation.screens.paywall.PaywallContract.Event
+import presentation.theme.CustomColor
 import presentation.theme.iosTitle1
 
 @Composable
@@ -55,13 +56,7 @@ fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
             offerings = state.offerings,
             selectedOffering = state.selectedPackage,
             showAllPans = state.showAllPlans,
-            onActionButtonClicked = {
-                if (state.needsReload || state.offerings.isEmpty()) {
-                    viewModel.setEvent(Event.GetOfferings)
-                } else {
-                    viewModel.setEvent(Event.OnOfferingSelected(state.offerings.first()))
-                }
-            },
+            onActionButtonClicked = { viewModel.setEvent(Event.OnProceedButtonClicked) },
             onFooterItemClicked = { viewModel.setEvent(it) },
             onOfferingSelected = { viewModel.setEvent(Event.OnOfferingSelected(it)) }
         )
@@ -80,7 +75,7 @@ private fun PaywallContent(onCancel: () -> Unit) {
                 rememberScrollState()
             ), horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(56.dp))
+        Spacer(modifier = Modifier.height(48.dp))
         Text(
             text = "How your free \ntrial works",
             modifier = Modifier.padding(horizontal = 32.dp),
@@ -89,10 +84,11 @@ private fun PaywallContent(onCancel: () -> Unit) {
             ),
             textAlign = TextAlign.Center
         )
-        Spacer(modifier = Modifier.height(56.dp))
+        Spacer(modifier = Modifier.height(48.dp))
         SubscriptionsSteps()
-        Spacer(modifier = Modifier.height(56.dp))
-        HorizontalDivider()
+        Spacer(modifier = Modifier.height(40.dp))
+        HorizontalDivider(color = CustomColor.Gray_200)
+        Spacer(modifier = Modifier.height(48.dp))
         DismissContainer(onDismiss = onCancel)
         Spacer(modifier = Modifier.height(200.dp))
     }

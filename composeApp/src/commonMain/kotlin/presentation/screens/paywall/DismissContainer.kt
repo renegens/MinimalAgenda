@@ -7,11 +7,9 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -31,7 +29,6 @@ fun DismissContainer(onDismiss: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
         Text(
             text = "Made by one person with no investors or corporate owner",
             style = iosSubheadline,
@@ -85,7 +82,7 @@ fun DismissContainer(onDismiss: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            "You're in your App Store subscriptions. Select Minimalist Daily Planer press Cancel Trial and confirm.",
+            "You're in your App Store subscriptions. Select Minimalist Daily Planner press Cancel Trial and confirm.",
             style = iosFootnote,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface

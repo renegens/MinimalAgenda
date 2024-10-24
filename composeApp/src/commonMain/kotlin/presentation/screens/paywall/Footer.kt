@@ -17,7 +17,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.revenuecat.purchases.kmp.models.Package
@@ -42,23 +41,25 @@ fun Footer(
 ) {
 
     Column(
-        modifier = Modifier.background(MaterialTheme.colorScheme.surface).shadow(elevation = 1.dp)
+        modifier = Modifier
+            .background(MaterialTheme.colorScheme.surface)
             .padding(horizontal = 16.dp)
     ) {
-
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         if (offerings.isEmpty()) {
             Spacer(modifier = Modifier.height(16.dp))
         } else {
-            Text(
-                modifier = Modifier.align(Alignment.CenterHorizontally),
-                text = selectedOffering?.getOfferText() ?: "",
-                style = iosBody,
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(8.dp))
 
+            if (showAllPans.not()) {
+                Text(
+                    modifier = Modifier.align(Alignment.CenterHorizontally),
+                    text = selectedOffering?.getOfferText() ?: "",
+                    style = iosBody,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
 
         if (showAllPans && offerings.isNotEmpty()) {

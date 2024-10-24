@@ -2,6 +2,8 @@ package presentation.screens.paywall
 
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.models.CustomerInfo
+import com.revenuecat.purchases.kmp.models.Package
+import com.revenuecat.purchases.kmp.models.PackageType
 import com.revenuecat.purchases.kmp.models.PurchasesError
 import com.revenuecat.purchases.kmp.models.PurchasesErrorCode
 import data.PRIVACY_URL
@@ -38,11 +40,26 @@ class PaywallViewModel(private val browser: Browser) :
             Event.OpenPrivacy -> browser.openUrl(PRIVACY_URL)
             Event.OpenTermsOfUse -> browser.openUrl(TERMS_OF_USE_URL)
             Event.AllPlans -> setState { copy(showAllPlans = !showAllPlans) }
-            Event.OnProceedButtonClicked -> handlePurchase(uiState.value.selectedPackage!!)
+            Event.OnProceedButtonClicked -> {
+                if (uiState.value.needsReload || uiState.value.offerings.isEmpty()) {
+                    getOfferings()
+                    return
+                }
+
+                val item = uiState.value.selectedPackage
+                item?.let { handlePurchase(it) } ?: setState {
+                    copy(
+                        error = PurchasesError(
+                            underlyingErrorMessage = "No Product Selected",
+                            code = PurchasesErrorCode.ConfigurationError
+                        )
+                    )
+                }
+            }
         }
     }
 
-    private fun handlePurchase(packageItem: com.revenuecat.purchases.kmp.models.Package) {
+    private fun handlePurchase(packageItem: Package) {
         setState { copy(isProcessing = true) }
         Purchases.sharedInstance.purchase(
             packageToPurchase = packageItem,
@@ -68,16 +85,25 @@ class PaywallViewModel(private val browser: Browser) :
                 if (items.isNullOrEmpty()) {
                     setState { copy(needsReload = true, isProcessing = false) }
                 } else {
-                    items.forEach {
-                        println(it.identifier)
+                    var selectedItem: Package? = null
+                    val sortedItems = mutableListOf<Package>()
+                    items.firstOrNull { it.packageType == PackageType.MONTHLY }?.let {
+                        sortedItems.add(it)
                     }
-                    val selectedItem = items.firstOrNull { it.identifier == "\$rc_monthly" }
+                    items.firstOrNull { it.packageType == PackageType.ANNUAL }?.let {
+                        sortedItems.add(it)
+                        selectedItem = it
+                    }
+                    items.firstOrNull { it.packageType == PackageType.LIFETIME }?.let {
+                        sortedItems.add(it)
+                    }
+
                     setState {
                         copy(
-                            offerings = items,
+                            offerings = sortedItems,
                             isProcessing = false,
                             needsReload = false,
-                            selectedPackage = selectedItem
+                            selectedPackage = selectedItem ?: sortedItems.first()
                         )
                     }
                 }

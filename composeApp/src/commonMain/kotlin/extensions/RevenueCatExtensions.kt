@@ -1,16 +1,17 @@
 package extensions
 
-import com.revenuecat.purchases.kmp.CustomerInfo
 import com.revenuecat.purchases.kmp.LogLevel
-import com.revenuecat.purchases.kmp.Package
-import com.revenuecat.purchases.kmp.PackageType
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.PurchasesConfiguration
+import com.revenuecat.purchases.kmp.models.CustomerInfo
+import com.revenuecat.purchases.kmp.models.Package
+import com.revenuecat.purchases.kmp.models.PackageType
 
 private val entitlementIdentifier = "Unlocked"
 val REVENUECAT_API_KEY = "appl_yNbwOFpPkxlEQiXtVZmDQpMsMBt"
 
-fun CustomerInfo.isSubscribed() = this.entitlements[entitlementIdentifier]?.isActive == true
+fun CustomerInfo.isSubscribed() =
+    this.entitlements[entitlementIdentifier]?.isActive == true
 
 fun initializeRevenueCat(debug: Boolean = false) {
     if (debug) {
