@@ -18,7 +18,7 @@ class PaywallContract {
     ) : UiState
 
     sealed class Effect : UiEffect {
-        object OnPurchaseCompleted : Effect()
+        class OnPurchaseCompleted(val purchase: Package?) : Effect()
     }
 
     sealed class Event : UiEvent {

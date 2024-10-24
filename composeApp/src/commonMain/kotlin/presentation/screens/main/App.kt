@@ -24,6 +24,15 @@ fun App() {
         AppTheme(
             appThemeMode = state.appTheme.appThemeMode, appColor = state.appTheme.appColor
         ) {
+
+            if (state.showTrialError) {
+                TrialNotificationError { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
+            }
+
+            if (state.showTrialSuccess) {
+                TrialNotificationSuccess { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
+            }
+
             CalendarScreen(appThemeMode = state.appTheme.appThemeMode,
                 forceEventLoad = state.forceEventLoad,
                 onAddEvent = {
@@ -43,7 +52,7 @@ fun App() {
                     sheetState = sheetState
                 ) {
                     PaywallScreen(
-                        onPurchaseComplete = { viewModel.setEvent(AppContract.Event.DismissPaywall) },
+                        onPurchaseComplete = { viewModel.setEvent(AppContract.Event.OnPurchased(it)) },
                         onCancel = { viewModel.setEvent(AppContract.Event.DismissPaywall) })
                 }
             }

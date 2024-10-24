@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.revenuecat.purchases.kmp.models.Package
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.AppAlertDialog
@@ -30,14 +31,14 @@ import presentation.theme.CustomColor
 import presentation.theme.iosTitle1
 
 @Composable
-fun PaywallScreen(onPurchaseComplete: () -> Unit, onCancel: () -> Unit) {
+fun PaywallScreen(onPurchaseComplete: (Package?) -> Unit, onCancel: () -> Unit) {
     val viewModel: PaywallViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
             when (it) {
-                Effect.OnPurchaseCompleted -> onPurchaseComplete.invoke()
+                is Effect.OnPurchaseCompleted -> onPurchaseComplete.invoke(it.purchase)
             }
         }
     }

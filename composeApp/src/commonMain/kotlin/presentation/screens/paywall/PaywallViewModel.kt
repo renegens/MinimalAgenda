@@ -123,7 +123,7 @@ class PaywallViewModel(private val browser: Browser) :
     private fun onPurchaseComplete(customerInfo: CustomerInfo) {
         setState { copy(isProcessing = false) }
         if (customerInfo.isSubscribed()) {
-            setEffect { Effect.OnPurchaseCompleted }
+            setEffect { Effect.OnPurchaseCompleted(uiState.value.selectedPackage) }
         } else {
             setState {
                 copy(

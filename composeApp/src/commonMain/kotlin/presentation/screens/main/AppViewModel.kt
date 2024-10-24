@@ -2,7 +2,9 @@ package presentation.screens.main
 
 import androidx.lifecycle.viewModelScope
 import com.revenuecat.purchases.kmp.Purchases
+import com.revenuecat.purchases.kmp.models.PackageType
 import domain.use_case.AppThemeListenerUseCase
+import domain.use_case.ScheduleTrialNotificationUseCase
 import extensions.guardPremium
 import presentation.base.BaseViewModel
 import presentation.screens.main.AppContract.*
@@ -15,7 +17,8 @@ import platform.ModalPresenter
 class AppViewModel(
     private val appThemeListenerUseCase: AppThemeListenerUseCase,
     private val eventEditViewHandler: EventEditViewHandler,
-    private val modalPresenter: ModalPresenter
+    private val modalPresenter: ModalPresenter,
+    private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
@@ -45,6 +48,29 @@ class AppViewModel(
 
             Event.NotEligible -> setState { copy(showPaywall = true) }
             Event.DismissPaywall -> setState { copy(showPaywall = false) }
+            is Event.OnPurchased -> {
+                setState { copy(showPaywall = false) }
+                if (event.purchase?.packageType == PackageType.ANNUAL) {
+                    viewModelScope.launch {
+                        when (scheduleTrialNotificationUseCase()) {
+                            ScheduleTrialNotificationUseCase.State.Success -> setState {
+                                copy(
+                                    showTrialSuccess = true
+                                )
+                            }
+
+                            else -> setState { copy(showTrialError = true) }
+                        }
+                    }
+                }
+            }
+
+            Event.DismissTrialNotification -> setState {
+                copy(
+                    showTrialSuccess = false,
+                    showTrialError = false
+                )
+            }
         }
     }
 

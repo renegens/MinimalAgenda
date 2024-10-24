@@ -9,6 +9,7 @@ import domain.use_case.GetAllEventsUseCase
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
+import domain.use_case.ScheduleTrialNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
@@ -42,6 +43,7 @@ val sharedModule = module {
     factoryOf(::GetSettingsUseCase)
     factoryOf(::SaveSettingsUseCase)
     factoryOf(::ScheduleNotificationUseCase)
+    factoryOf(::ScheduleTrialNotificationUseCase)
     singleOf(::AppThemeListenerUseCase)
 
     factoryOf(::FlatCalendarViewFactory)
