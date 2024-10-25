@@ -26,5 +26,6 @@ class AppContract {
         object NotEligible: Event()
         object DismissPaywall: Event()
         class OnPurchased(val purchase: Package?): Event()
+        object CheckPaywall: Event()
     }
 }

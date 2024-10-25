@@ -69,7 +69,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
     @SuppressLint("SimpleDateFormat")
     fun dateFormatter(milliseconds: String): String {
-        return SimpleDateFormat("HH mm").format(Date(milliseconds.toLong())).toString()
+        return SimpleDateFormat("HH : mm").format(Date(milliseconds.toLong())).toString()
     }
 
     override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {

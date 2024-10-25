@@ -7,8 +7,10 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.lifecycle.Lifecycle
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
+import presentation.components.ComposableLifecycle
 import presentation.screens.calendar.CalendarScreen
 import presentation.screens.paywall.PaywallScreen
 import presentation.theme.AppTheme
@@ -20,6 +22,12 @@ fun App() {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
         val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+
+        ComposableLifecycle {
+            if (it == Lifecycle.Event.ON_START) {
+                viewModel.setEvent(AppContract.Event.CheckPaywall)
+            }
+        }
 
         AppTheme(
             appThemeMode = state.appTheme.appThemeMode, appColor = state.appTheme.appColor

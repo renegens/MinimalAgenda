@@ -5,6 +5,7 @@ import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.models.PackageType
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.ScheduleTrialNotificationUseCase
+import domain.use_case.ShowPaywallOncePerDayUseCase
 import extensions.guardPremium
 import presentation.base.BaseViewModel
 import presentation.screens.main.AppContract.*
@@ -18,7 +19,8 @@ class AppViewModel(
     private val appThemeListenerUseCase: AppThemeListenerUseCase,
     private val eventEditViewHandler: EventEditViewHandler,
     private val modalPresenter: ModalPresenter,
-    private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase
+    private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
+    private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
@@ -70,6 +72,12 @@ class AppViewModel(
                     showTrialSuccess = false,
                     showTrialError = false
                 )
+            }
+
+            Event.CheckPaywall -> viewModelScope.launch {
+                if (showPaywallOncePerDayUseCase.shouldPresentPaywall()) {
+                    setState { copy(showPaywall = true) }
+                }
             }
         }
     }
