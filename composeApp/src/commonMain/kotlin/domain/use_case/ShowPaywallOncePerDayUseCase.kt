@@ -9,7 +9,7 @@ import kotlin.time.DurationUnit
 class ShowPaywallOncePerDayUseCase(private val paywallLocalDataSource: PaywallLocalDataSource) {
 
     suspend fun shouldPresentPaywall(): Boolean {
-        if (isPremium()) return true
+        if (isPremium()) return false
 
         val timestamp = paywallLocalDataSource.getTimestamp()
 
