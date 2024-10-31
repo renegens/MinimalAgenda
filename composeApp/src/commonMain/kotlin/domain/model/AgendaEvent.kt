@@ -1,6 +1,7 @@
 package domain.model
 
 import data.local.HiddenEventEntity
+import extensions.takingScreenshots
 import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
@@ -68,6 +69,7 @@ data class AgendaEvent(
     }
 
     fun hasPassedForToday(today: Int): Boolean {
+        if (takingScreenshots) return false
         if (epochDay != today) return false
         val eventDate =
             Instant.fromEpochSeconds(endTime ?: 0).toLocalDateTime(TimeZone.currentSystemDefault())
