@@ -218,6 +218,7 @@ fun Event(
             }
 
             Text(
+                modifier = Modifier.padding(start = 4.dp),
                 text = event.title,
                 style = style,
                 color = event.getTextColor(showAll),
