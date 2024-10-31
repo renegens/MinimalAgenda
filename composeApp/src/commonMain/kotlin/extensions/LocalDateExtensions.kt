@@ -6,7 +6,7 @@ import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
-val takingScreenshots = true
+val takingScreenshots = false
 private val epochDay4September2024 = 1725408000L
 
 val today: LocalDate
