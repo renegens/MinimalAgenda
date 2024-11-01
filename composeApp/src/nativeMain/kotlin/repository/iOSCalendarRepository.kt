@@ -19,15 +19,9 @@ import platform.EventKit.EKSpan
 import platform.Foundation.NSCalendar
 import platform.Foundation.NSCalendarUnitMonth
 import platform.Foundation.NSDate
-import platform.Foundation.NSDateFormatter
-import platform.Foundation.NSDateFormatterShortStyle
-import platform.Foundation.NSLocale
-import platform.Foundation.NSTimeInterval
-import platform.Foundation.NSTimeZone
-import platform.Foundation.currentLocale
-import platform.Foundation.localTimeZone
 import platform.Foundation.timeIntervalSince1970
 import platform.toEKEventDate
+import platform.uses24HourClock
 import kotlin.coroutines.resume
 
 @Suppress("ClassName")
@@ -92,6 +86,11 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                 if (ekEvent == null) {
                     continuation.resume(null)
                 }
+                val timeZone = TimeZone.currentSystemDefault()
+                val uses24HourClock = uses24HourClock()
+                val localDateTime = Instant.fromEpochSeconds(
+                    ekEvent?.startDate?.timeIntervalSince1970?.toLong() ?: 0
+                ).toLocalDateTime(timeZone)
                 ekEvent as EKEvent
                 val event = EventEntity(
                     id = ekEvent.eventIdentifier,
@@ -101,10 +100,9 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
                     allDay = ekEvent.allDay,
                     isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
-                    epochDay = calculateEpochDay(
-                        ekEvent.startDate?.timeIntervalSince1970?.toLong(), TimeZone.currentSystemDefault()
-                    ),
-                    format = formatUnixTimestamp(ekEvent.startDate?.timeIntervalSince1970)
+                    epochDay = localDateTime.date.toEpochDays(),
+                    localDateTime = localDateTime,
+                    uses24HourClock = uses24HourClock
                 )
 
                 continuation.resume(event)
@@ -155,45 +153,34 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
             suspendCancellableCoroutine { continuation ->
 
                 val timeZone = TimeZone.currentSystemDefault()
+                val uses24HourClock = uses24HourClock()
                 val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
                 val startDate = nsStartDateForCalendar(durationInMonths)
                 val endDate = nsEndDateForCalendar(durationInMonths)
                 val predicate =
                     eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
-                val events = eventStore.eventsMatchingPredicate(predicate).map { event ->
-                    event as EKEvent
+                val events = eventStore.eventsMatchingPredicate(predicate).map { ekEvent ->
+                    ekEvent as EKEvent
+                    val localDateTime = Instant.fromEpochSeconds(
+                        ekEvent.startDate?.timeIntervalSince1970?.toLong() ?: 0
+                    ).toLocalDateTime(timeZone)
+
                     EventEntity(
-                        id = event.eventIdentifier,
-                        title = event.title,
-                        location = event.location,
-                        startTime = event.startDate?.timeIntervalSince1970?.toLong(),
-                        endTime = event.endDate?.timeIntervalSince1970?.toLong(),
-                        allDay = event.allDay,
-                        epochDay = calculateEpochDay(
-                            event.startDate?.timeIntervalSince1970?.toLong(), timeZone
-                        ),
-                        isRecurring = event.recurrenceRules().isNullOrEmpty().not(),
-                        format = formatUnixTimestamp(event.startDate?.timeIntervalSince1970)
+                        id = ekEvent.eventIdentifier,
+                        title = ekEvent.title,
+                        location = ekEvent.location,
+                        startTime = ekEvent.startDate?.timeIntervalSince1970?.toLong(),
+                        endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
+                        allDay = ekEvent.allDay,
+                        epochDay = localDateTime.date.toEpochDays(),
+                        isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
+                        localDateTime = localDateTime,
+                        uses24HourClock = uses24HourClock
                     )
                 }
 
                 continuation.resume(events)
             }
         }
-    }
-
-    private fun calculateEpochDay(starTime: Long?, timeZone: TimeZone): Int {
-        return Instant.fromEpochSeconds(starTime ?: 0).toLocalDateTime(timeZone).date.toEpochDays()
-    }
-
-    private fun formatUnixTimestamp(unixTimestamp: NSTimeInterval?): String {
-        val nsDate = NSDate(unixTimestamp!!)
-        val nsDateFormatter = NSDateFormatter()
-
-        nsDateFormatter.timeZone = NSTimeZone.localTimeZone
-        nsDateFormatter.locale = NSLocale.currentLocale
-        nsDateFormatter.timeStyle = NSDateFormatterShortStyle
-        val localTimeString = nsDateFormatter.stringFromDate(nsDate)
-        return localTimeString
     }
 }

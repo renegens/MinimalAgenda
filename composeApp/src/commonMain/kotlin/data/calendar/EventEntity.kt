@@ -1,6 +1,7 @@
 package data.calendar
 
 import domain.model.AgendaEvent
+import kotlinx.datetime.LocalDateTime
 
 data class EventEntity(
     val id: String?,
@@ -10,8 +11,9 @@ data class EventEntity(
     val endTime: Long?,
     val allDay: Boolean?,
     val isRecurring: Boolean?,
-    var epochDay: Int? = null,
-    val format: String = ""
+    var epochDay: Int,
+    val localDateTime: LocalDateTime,
+    val uses24HourClock: Boolean
 )
 
 fun EventEntity.toEvent(): AgendaEvent {
@@ -28,6 +30,7 @@ fun EventEntity.toEvent(): AgendaEvent {
         isRecurring = isRecurring!!,
         epochDay = epochDay,
         isHidden = false,
-        formattedTime = format
+        localDateTime = localDateTime,
+        uses24HourClock = uses24HourClock
     )
 }
