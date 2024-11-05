@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.models.PackageType
 import domain.use_case.AppThemeListenerUseCase
+import domain.use_case.SavePaywallTimestampUseCase
 import domain.use_case.ScheduleTrialNotificationUseCase
 import domain.use_case.ShowPaywallOncePerDayUseCase
 import extensions.guardPremium
@@ -20,7 +21,8 @@ class AppViewModel(
     private val eventEditViewHandler: EventEditViewHandler,
     private val modalPresenter: ModalPresenter,
     private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
-    private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase
+    private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase,
+    private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
@@ -48,7 +50,11 @@ class AppViewModel(
                     onSubscribed = ::showNewEventScreen,
                     onPaywall = { setEvent(Event.NotEligible) })
 
-            Event.NotEligible -> setState { copy(showPaywall = true) }
+            Event.NotEligible -> {
+                viewModelScope.launch { savePaywallTimestampUseCase() }
+                setState { copy(showPaywall = true) }
+            }
+
             Event.DismissPaywall -> setState { copy(showPaywall = false) }
             is Event.OnPurchased -> {
                 setState { copy(showPaywall = false) }

@@ -8,6 +8,7 @@ import domain.use_case.CalendarGenerator
 import domain.use_case.FlatCalendarViewFactory
 import domain.use_case.GetAllEventsUseCase
 import domain.use_case.GetSettingsUseCase
+import domain.use_case.SavePaywallTimestampUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ScheduleTrialNotificationUseCase
@@ -47,6 +48,7 @@ val sharedModule = module {
     factoryOf(::ScheduleNotificationUseCase)
     factoryOf(::ScheduleTrialNotificationUseCase)
     factoryOf(::ShowPaywallOncePerDayUseCase)
+    factoryOf(::SavePaywallTimestampUseCase)
     singleOf(::AppThemeListenerUseCase)
 
     factoryOf(::FlatCalendarViewFactory)

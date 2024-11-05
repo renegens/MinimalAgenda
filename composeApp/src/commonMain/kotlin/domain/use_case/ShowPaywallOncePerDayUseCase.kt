@@ -6,7 +6,10 @@ import kotlinx.datetime.Clock
 import kotlin.time.Duration.Companion.milliseconds
 import kotlin.time.DurationUnit
 
-class ShowPaywallOncePerDayUseCase(private val paywallLocalDataSource: PaywallLocalDataSource) {
+class ShowPaywallOncePerDayUseCase(
+    private val paywallLocalDataSource: PaywallLocalDataSource,
+    private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase
+) {
 
     suspend fun shouldPresentPaywall(): Boolean {
         if (isPremium()) return false
@@ -15,22 +18,18 @@ class ShowPaywallOncePerDayUseCase(private val paywallLocalDataSource: PaywallLo
 
         if (timestamp == null) {
             // First time launch, save the current timestamp
-            saveCurrentTimestamp()
+            savePaywallTimestampUseCase()
             return false
         } else {
             val hoursPassed = hoursSinceTimestamp(timestamp)
 
             if (hoursPassed >= 24) {
-                saveCurrentTimestamp()
+                savePaywallTimestampUseCase()
                 return true
             } else {
                 return false
             }
         }
-    }
-
-    private suspend fun saveCurrentTimestamp() {
-        paywallLocalDataSource.save(Clock.System.now().toEpochMilliseconds())
     }
 
     private fun hoursSinceTimestamp(timestamp: Long): Long {
