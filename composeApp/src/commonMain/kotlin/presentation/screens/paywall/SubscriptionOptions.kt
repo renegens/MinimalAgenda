@@ -114,7 +114,7 @@ fun SubscriptionOptions(
 
                             if (offering.packageType == PackageType.ANNUAL) {
                                 Text(
-                                    text = "85% OFF",
+                                    text = "72% OFF",
                                     color = MaterialTheme.colorScheme.inverseSurface,
                                     style = iosFootnote,
                                     modifier = Modifier
