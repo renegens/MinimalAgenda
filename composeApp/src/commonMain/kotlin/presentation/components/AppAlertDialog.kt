@@ -6,17 +6,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import getPlatform
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
+import io.github.alexzhirkevich.cupertino.cancel
 import io.github.alexzhirkevich.cupertino.default
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import presentation.theme.DMSans18Regular
 
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
-fun AppAlertDialog(title: String, message: String, onDismissRequest: () -> Unit) {
+fun AppAlertDialog(
+    title: String,
+    message: String,
+    confirmButtonLabel: String = "OK",
+    onContinueRequest: () -> Unit,
+    onCancelRequest: (() -> Unit)? = null
+) {
     if (getPlatform().isAndroid) {
         AlertDialog(
             title = {
@@ -31,19 +39,20 @@ fun AppAlertDialog(title: String, message: String, onDismissRequest: () -> Unit)
                     color = MaterialTheme.colorScheme.inverseSurface
                 )
             },
-            onDismissRequest = onDismissRequest,
+            onDismissRequest = onContinueRequest,
             confirmButton = {
                 TextButton(
-                    onClick = onDismissRequest
+                    onClick = onContinueRequest
                 ) {
-                    Text("Ok")
+                    Text(confirmButtonLabel)
                 }
             }
         )
     } else {
         CupertinoTheme {
             CupertinoAlertDialog(
-                onDismissRequest = onDismissRequest,
+                properties = DialogProperties(dismissOnClickOutside = false),
+                onDismissRequest = onContinueRequest,
                 title = {
                     CupertinoText(title)
                 },
@@ -53,10 +62,19 @@ fun AppAlertDialog(title: String, message: String, onDismissRequest: () -> Unit)
             ) {
                 default(
                     onClick = {
-                        onDismissRequest.invoke()
+                        onContinueRequest.invoke()
                     }
                 ) {
-                    CupertinoText("OK")
+                    CupertinoText(confirmButtonLabel)
+                }
+                onCancelRequest?.let {
+                    cancel(
+                        onClick = {
+                            it.invoke()
+                        }
+                    ) {
+                        CupertinoText("Cancel")
+                    }
                 }
             }
         }

@@ -1,28 +1,39 @@
 PODS:
   - composeApp (1.0):
-    - PurchasesHybridCommon (= 13.2.0)
-  - PurchasesHybridCommon (13.2.0):
-    - RevenueCat (= 5.3.1)
-  - RevenueCat (5.3.1)
+    - PurchasesHybridCommon (= 13.6.0)
+    - PurchasesHybridCommonUI (= 13.6.0)
+  - PurchasesHybridCommon (13.6.0):
+    - RevenueCat (= 5.6.0)
+  - PurchasesHybridCommonUI (13.6.0):
+    - PurchasesHybridCommon (= 13.6.0)
+    - RevenueCatUI (= 5.6.0)
+  - RevenueCat (5.6.0)
+  - RevenueCatUI (5.6.0):
+    - RevenueCat (= 5.6.0)
 
 DEPENDENCIES:
   - composeApp (from `../composeApp`)
-  - PurchasesHybridCommon (= 13.2.0)
+  - PurchasesHybridCommon (= 13.6.0)
+  - PurchasesHybridCommonUI (= 13.6.0)
 
 SPEC REPOS:
   trunk:
     - PurchasesHybridCommon
+    - PurchasesHybridCommonUI
     - RevenueCat
+    - RevenueCatUI
 
 EXTERNAL SOURCES:
   composeApp:
     :path: "../composeApp"
 
 SPEC CHECKSUMS:
-  composeApp: 0109f684507a14fdc012c4fb392298aa88babf51
-  PurchasesHybridCommon: 20acf98303a9593f5d56b449459dcf16ea581a99
-  RevenueCat: b2d2555cbb1f4116d341af4c5f82269c8e4e499a
+  composeApp: 871ea6227e05f54a24d873d13a2d6b3fe1d89946
+  PurchasesHybridCommon: 7201254c8cd7a735f793cf9eb46677feb218f876
+  PurchasesHybridCommonUI: a66ca941d139ff2f5a827c82b4185ddc7cccba1d
+  RevenueCat: a7117d40c27bc1e8a48e41ca4ea6856209664097
+  RevenueCatUI: 8ea429e4f6353ef3995f24d8d069fef19e2fa130
 
-PODFILE CHECKSUM: 31f90bdf9441aa69c36ca972d759e74a1a9ed2a8
+PODFILE CHECKSUM: d941aece63f777aa6c30f9b909bd8669d456f5db
 
 COCOAPODS: 1.15.2

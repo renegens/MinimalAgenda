@@ -1,7 +1,7 @@
 package presentation.screens.paywall
 
-import com.revenuecat.purchases.kmp.Package
-import com.revenuecat.purchases.kmp.PurchasesError
+import com.revenuecat.purchases.kmp.models.Package
+import com.revenuecat.purchases.kmp.models.PurchasesError
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
@@ -12,19 +12,23 @@ class PaywallContract {
         val offerings: List<Package> = emptyList(),
         val isProcessing: Boolean = false,
         val error: PurchasesError? = null,
-        val needsReload: Boolean = false
+        val needsReload: Boolean = false,
+        val showAllPlans: Boolean = false,
+        val selectedPackage: Package? = null
     ) : UiState
 
     sealed class Effect : UiEffect {
-        object OnPurchaseCompleted: Effect()
+        class OnPurchaseCompleted(val purchase: Package?) : Effect()
     }
 
     sealed class Event : UiEvent {
-        class OnPurchaseItemClicked(val item: Package): Event()
+        class OnOfferingSelected(val offer: Package) : Event()
+        object OnProceedButtonClicked : Event()
         object DismissErrorDialog : Event()
         object GetOfferings : Event()
         object RestorePurchases : Event()
-        object OpenPrivacy: Event()
-        object OpenTermsOfUse: Event()
+        object AllPlans : Event()
+        object OpenPrivacy : Event()
+        object OpenTermsOfUse : Event()
     }
 }

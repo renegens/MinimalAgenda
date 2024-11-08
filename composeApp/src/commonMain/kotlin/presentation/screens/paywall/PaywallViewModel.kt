@@ -1,16 +1,19 @@
 package presentation.screens.paywall
 
-import com.revenuecat.purchases.kmp.CustomerInfo
-import com.revenuecat.purchases.kmp.Package
 import com.revenuecat.purchases.kmp.Purchases
-import com.revenuecat.purchases.kmp.PurchasesError
-import com.revenuecat.purchases.kmp.PurchasesErrorCode
+import com.revenuecat.purchases.kmp.models.CustomerInfo
+import com.revenuecat.purchases.kmp.models.Package
+import com.revenuecat.purchases.kmp.models.PackageType
+import com.revenuecat.purchases.kmp.models.PurchasesError
+import com.revenuecat.purchases.kmp.models.PurchasesErrorCode
 import data.PRIVACY_URL
 import data.TERMS_OF_USE_URL
 import extensions.isSubscribed
 import platform.Browser
 import presentation.base.BaseViewModel
-import presentation.screens.paywall.PaywallContract.*
+import presentation.screens.paywall.PaywallContract.Effect
+import presentation.screens.paywall.PaywallContract.Event
+import presentation.screens.paywall.PaywallContract.State
 
 class PaywallViewModel(private val browser: Browser) :
     BaseViewModel<Event, State, Effect>() {
@@ -23,12 +26,12 @@ class PaywallViewModel(private val browser: Browser) :
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.OnPurchaseItemClicked -> handlePurchase(event.item)
+            is Event.OnOfferingSelected -> setState { copy(selectedPackage = event.offer) }
             Event.DismissErrorDialog -> setState {
                 copy(
                     isProcessing = false,
                     error = null,
-                    needsReload = false,
+                    needsReload = true,
                 )
             }
 
@@ -36,6 +39,23 @@ class PaywallViewModel(private val browser: Browser) :
             Event.RestorePurchases -> restorePurchases()
             Event.OpenPrivacy -> browser.openUrl(PRIVACY_URL)
             Event.OpenTermsOfUse -> browser.openUrl(TERMS_OF_USE_URL)
+            Event.AllPlans -> setState { copy(showAllPlans = !showAllPlans) }
+            Event.OnProceedButtonClicked -> {
+                if (uiState.value.needsReload || uiState.value.offerings.isEmpty()) {
+                    getOfferings()
+                    return
+                }
+
+                val item = uiState.value.selectedPackage
+                item?.let { handlePurchase(it) } ?: setState {
+                    copy(
+                        error = PurchasesError(
+                            underlyingErrorMessage = "No Product Selected",
+                            code = PurchasesErrorCode.ConfigurationError
+                        )
+                    )
+                }
+            }
         }
     }
 
@@ -65,7 +85,27 @@ class PaywallViewModel(private val browser: Browser) :
                 if (items.isNullOrEmpty()) {
                     setState { copy(needsReload = true, isProcessing = false) }
                 } else {
-                    setState { copy(offerings = items, isProcessing = false) }
+                    var selectedItem: Package? = null
+                    val sortedItems = mutableListOf<Package>()
+                    items.firstOrNull { it.packageType == PackageType.MONTHLY }?.let {
+                        sortedItems.add(it)
+                    }
+                    items.firstOrNull { it.packageType == PackageType.ANNUAL }?.let {
+                        sortedItems.add(it)
+                        selectedItem = it
+                    }
+                    items.firstOrNull { it.packageType == PackageType.LIFETIME }?.let {
+                        sortedItems.add(it)
+                    }
+
+                    setState {
+                        copy(
+                            offerings = sortedItems,
+                            isProcessing = false,
+                            needsReload = false,
+                            selectedPackage = selectedItem ?: sortedItems.first()
+                        )
+                    }
                 }
             })
     }
@@ -83,7 +123,7 @@ class PaywallViewModel(private val browser: Browser) :
     private fun onPurchaseComplete(customerInfo: CustomerInfo) {
         setState { copy(isProcessing = false) }
         if (customerInfo.isSubscribed()) {
-            setEffect { Effect.OnPurchaseCompleted }
+            setEffect { Effect.OnPurchaseCompleted(uiState.value.selectedPackage) }
         } else {
             setState {
                 copy(

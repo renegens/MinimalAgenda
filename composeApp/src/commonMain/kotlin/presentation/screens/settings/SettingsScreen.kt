@@ -103,7 +103,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
                 AppAlertDialog(
                     title = "Mail Error",
                     message = "Mail services are not available",
-                    onDismissRequest = { showEmailError = false })
+                    onContinueRequest = { showEmailError = false })
             }
             ItemText("Help us improve by sharing your feedback – we’d love to hear from you!")
             Spacer(modifier = Modifier.height(16.dp))

@@ -1,8 +1,11 @@
 package presentation.screens.main
 
 import androidx.lifecycle.viewModelScope
-import com.revenuecat.purchases.kmp.Purchases
+import com.revenuecat.purchases.kmp.models.PackageType
 import domain.use_case.AppThemeListenerUseCase
+import domain.use_case.SavePaywallTimestampUseCase
+import domain.use_case.ScheduleTrialNotificationUseCase
+import domain.use_case.ShowPaywallOncePerDayUseCase
 import extensions.guardPremium
 import presentation.base.BaseViewModel
 import presentation.screens.main.AppContract.*
@@ -15,13 +18,14 @@ import platform.ModalPresenter
 class AppViewModel(
     private val appThemeListenerUseCase: AppThemeListenerUseCase,
     private val eventEditViewHandler: EventEditViewHandler,
-    private val modalPresenter: ModalPresenter
+    private val modalPresenter: ModalPresenter,
+    private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
+    private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase,
+    private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
         initializeRevenueCat()
-        Purchases.sharedInstance.getCustomerInfo(onError = { }, onSuccess = { })
-
         viewModelScope.launch {
             appThemeListenerUseCase().collectLatest {
                 setState { copy(appTheme = it) }
@@ -44,7 +48,47 @@ class AppViewModel(
                     onPaywall = { setEvent(Event.NotEligible) })
 
             Event.NotEligible -> {
-                modalPresenter.presentPaywall(appTheme = uiState.value.appTheme, onCompletion = {})
+                viewModelScope.launch { savePaywallTimestampUseCase() }
+                setState { copy(showPaywall = true) }
+            }
+
+            Event.DismissPaywall -> setState { copy(showPaywall = false) }
+            is Event.OnPurchased -> {
+                setState { copy(showPaywall = false) }
+                if (event.purchase?.packageType == PackageType.ANNUAL) {
+                    setState { copy(showNotificationPermissionInfo = true) }
+                }
+            }
+
+            Event.DismissTrialNotification -> setState {
+                copy(
+                    showTrialNotificationSuccess = false,
+                    showTrialNotificationError = false
+                )
+            }
+
+            Event.CheckPaywall -> viewModelScope.launch {
+                if (showPaywallOncePerDayUseCase.shouldPresentPaywall()) {
+                    setState { copy(showPaywall = true) }
+                }
+            }
+
+            is Event.RequestNotificationPermission -> {
+                setState { copy(showNotificationPermissionInfo = false) }
+                if (event.shouldRequest) {
+                    viewModelScope.launch {
+                        when (scheduleTrialNotificationUseCase()) {
+                            ScheduleTrialNotificationUseCase.State.Success -> setState {
+                                copy(
+                                    showTrialNotificationSuccess = true
+                                )
+                            }
+                            else -> setState { copy(showTrialNotificationError = true) }
+                        }
+                    }
+                } else {
+                    setState { copy(showTrialNotificationError = true) }
+                }
             }
         }
     }
