@@ -25,9 +25,10 @@ import presentation.theme.iosFootnote
 import presentation.theme.iosSubheadline
 
 @Composable
-fun DismissContainer(onDismiss: () -> Unit) {
+fun DismissContainer(isProcessing: Boolean, onDismiss: () -> Unit) {
     Column(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
             text = "Made by one person with no investors or corporate owner",
@@ -45,7 +46,11 @@ fun DismissContainer(onDismiss: () -> Unit) {
         Text(
             "Dismiss",
             style = iosBody.copy(textDecoration = TextDecoration.Underline),
-            modifier = Modifier.clickable { onDismiss.invoke() },
+            modifier = Modifier.clickable {
+                if (isProcessing.not()) {
+                    onDismiss.invoke()
+                }
+            },
             color = MaterialTheme.colorScheme.onSurface
         )
 

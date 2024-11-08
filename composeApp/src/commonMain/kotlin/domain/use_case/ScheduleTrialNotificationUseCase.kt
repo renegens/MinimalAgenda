@@ -19,10 +19,9 @@ class ScheduleTrialNotificationUseCase(
         if (permissionGranted) {
 
             val fiveDaysSeconds = 432000
-
             val didSchedule = notificationHandler.scheduleNotification(
-                id = "Papely trial reminder",
-                title = "Trial expiration",
+                id = "daily planner trial reminder",
+                title = "Daily Planner",
                 body = "Your trial will end in 2 days",
                 delayInSeconds = fiveDaysSeconds
             )

@@ -33,12 +33,24 @@ fun App() {
             appThemeMode = state.appTheme.appThemeMode, appColor = state.appTheme.appColor
         ) {
 
-            if (state.showTrialError) {
+            if (state.showTrialNotificationError) {
                 TrialNotificationError { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
             }
 
-            if (state.showTrialSuccess) {
+            if (state.showTrialNotificationSuccess) {
                 TrialNotificationSuccess { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
+            }
+
+            if (state.showNotificationPermissionInfo) {
+                TrialNotificationAskForNotificationPermission(onContinue = {
+                    viewModel.setEvent(
+                        AppContract.Event.RequestNotificationPermission(true)
+                    )
+                }, onCancel = {
+                    viewModel.setEvent(
+                        AppContract.Event.RequestNotificationPermission(false)
+                    )
+                })
             }
 
             CalendarScreen(appThemeMode = state.appTheme.appThemeMode,

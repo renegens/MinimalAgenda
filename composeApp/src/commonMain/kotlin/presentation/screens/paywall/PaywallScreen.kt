@@ -46,7 +46,7 @@ fun PaywallScreen(onPurchaseComplete: (Package?) -> Unit, onCancel: () -> Unit) 
     if (state.error != null) {
         AppAlertDialog(
             title = "Something went wrong",
-            onDismissRequest = { viewModel.setEvent(Event.DismissErrorDialog) },
+            onContinueRequest = { viewModel.setEvent(Event.DismissErrorDialog) },
             message = state.error?.message ?: ""
         )
     }
@@ -62,18 +62,19 @@ fun PaywallScreen(onPurchaseComplete: (Package?) -> Unit, onCancel: () -> Unit) 
             onOfferingSelected = { viewModel.setEvent(Event.OnOfferingSelected(it)) }
         )
     }) {
-        PaywallContent(onCancel = onCancel)
+        PaywallContent(state.isProcessing, onCancel = onCancel)
     }
 }
 
 @Composable
-private fun PaywallContent(onCancel: () -> Unit) {
+private fun PaywallContent(isProcessing: Boolean, onCancel: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().background(color = MaterialTheme.colorScheme.surface)
             .padding(
                 horizontal = 16.dp
             ).verticalScroll(
-                rememberScrollState()
+                rememberScrollState(),
+                enabled = isProcessing.not()
             ), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer(modifier = Modifier.height(48.dp))
@@ -90,7 +91,7 @@ private fun PaywallContent(onCancel: () -> Unit) {
         Spacer(modifier = Modifier.height(40.dp))
         HorizontalDivider(color = CustomColor.Gray_200)
         Spacer(modifier = Modifier.height(48.dp))
-        DismissContainer(onDismiss = onCancel)
+        DismissContainer(isProcessing = isProcessing, onDismiss = onCancel)
         Spacer(modifier = Modifier.height(200.dp))
     }
 }

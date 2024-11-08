@@ -13,8 +13,9 @@ class AppContract {
         val forceEventLoad: Int = 0,
         val appTheme: AppTheme = AppTheme.Default,
         val showPaywall: Boolean = false,
-        val showTrialError: Boolean = false,
-        val showTrialSuccess: Boolean = false
+        val showTrialNotificationError: Boolean = false,
+        val showTrialNotificationSuccess: Boolean = false,
+        val showNotificationPermissionInfo: Boolean = false
     ) : UiState
 
     sealed class Effect : UiEffect
@@ -23,6 +24,7 @@ class AppContract {
         class EditExternal(val agendaEvent: AgendaEvent): Event()
         object NewEvent: Event()
         object DismissTrialNotification: Event()
+        class  RequestNotificationPermission(val shouldRequest: Boolean): Event()
         object NotEligible: Event()
         object DismissPaywall: Event()
         class OnPurchased(val purchase: Package?): Event()

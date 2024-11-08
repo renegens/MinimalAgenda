@@ -1,7 +1,6 @@
 package presentation.screens.main
 
 import androidx.lifecycle.viewModelScope
-import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.models.PackageType
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.SavePaywallTimestampUseCase
@@ -27,8 +26,6 @@ class AppViewModel(
 
     init {
         initializeRevenueCat()
-        Purchases.sharedInstance.getCustomerInfo(onError = { }, onSuccess = { })
-
         viewModelScope.launch {
             appThemeListenerUseCase().collectLatest {
                 setState { copy(appTheme = it) }
@@ -59,30 +56,38 @@ class AppViewModel(
             is Event.OnPurchased -> {
                 setState { copy(showPaywall = false) }
                 if (event.purchase?.packageType == PackageType.ANNUAL) {
-                    viewModelScope.launch {
-                        when (scheduleTrialNotificationUseCase()) {
-                            ScheduleTrialNotificationUseCase.State.Success -> setState {
-                                copy(
-                                    showTrialSuccess = true
-                                )
-                            }
-
-                            else -> setState { copy(showTrialError = true) }
-                        }
-                    }
+                    setState { copy(showNotificationPermissionInfo = true) }
                 }
             }
 
             Event.DismissTrialNotification -> setState {
                 copy(
-                    showTrialSuccess = false,
-                    showTrialError = false
+                    showTrialNotificationSuccess = false,
+                    showTrialNotificationError = false
                 )
             }
 
             Event.CheckPaywall -> viewModelScope.launch {
                 if (showPaywallOncePerDayUseCase.shouldPresentPaywall()) {
                     setState { copy(showPaywall = true) }
+                }
+            }
+
+            is Event.RequestNotificationPermission -> {
+                setState { copy(showNotificationPermissionInfo = false) }
+                if (event.shouldRequest) {
+                    viewModelScope.launch {
+                        when (scheduleTrialNotificationUseCase()) {
+                            ScheduleTrialNotificationUseCase.State.Success -> setState {
+                                copy(
+                                    showTrialNotificationSuccess = true
+                                )
+                            }
+                            else -> setState { copy(showTrialNotificationError = true) }
+                        }
+                    }
+                } else {
+                    setState { copy(showTrialNotificationError = true) }
                 }
             }
         }
