@@ -87,7 +87,7 @@ fun DismissContainer(isProcessing: Boolean, onDismiss: () -> Unit) {
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            "You're in your App Store subscriptions. Select Minimalist Daily Planner press Cancel Trial and confirm.",
+            "You're in your App Store subscriptions. Select Daily Planner press Cancel Trial and confirm.",
             style = iosFootnote,
             textAlign = TextAlign.Center,
             color = MaterialTheme.colorScheme.onSurface
