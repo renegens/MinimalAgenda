@@ -16,7 +16,10 @@ class AppContract {
         val showTrialNotificationError: Boolean = false,
         val showTrialNotificationSuccess: Boolean = false,
         val showNotificationPermissionInfo: Boolean = false
-    ) : UiState
+    ) : UiState {
+
+        fun isPresentingNotificationOnboarding() = showTrialNotificationSuccess || showTrialNotificationError || showNotificationPermissionInfo
+    }
 
     sealed class Effect : UiEffect
 

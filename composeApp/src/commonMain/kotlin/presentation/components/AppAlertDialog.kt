@@ -11,7 +11,6 @@ import getPlatform
 import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.cancel
 import io.github.alexzhirkevich.cupertino.default
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import presentation.theme.DMSans18Regular
@@ -22,8 +21,7 @@ fun AppAlertDialog(
     title: String,
     message: String,
     confirmButtonLabel: String = "OK",
-    onContinueRequest: () -> Unit,
-    onCancelRequest: (() -> Unit)? = null
+    onContinueRequest: () -> Unit
 ) {
     if (getPlatform().isAndroid) {
         AlertDialog(
@@ -66,15 +64,6 @@ fun AppAlertDialog(
                     }
                 ) {
                     CupertinoText(confirmButtonLabel)
-                }
-                onCancelRequest?.let {
-                    cancel(
-                        onClick = {
-                            it.invoke()
-                        }
-                    ) {
-                        CupertinoText("Cancel")
-                    }
                 }
             }
         }

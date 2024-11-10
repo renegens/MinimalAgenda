@@ -61,7 +61,9 @@ fun App() {
                 onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
                 notEligible = {
                     viewModel.setEvent(AppContract.Event.NotEligible)
-                })
+                },
+                isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding()
+            )
 
             if (state.showPaywall) {
                 ModalBottomSheet(

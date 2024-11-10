@@ -64,7 +64,8 @@ fun DayScreen(
     calendarPermission: CalendarPermissionHandler.State,
     onRequestCalendarPermission: () -> Unit,
     onNotify: (AgendaEvent) -> Unit,
-    onEdit: (AgendaEvent) -> Unit
+    onEdit: (AgendaEvent) -> Unit,
+    isPresentingNotificationOnBoarding: Boolean
 ) {
     if (items.isEmpty()) return
 
@@ -104,9 +105,11 @@ fun DayScreen(
 
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
 
-            CalendarPermission(
-                onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
-            )
+            if (isPresentingNotificationOnBoarding.not()){
+                CalendarPermission(
+                    onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
+                )
+            }
 
             items(items = items, key = { item -> item.uniqueId }, contentType = { item ->
                 when (item) {

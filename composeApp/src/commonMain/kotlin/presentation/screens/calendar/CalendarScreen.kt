@@ -40,7 +40,8 @@ fun CalendarScreen(
     onAddEvent: () -> Unit,
     onEditEvent: (AgendaEvent) -> Unit,
     notEligible: () -> Unit,
-    forceEventLoad: Int
+    forceEventLoad: Int,
+    isPresentingNotificationOnboarding: Boolean
 ) {
     val viewModel: CalendarViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
@@ -149,7 +150,9 @@ fun CalendarScreen(
                         onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
                         onRequestCalendarPermission = {
                             viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                        })
+                        },
+                        isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding
+                    )
 
                     CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
                         days = state.days,
