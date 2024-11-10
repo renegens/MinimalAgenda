@@ -21,7 +21,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import presentation.theme.CustomColor
+import io.github.alexzhirkevich.cupertino.theme.CupertinoColors
+import io.github.alexzhirkevich.cupertino.theme.systemGreen
 import presentation.theme.iosBody
 import presentation.theme.iosTitle3
 
@@ -78,7 +79,7 @@ fun SubscriptionsSteps() {
             title = "Day 7",
             description = "Your subscription starts, cancel anytime before",
             icon = Icons.Default.CheckCircle,
-            iconColor = CustomColor.Mint_500
+            iconColor = CupertinoColors.systemGreen
         )
     }
 }
