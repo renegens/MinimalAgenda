@@ -1,5 +1,5 @@
 [versions]
-agp = "8.5.2"
+agp = "8.7.2"
 android-compileSdk = "34"
 android-minSdk = "24"
 android-targetSdk = "34"
@@ -19,6 +19,7 @@ cupertino = "0.1.0-alpha04"
 
 [libraries]
 cupertino-theme = { module = "io.github.alexzhirkevich:cupertino", version.ref = "cupertino" }
+cupertino-theme-icons = { module = "io.github.alexzhirkevich:cupertino-icons-extended", version.ref = "cupertino" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 kotlinx-datetime = {module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime"}
 kotlinx-serialization-json = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json"}
