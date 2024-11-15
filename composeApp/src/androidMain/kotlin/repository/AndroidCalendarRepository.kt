@@ -87,7 +87,8 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                     allDay = false,
                     epochDay = calculateEpochDay(timestamp, TimeZone.currentSystemDefault()),
                     isRecurring = false,
-                    format = dateFormatter(timestamp.toString())
+                    localDateTime = Instant.fromEpochSeconds(timestamp).toLocalDateTime(TimeZone.currentSystemDefault()),
+                    uses24HourClock = false
                 )
             )
         }
@@ -152,7 +153,9 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                             endTime = startTime + 6000,
                             allDay = false,
                             isRecurring = false,
-                            epochDay = endTime.millisToEpochDay()
+                            epochDay = endTime.millisToEpochDay(),
+                            localDateTime = Instant.fromEpochSeconds(startTime).toLocalDateTime(TimeZone.currentSystemDefault()),
+                            uses24HourClock = false
                         )
                     )
                 }
