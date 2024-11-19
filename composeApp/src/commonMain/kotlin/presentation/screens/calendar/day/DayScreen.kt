@@ -1,12 +1,10 @@
 package presentation.screens.calendar.day
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -18,7 +16,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
@@ -42,12 +39,13 @@ import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
 import presentation.components.CalendarPermission
 import presentation.components.DayHeader
+import presentation.components.EventOptionsMenu
 import presentation.components.ScrollablePaperBackground
 import presentation.components.SectionDivider
-import presentation.components.addHapticFeedback
+import presentation.components.addHapticFeedbackProminent
+import presentation.components.noRippleClickable
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
-import presentation.theme.DMSansBlack36
 
 private val STICKY_HEADER_INDEX = 1
 
@@ -146,7 +144,8 @@ fun DayScreen(
                                 selectedItem = it
                             },
                             showAll = showAll,
-                            hapticFeedback = hapticFeedback
+                            hapticFeedback = hapticFeedback,
+                            appThemeMode = appThemeMode
                         )
                     }
 
@@ -194,69 +193,51 @@ fun Event(
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean,
-    hapticFeedback: HapticFeedback
+    hapticFeedback: HapticFeedback,
+    appThemeMode: AppThemeMode
 ) {
     if (showAll.not() && event.isHidden) return
-
+    val textColor = if (selectedItem == event) {
+        MaterialTheme.colorScheme.secondary
+    } else {
+        event.getTextColor(showAll)
+    }
     Row(
-        modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 16.dp)
-    ) {
-        Time(agendaEvent = event, showAll = showAll)
-        Column(
-            modifier = Modifier.fillMaxWidth().background(
-                color = if (selectedItem == event) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
-            ).clickable {
-                hapticFeedback.addHapticFeedback()
+        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 28.dp).wrapContentHeight()
+            .padding(horizontal = 16.dp).noRippleClickable {
+                hapticFeedback.addHapticFeedbackProminent()
                 if (selectedItem == event) {
                     onItemSelected.invoke(null)
                 } else {
                     onItemSelected.invoke(event)
                 }
             }
-        ) {
+    ) {
+        Time(agendaEvent = event, textColor = textColor)
+        Column(modifier = Modifier.fillMaxWidth()) {
             val style = if (event.allDay.not() && event.hasPassedForToday(today.toEpochDays())) {
                 DMSans18Medium.copy(textDecoration = TextDecoration.LineThrough)
             } else {
                 DMSans18Medium
             }
-
             Text(
                 modifier = Modifier.padding(start = 4.dp),
                 text = event.title,
                 style = style,
-                color = event.getTextColor(showAll),
+                color = textColor,
             )
-
-            AnimatedVisibility(visible = selectedItem == event) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    TextButton(onClick = {
-                        onHide.invoke(event)
-                        onItemSelected.invoke(null)
-                    }) {
-                        val text = if (event.isHidden) {
-                            "Show"
-                        } else {
-                            "Hide"
-                        }
-                        Text(text.uppercase(), style = DMSansBlack36)
-                    }
-                    TextButton(onClick = {
-                        onNotify.invoke(event)
-                        onItemSelected.invoke(null)
-                    }) {
-                        Text("Notify".uppercase(), style = DMSansBlack36)
-                    }
-                    TextButton(onClick = {
-                        onEdit.invoke(event)
-                        onItemSelected.invoke(null)
-                    }) {
-                        Text("Edit".uppercase(), style = DMSansBlack36)
-                    }
-                }
-            }
         }
+
+        EventOptionsMenu(
+            event = event,
+            onNotify = onNotify,
+            onHide = onHide,
+            onEdit = onEdit,
+            selectedItem = selectedItem,
+            hapticFeedback = hapticFeedback,
+            onItemSelected = onItemSelected,
+            appThemeMode = appThemeMode
+        )
     }
 }
 
@@ -284,34 +265,35 @@ fun EmptyMessage() {
 }
 
 @Composable
-fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
+fun Time(agendaEvent: AgendaEvent, textColor: Color) {
     val time = agendaEvent.getFormattedTime()
+
     Row(modifier = Modifier.width(time.getRowWidth().dp).padding(end = 8.dp)) {
         if (agendaEvent.allDay) {
             Text(
                 text = "All Day",
                 style = DMSans18Bold60,
-                color = agendaEvent.getTextColor(showAll)
+                color = textColor
             )
         } else {
             Text(
                 modifier = Modifier.weight(0.6F),
                 text = time.hours,
                 style = DMSans18Bold60,
-                color = agendaEvent.getTextColor(showAll)
+                color = textColor
             )
             Text(
                 modifier = Modifier.weight(1F),
                 text = time.minutes,
                 style = DMSans18Bold60,
-                color = agendaEvent.getTextColor(showAll)
+                color = textColor
             )
             time.ampm?.let {
                 Text(
                     modifier = Modifier.weight(1F),
                     text = it,
                     style = DMSans18Bold60,
-                    color = agendaEvent.getTextColor(showAll)
+                    color = textColor
                 )
             }
         }
