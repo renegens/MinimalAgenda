@@ -2,6 +2,7 @@ package presentation.screens.main
 
 import androidx.lifecycle.viewModelScope
 import com.revenuecat.purchases.kmp.models.PackageType
+import data.local.LaunchCounterDataSource
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.SavePaywallTimestampUseCase
 import domain.use_case.ScheduleTrialNotificationUseCase
@@ -21,12 +22,14 @@ class AppViewModel(
     private val modalPresenter: ModalPresenter,
     private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
     private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase,
-    private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase
+    private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase,
+    private val launchCounterDataSource: LaunchCounterDataSource
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
         initializeRevenueCat()
         viewModelScope.launch {
+            launchCounterDataSource.increment()
             appThemeListenerUseCase().collectLatest {
                 setState { copy(appTheme = it) }
             }

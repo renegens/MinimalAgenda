@@ -11,6 +11,7 @@ import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
 import domain.use_case.FlatCalendarViewFactory
+import domain.use_case.ShouldPresentSwipeToolTipUseCase
 import extensions.guardPremium
 import extensions.today
 import platform.CalendarPermissionHandler
@@ -21,7 +22,8 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-    private val flatCalendarViewFactory: FlatCalendarViewFactory
+    private val flatCalendarViewFactory: FlatCalendarViewFactory,
+    private val shouldPresentSwipeToolTipUseCase: ShouldPresentSwipeToolTipUseCase
 ) : BaseViewModel<Event, State, Effect>() {
 
     override fun createInitialState() = State()
@@ -82,13 +84,14 @@ class CalendarViewModel(
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
             is Event.OnEditEvent -> guardPremium(onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
                 onPaywall = { setEffect { Effect.ShowPaywall } })
+
+            Event.HideSwipeToolTip -> setState { copy(showSwipeToolTip = false) }
         }
     }
 
     private fun loadData() {
         when (val permissionState = permissionHandler.getPermissionState()) {
             CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
-
                 val eventsUIList = uiState.value.flatDaysAndEvents
 
                 if (eventsUIList.isEmpty()) {
@@ -97,7 +100,6 @@ class CalendarViewModel(
                 }
 
                 when (val slowIteration = getAllEventsUseCase(24)) {
-
                     is GetAllEventsUseCase.State.Success -> {
                         setState {
                             copy(
@@ -111,12 +113,16 @@ class CalendarViewModel(
                 }
             }
 
-            else -> setState {
-                State(
-                    days = calendarGenerator.calendar,
-                    flatDaysAndEvents = flatCalendarViewFactory.build(),
-                    calendarPermission = permissionState
-                )
+            else -> viewModelScope.launch {
+                val shouldPresentSwipeTooltip = shouldPresentSwipeToolTipUseCase()
+                setState {
+                    State(
+                        days = calendarGenerator.calendar,
+                        flatDaysAndEvents = flatCalendarViewFactory.build(),
+                        showSwipeToolTip = shouldPresentSwipeTooltip,
+                        calendarPermission = permissionState
+                    )
+                }
             }
         }
     }
@@ -157,7 +163,7 @@ class CalendarViewModel(
                         flatDaysAndEvents = fastIteration.dayListViewTypes,
                         agendaEvents = fastIteration.agendaEvents,
                         calendarPermission = CalendarPermissionHandler.State.FullAccess,
-                        scrollToNow = scrollToNow
+                        scrollToNow = scrollToNow,
                     )
                 }
                 when (val slowIteration = getAllEventsUseCase(24)) {

@@ -26,6 +26,7 @@ import presentation.components.ComposableLifecycle
 import presentation.components.NotificationPermissionDialog
 import presentation.components.SafeTransparentNavigationContainer
 import presentation.components.addHapticFeedbackProminent
+import presentation.components.tooltip.SwipeToolTip
 import presentation.screens.calendar.CalendarContract.Effect
 import presentation.screens.calendar.CalendarContract.Event
 import presentation.screens.calendar.CalendarContract.Section
@@ -64,6 +65,9 @@ fun CalendarScreen(
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
             haptic.addHapticFeedbackProminent()
+            if (page == Section.Settings.position && state.showSwipeToolTip){
+                viewModel.setEvent(Event.HideSwipeToolTip)
+            }
         }
     }
 
@@ -134,6 +138,10 @@ fun CalendarScreen(
                 shouldShowNotificationPermission = false
             })
         }
+
+        if (state.showSwipeToolTip){
+            SwipeToolTip()
+        }
         SafeTransparentNavigationContainer {
             HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                 when (page) {
@@ -151,6 +159,7 @@ fun CalendarScreen(
                         onRequestCalendarPermission = {
                             viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
                         },
+                        isPresentingSwipeTip = state.showSwipeToolTip,
                         isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding
                     )
 

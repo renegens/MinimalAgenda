@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class PaywallLocalDataSource(private val dataStore: DataStore) {
+class  PaywallLocalDataSource(private val dataStore: DataStore) {
 
     companion object {
         const val PAYWALL = "paywall"
