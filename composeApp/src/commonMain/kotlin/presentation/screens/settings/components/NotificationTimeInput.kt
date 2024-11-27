@@ -39,7 +39,7 @@ internal fun NotificationTimeInput(focusRequester: FocusRequester, time: Int, on
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            ItemText(label = "Notification Alert Time")
+            ItemTitle(label = "Notification Alert Time")
 
             Box(
                 modifier = Modifier.width(64.dp).height(32.dp)
@@ -73,7 +73,7 @@ internal fun NotificationTimeInput(focusRequester: FocusRequester, time: Int, on
             Spacer(modifier = Modifier.height(8.dp))
         }
         Spacer(modifier = Modifier.height(4.dp))
-        ExplanationText(label = "Set the notification time in minutes. Enter 0 to receive a notification at the event start time. (Premium)")
+        ItemBody(label = "Set the notification time in minutes. Enter 0 to receive a notification at the event start time. (Premium)")
     }
 }
 

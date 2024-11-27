@@ -20,8 +20,9 @@ import presentation.components.PaperBackground
 import presentation.components.noRippleClickable
 import presentation.screens.settings.SettingsContract.*
 import presentation.screens.settings.components.ColorSelection
-import presentation.screens.settings.components.ExplanationText
-import presentation.screens.settings.components.ItemText
+import presentation.screens.settings.components.ItemBody
+import presentation.screens.settings.components.ItemHeadline
+import presentation.screens.settings.components.ItemTitle
 import presentation.screens.settings.components.ModeSelection
 import presentation.screens.settings.components.NotificationTimeInput
 import presentation.screens.settings.components.SwitchSettingItem
@@ -69,7 +70,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
             SwitchSettingItem(title = "Private Notifications",
                 isChecked = state.privateNotifications,
                 onCheckedChange = { viewModel.setEvent(Event.OnTogglePrivateNotifications(it)) })
-            ExplanationText(
+            ItemBody(
                 "When enabled, notifications will use a generic title. (Premium)",
             )
         }
@@ -84,7 +85,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
         }
 
         SettingsItem(state.appThemeMode) {
-            ItemText("Select your preferred mode")
+            ItemTitle("Select your preferred mode")
             Spacer(modifier = Modifier.height(4.dp))
             ModeSelection(
                 selectedTheme = state.appThemeMode
@@ -92,9 +93,25 @@ fun SettingsScreen(notEligible: () -> Unit) {
         }
 
         SettingsItem(state.appThemeMode) {
-            ItemText("Select your preferred color (Premium)")
+            ItemTitle("Select your preferred color (Premium)")
             Spacer(modifier = Modifier.height(16.dp))
             ColorSelection(state.appColor) { viewModel.setEvent(Event.OnColorSelected(it)) }
+        }
+
+        SettingsItem(state.appThemeMode, showDivider = true) {
+            ItemTitle("What happens with your data")
+            Spacer(modifier = Modifier.height(16.dp))
+            ItemHeadline("Accessing Existing Calendars")
+            Spacer(modifier = Modifier.height(8.dp))
+            ItemBody("The app will only access the calendar data already stored on your device. This includes events from any calendars synced to your device, such as iCloud, Google, or Outlook calendars")
+            Spacer(modifier = Modifier.height(12.dp))
+            ItemHeadline("Data Stays on Your Device")
+            Spacer(modifier = Modifier.height(8.dp))
+            ItemBody("Your calendar data is not sent or uploaded anywhere. It remains securely stored on your device, and the app only reads the data to display your events. No external servers or third parties have access to this information")
+            Spacer(modifier = Modifier.height(12.dp))
+            ItemHeadline("Privacy Assurance")
+            Spacer(modifier = Modifier.height(8.dp))
+            ItemBody("The app can't share your calendar data. It only uses the existing events to provide functionality directly on your device")
         }
 
         SettingsItem(state.appThemeMode) {
@@ -105,7 +122,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
                     message = "Mail services are not available",
                     onContinueRequest = { showEmailError = false })
             }
-            ItemText("Help us improve by sharing your feedback – we’d love to hear from you!")
+            ItemTitle("Help us improve by sharing your feedback – we’d love to hear from you")
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 "Send Feedback",
@@ -117,15 +134,15 @@ fun SettingsScreen(notEligible: () -> Unit) {
         }
 
         SettingsItem(state.appThemeMode, showDivider = false) {
-            ItemText("Don’t Miss Important Notifications")
+            ItemTitle("Don’t Miss Important Notifications")
             Spacer(modifier = Modifier.height(16.dp))
-            ExplanationText("Open your Settings on iOS.")
+            ItemBody("Open your Settings on iOS")
             Spacer(modifier = Modifier.height(4.dp))
-            ExplanationText("Go to Focus.")
+            ItemBody("Go to Focus")
             Spacer(modifier = Modifier.height(4.dp))
-            ExplanationText("Select the specific mode (e.g. Work, Do Not Disturb).")
+            ItemBody("Select the specific mode (e.g. Work, Do Not Disturb)")
             Spacer(modifier = Modifier.height(4.dp))
-            ExplanationText("Under Allowed Notifications, add this app to ensure you receive important alerts.")
+            ItemBody("Under Allowed Notifications, add this app to ensure you receive important alerts")
         }
         Spacer(modifier = Modifier.height(64.dp))
     }

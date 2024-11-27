@@ -35,22 +35,24 @@ fun ActionButton(
     val haptic = LocalHapticFeedback.current
 
     Column(modifier = Modifier.padding(end = 16.dp)) {
-        Box(
-            modifier = Modifier.size(56.dp)
-                .background(color = CustomColor.Black_500, shape = CircleShape)
-                .clickable {
-                    haptic.addHapticFeedback()
-                    toggleActive.invoke()
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            val label = if (showAll) "Active" else "All"
-            Text(
-                label.uppercase(),
-                color = CustomColor.White_500,
-                style = DMSansBlack36,
-                modifier = Modifier.wrapContentHeight(unbounded = true)
-            )
+        if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
+            Box(
+                modifier = Modifier.size(56.dp)
+                    .background(color = CustomColor.Black_500, shape = CircleShape)
+                    .clickable {
+                        haptic.addHapticFeedback()
+                        toggleActive.invoke()
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                val label = if (showAll) "Active" else "All"
+                Text(
+                    label.uppercase(),
+                    color = CustomColor.White_500,
+                    style = DMSansBlack36,
+                    modifier = Modifier.wrapContentHeight(unbounded = true)
+                )
+            }
         }
         Box(
             modifier = Modifier.size(56.dp)

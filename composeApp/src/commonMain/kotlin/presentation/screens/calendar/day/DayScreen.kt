@@ -47,8 +47,6 @@ import presentation.components.noRippleClickable
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 
-private val STICKY_HEADER_INDEX = 1
-
 @Composable
 fun DayScreen(
     items: List<DayListViewType>,
@@ -68,12 +66,19 @@ fun DayScreen(
 ) {
     if (items.isEmpty()) return
 
+    val stickyHeaderPadding =
+        if (calendarPermission == CalendarPermissionHandler.State.NotDetermined) {
+            3
+        } else {
+            1
+        }
+
     val currentEpochDay = currentDate.toEpochDays()
 
     val todayIndex by if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
         mutableStateOf(items.findIndexOf(currentEpochDay))
     } else {
-        mutableStateOf(items.findIndexOf(currentEpochDay) - STICKY_HEADER_INDEX)
+        mutableStateOf(items.findIndexOf(currentEpochDay) - stickyHeaderPadding)
     }
 
     val listState = rememberLazyListState()
@@ -104,7 +109,7 @@ fun DayScreen(
 
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
 
-            if (isPresentingNotificationOnBoarding.not() && isPresentingSwipeTip.not()){
+            if (isPresentingNotificationOnBoarding.not() && isPresentingSwipeTip.not()) {
                 CalendarPermission(
                     onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
                 )

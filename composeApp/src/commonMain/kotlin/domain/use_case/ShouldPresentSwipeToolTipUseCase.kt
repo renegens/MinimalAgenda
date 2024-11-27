@@ -4,7 +4,7 @@ import data.local.LaunchCounterDataSource
 
 class ShouldPresentSwipeToolTipUseCase(private val launchCounterDataSource: LaunchCounterDataSource) {
 
-    private val MAX_SHOW = 2
+    private val MAX_SHOW = 1
 
     suspend operator fun invoke(): Boolean {
         val count = launchCounterDataSource.getCount()
