@@ -80,7 +80,7 @@ private fun AskForPermission(onPermissionRequest: () -> Unit, state: State) {
                     CupertinoIcon(
                         imageVector = CupertinoIcons.Default.CalendarBadgePlus,
                         contentDescription = "calendar",
-                        tint = MaterialTheme.colorScheme.inverseSurface
+                        tint = MaterialTheme.colorScheme.inverseOnSurface
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     Column {
@@ -101,7 +101,7 @@ private fun AskForPermission(onPermissionRequest: () -> Unit, state: State) {
                     CupertinoIcon(
                         imageVector = CupertinoIcons.Default.CalendarBadgePlus,
                         contentDescription = "calendar",
-                        tint = MaterialTheme.colorScheme.inverseSurface
+                        tint = MaterialTheme.colorScheme.inverseOnSurface
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     BodyText(
@@ -114,7 +114,7 @@ private fun AskForPermission(onPermissionRequest: () -> Unit, state: State) {
                     CupertinoIcon(
                         imageVector = CupertinoIcons.Default.Lock,
                         contentDescription = "lock",
-                        tint = MaterialTheme.colorScheme.inverseSurface
+                        tint = MaterialTheme.colorScheme.inverseOnSurface
                     )
                     Spacer(modifier = Modifier.width(20.dp))
                     BodyText("All your data stays private, securely stored locally on your device, and is never accessed by third parties")
@@ -124,7 +124,7 @@ private fun AskForPermission(onPermissionRequest: () -> Unit, state: State) {
                     CupertinoIcon(
                         imageVector = CupertinoIcons.Default.Gear,
                         contentDescription = "gear",
-                        tint = MaterialTheme.colorScheme.inverseSurface
+                        tint = MaterialTheme.colorScheme.inverseOnSurface
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     BodyText("You can revoke calendar access at any time in the iOS Settings app under Privacy -> Calendars")
@@ -134,7 +134,7 @@ private fun AskForPermission(onPermissionRequest: () -> Unit, state: State) {
                     CupertinoIcon(
                         imageVector = CupertinoIcons.Default.CheckmarkCircle,
                         contentDescription = "checkmark circle",
-                        tint = MaterialTheme.colorScheme.inverseSurface
+                        tint = MaterialTheme.colorScheme.inverseOnSurface
                     )
                     Spacer(modifier = Modifier.width(12.dp))
                     BodyText("Swipe left to access the settings page and learn more about how your data is handled")
@@ -164,6 +164,6 @@ fun BodyText(label: String) {
         modifier = Modifier.fillMaxWidth(),
         style = DMSans18Medium.copy(fontSize = 16.sp),
         textAlign = TextAlign.Start,
-        color = MaterialTheme.colorScheme.inverseSurface
+        color = MaterialTheme.colorScheme.inverseOnSurface
     )
 }

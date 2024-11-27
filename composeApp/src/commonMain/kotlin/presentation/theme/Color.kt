@@ -40,6 +40,7 @@ fun getLightColorScheme(primaryColor: Color): ColorScheme {
         onSurface = CustomColor.Black_900,
         secondaryContainer = CustomColor.Sepia_900,
         inversePrimary = CustomColor.Black_900,
+        inverseOnSurface = CustomColor.Gray_200,
         inverseSurface = CustomColor.White_500,
         surfaceVariant = CustomColor.Sepia_100
     )
@@ -52,6 +53,7 @@ fun getDarkColorScheme(primaryColor: Color): ColorScheme {
         tertiary = CustomColor.Gray_200,
         secondaryContainer = CustomColor.Black_900,
         inversePrimary = CustomColor.White_500,
+        inverseOnSurface = CustomColor.Black_200,
         inverseSurface = CustomColor.Black_900,
         surfaceVariant = CustomColor.Black_200,
         surface = CustomColor.Black_900,

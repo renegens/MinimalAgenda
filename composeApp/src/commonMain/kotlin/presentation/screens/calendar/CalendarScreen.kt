@@ -139,9 +139,7 @@ fun CalendarScreen(
             })
         }
 
-        if (state.showSwipeToolTip){
-            SwipeToolTip()
-        }
+        SwipeToolTip(state.showSwipeToolTip)
         SafeTransparentNavigationContainer {
             HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                 when (page) {
