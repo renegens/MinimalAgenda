@@ -26,8 +26,8 @@ val nextHour: Int
     get() {
         val date = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
         val newHour = date.time.hour + 1
-        return if (newHour > 24) {
-            24
+        return if (newHour >= 24) {
+            23
         } else {
             newHour
         }
