@@ -105,7 +105,7 @@ fun NewEventHeader(label: String) {
             append(label)
         }
         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary)) {
-            append("Event")
+            append("Entry")
         }
     }
     Text(

@@ -5,9 +5,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
+import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.ComposableLifecycle
@@ -21,11 +28,26 @@ fun App() {
     KoinContext {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
-        val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val paywallSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+        val scope = rememberCoroutineScope()
+        var showPaywallBottomSheet by remember { mutableStateOf(false) }
 
         ComposableLifecycle {
             if (it == Lifecycle.Event.ON_START) {
                 viewModel.setEvent(AppContract.Event.CheckPaywall)
+            }
+        }
+
+        LaunchedEffect(Unit) {
+            viewModel.effect.collectLatest {
+                when (it) {
+                    AppContract.Effect.DismissPaywall -> scope.launch { paywallSheetState.hide() }.invokeOnCompletion {
+                        if (!paywallSheetState.isVisible) {
+                            showPaywallBottomSheet = false
+                        }
+                    }
+                    AppContract.Effect.PresentPaywall -> showPaywallBottomSheet = true
+                }
             }
         }
 
@@ -53,7 +75,8 @@ fun App() {
                 })
             }
 
-            CalendarScreen(appThemeMode = state.appTheme.appThemeMode,
+            CalendarScreen(
+                appThemeMode = state.appTheme.appThemeMode,
                 forceEventLoad = state.forceEventLoad,
                 onAddEvent = {
                     viewModel.setEvent(AppContract.Event.NewEvent)
@@ -65,17 +88,17 @@ fun App() {
                 isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding()
             )
 
-            if (state.showPaywall) {
+            if (showPaywallBottomSheet) {
                 ModalBottomSheet(
                     containerColor = MaterialTheme.colorScheme.surface,
                     onDismissRequest = {
-                        viewModel.setEvent(AppContract.Event.DismissPaywall)
+                        viewModel.setEvent(AppContract.Event.OnDismissPaywall)
                     },
-                    sheetState = sheetState
+                    sheetState = paywallSheetState
                 ) {
                     PaywallScreen(
                         onPurchaseComplete = { viewModel.setEvent(AppContract.Event.OnPurchased(it)) },
-                        onCancel = { viewModel.setEvent(AppContract.Event.DismissPaywall) })
+                        onCancel = { viewModel.setEvent(AppContract.Event.OnDismissPaywall) })
                 }
             }
         }

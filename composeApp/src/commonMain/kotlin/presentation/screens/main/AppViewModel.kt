@@ -52,12 +52,12 @@ class AppViewModel(
 
             Event.NotEligible -> {
                 viewModelScope.launch { savePaywallTimestampUseCase() }
-                setState { copy(showPaywall = true) }
+                setEffect { Effect.PresentPaywall }
             }
 
-            Event.DismissPaywall -> setState { copy(showPaywall = false) }
+            Event.OnDismissPaywall -> setEffect { Effect.DismissPaywall }
             is Event.OnPurchased -> {
-                setState { copy(showPaywall = false) }
+                setEffect { Effect.DismissPaywall }
                 if (event.purchase?.packageType == PackageType.ANNUAL) {
                     setState { copy(showNotificationPermissionInfo = true) }
                 }
@@ -72,7 +72,7 @@ class AppViewModel(
 
             Event.CheckPaywall -> viewModelScope.launch {
                 if (showPaywallOncePerDayUseCase.shouldPresentPaywall()) {
-                    setState { copy(showPaywall = true) }
+                    setEffect { Effect.PresentPaywall }
                 }
             }
 

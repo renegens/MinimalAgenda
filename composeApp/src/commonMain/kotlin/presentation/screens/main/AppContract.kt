@@ -12,7 +12,6 @@ class AppContract {
     data class State(
         val forceEventLoad: Int = 0,
         val appTheme: AppTheme = AppTheme.Default,
-        val showPaywall: Boolean = false,
         val showTrialNotificationError: Boolean = false,
         val showTrialNotificationSuccess: Boolean = false,
         val showNotificationPermissionInfo: Boolean = false
@@ -21,7 +20,10 @@ class AppContract {
         fun isPresentingNotificationOnboarding() = showTrialNotificationSuccess || showTrialNotificationError || showNotificationPermissionInfo
     }
 
-    sealed class Effect : UiEffect
+    sealed class Effect : UiEffect {
+        object PresentPaywall: Effect()
+        object DismissPaywall: Effect()
+    }
 
     sealed class Event : UiEvent {
         class EditExternal(val agendaEvent: AgendaEvent): Event()
@@ -29,7 +31,7 @@ class AppContract {
         object DismissTrialNotification: Event()
         class  RequestNotificationPermission(val shouldRequest: Boolean): Event()
         object NotEligible: Event()
-        object DismissPaywall: Event()
+        object OnDismissPaywall: Event()
         class OnPurchased(val purchase: Package?): Event()
         object CheckPaywall: Event()
     }
