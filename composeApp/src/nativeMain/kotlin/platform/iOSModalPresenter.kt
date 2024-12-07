@@ -3,6 +3,7 @@ package platform
 import androidx.compose.ui.window.ComposeUIViewController
 import domain.model.AppTheme
 import platform.UIKit.UIApplication
+import platform.UIKit.UINavigationController
 import presentation.screens.add_event.AddEventScreen
 import presentation.screens.paywall.PaywallScreen
 import presentation.theme.AppTheme
@@ -30,7 +31,10 @@ class iOSModalPresenter : ModalPresenter {
                 }
             }
         )
-        rootVC?.presentViewController(s, animated = true, completion = null)
+        val navigationController = UINavigationController(rootViewController = s)
+
+        // Present the navigation controller
+        rootVC?.presentViewController(navigationController, animated = true, completion = null)
     }
 
     override fun presentPaywall(appTheme: AppTheme, onCompletion: () -> Unit) {
