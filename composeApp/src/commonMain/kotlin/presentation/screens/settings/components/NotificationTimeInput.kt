@@ -73,7 +73,7 @@ internal fun NotificationTimeInput(focusRequester: FocusRequester, time: Int, on
             Spacer(modifier = Modifier.height(8.dp))
         }
         Spacer(modifier = Modifier.height(4.dp))
-        ItemBody(label = "Set the notification time in minutes. Enter 0 to receive a notification at the event start time. (Premium)")
+        ItemBody(label = "Set the notification time in minutes. Enter 0 to receive a notification at the event start time (Premium)")
     }
 }
 
