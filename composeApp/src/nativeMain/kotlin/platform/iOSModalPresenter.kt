@@ -31,10 +31,10 @@ class iOSModalPresenter : ModalPresenter {
                 }
             }
         )
-        val navigationController = UINavigationController(rootViewController = s)
+        //val navigationController = UINavigationController(rootViewController = s)
 
         // Present the navigation controller
-        rootVC?.presentViewController(navigationController, animated = true, completion = null)
+        rootVC?.presentViewController(s, animated = true, completion = null)
     }
 
     override fun presentPaywall(appTheme: AppTheme, onCompletion: () -> Unit) {
