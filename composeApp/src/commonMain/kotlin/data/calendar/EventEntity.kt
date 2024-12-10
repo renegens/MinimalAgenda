@@ -12,7 +12,9 @@ data class EventEntity(
     val allDay: Boolean?,
     val isRecurring: Boolean?,
     var epochDay: Int,
-    val localDateTime: LocalDateTime,
+    val startLocalDateTime: LocalDateTime,
+    val endLocalDateTime: LocalDateTime,
+    val isMultiDay: Boolean,
     val uses24HourClock: Boolean
 )
 
@@ -28,9 +30,11 @@ fun EventEntity.toEvent(): AgendaEvent {
         endTime = endTime,
         allDay = allDay!!,
         isRecurring = isRecurring!!,
+        isMultiDay = isMultiDay,
         epochDay = epochDay,
         isHidden = false,
-        localDateTime = localDateTime,
+        startLocalDateTime = startLocalDateTime,
+        endLocalDateTime = endLocalDateTime,
         uses24HourClock = uses24HourClock
     )
 }

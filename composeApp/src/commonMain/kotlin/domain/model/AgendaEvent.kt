@@ -18,8 +18,11 @@ data class AgendaEvent(
     var epochDay: Int?,
     var isRecurring: Boolean = false,
     var isHidden: Boolean,
-    val localDateTime: LocalDateTime,
-    val uses24HourClock: Boolean
+    val startLocalDateTime: LocalDateTime,
+    val endLocalDateTime: LocalDateTime,
+    val uses24HourClock: Boolean,
+    val isMultiDay: Boolean,
+    val isLastDayInMultiDayEvent: Boolean = false
 ) {
     fun toHiddenEventEntity() = HiddenEventEntity(eventId = id, epochDay = epochDay!!)
 
@@ -36,6 +39,12 @@ data class AgendaEvent(
     }
 
     fun getFormattedTime(): FormattedTime {
+        val localDateTime = if (isLastDayInMultiDayEvent) {
+            endLocalDateTime
+        } else {
+            startLocalDateTime
+        }
+
         val hour = localDateTime.time.hour
         val minute = localDateTime.time.minute
 

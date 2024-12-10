@@ -226,9 +226,15 @@ fun Event(
             } else {
                 DMSans18Medium
             }
+
+            val title = if (event.isLastDayInMultiDayEvent){
+                "${event.title} (Ending)"
+            }else{
+                event.title
+            }
             Text(
                 modifier = Modifier.padding(start = 4.dp),
-                text = event.title,
+                text = title,
                 style = style,
                 color = textColor,
             )
@@ -281,7 +287,7 @@ fun Time(agendaEvent: AgendaEvent, textColor: Color) {
                 style = DMSans18Bold60,
                 color = textColor
             )
-        } else {
+        }  else {
             Text(
                 modifier = Modifier.weight(0.6F),
                 text = time.hours,
