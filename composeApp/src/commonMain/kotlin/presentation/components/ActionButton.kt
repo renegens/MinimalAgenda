@@ -31,6 +31,7 @@ fun ActionButton(
     showAll: Boolean,
     calendarPermission: CalendarPermissionHandler.State
 ) {
+    if (currentSection == Section.Day && calendarPermission == CalendarPermissionHandler.State.NotDetermined) return
     if (currentSection == Section.Settings) return
     val haptic = LocalHapticFeedback.current
 

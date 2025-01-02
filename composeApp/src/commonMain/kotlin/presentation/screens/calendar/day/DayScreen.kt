@@ -67,10 +67,10 @@ fun DayScreen(
     if (items.isEmpty()) return
 
     val stickyHeaderPadding =
-        if (calendarPermission == CalendarPermissionHandler.State.NotDetermined) {
-            3
+        if (calendarPermission == CalendarPermissionHandler.State.NotDetermined && isPresentingSwipeTip.not()) {
+            4
         } else {
-            1
+            2
         }
 
     val currentEpochDay = currentDate.toEpochDays()

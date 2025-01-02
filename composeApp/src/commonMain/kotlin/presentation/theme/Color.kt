@@ -29,6 +29,10 @@ object CustomColor {
     val Sepia_900 = Color(0xFFd5d1c7)
 
     val White_500 = Color(0xFFFFFFFF)
+
+    val APP_ICON_BACKGROUND_LIGHT = Color(0xFFF5F5F5)
+    val APP_ICON_BACKGROUND_DARK = Color(0xFF3E3D3D)
+
 }
 
 fun getLightColorScheme(primaryColor: Color): ColorScheme {

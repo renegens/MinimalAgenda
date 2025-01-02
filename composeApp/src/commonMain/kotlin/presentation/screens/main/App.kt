@@ -19,6 +19,7 @@ import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.ComposableLifecycle
 import presentation.screens.calendar.CalendarScreen
+import presentation.screens.onboarding.Onboarding
 import presentation.screens.paywall.PaywallScreen
 import presentation.theme.AppTheme
 
@@ -87,6 +88,10 @@ fun App() {
                 },
                 isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding()
             )
+
+            if (state.shouldShowOnboarding){
+                Onboarding { viewModel.setEvent(AppContract.Event.DismissOnboarding) }
+            }
 
             if (showPaywallBottomSheet) {
                 ModalBottomSheet(

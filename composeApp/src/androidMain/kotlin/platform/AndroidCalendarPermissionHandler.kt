@@ -6,6 +6,6 @@ class AndroidCalendarPermissionHandler : CalendarPermissionHandler {
     }
 
     override fun getPermissionState(): CalendarPermissionHandler.State {
-        return CalendarPermissionHandler.State.FullAccess
+        return CalendarPermissionHandler.State.NotDetermined
     }
 }

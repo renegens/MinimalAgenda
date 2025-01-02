@@ -31,3 +31,31 @@ fun AppTheme(
         )
     }
 }
+
+@Composable
+private fun DarkTheme(content: @Composable () -> Unit) {
+    PaperBackground(AppThemeMode.DefaultDark) {
+        MaterialTheme(colorScheme = getDarkColorScheme(primaryColor = AppColor.Orange.color)) {
+            content()
+        }
+    }
+}
+
+@Composable
+private fun LightTheme(content: @Composable () -> Unit) {
+    PaperBackground(AppThemeMode.DefaultLight) {
+        MaterialTheme(colorScheme = getLightColorScheme(primaryColor = AppColor.Orange.color)) {
+            content()
+        }
+    }
+}
+
+@Composable
+fun InvertedAppTheme(content: @Composable () -> Unit) {
+    if (isSystemInDarkTheme()) {
+        LightTheme { content.invoke() }
+    } else {
+        DarkTheme { content.invoke() }
+    }
+}
+

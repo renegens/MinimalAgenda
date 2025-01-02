@@ -76,6 +76,15 @@ val DMSansBlack250: TextStyle
         letterSpacing = (-6).sp,
     )
 
+val DMSansBlack150: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSansBlackFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 50.sp,
+        letterSpacing = (-3).sp,
+    )
+
 val DMSansBlack36: TextStyle
     @Composable
     get() = TextStyle(

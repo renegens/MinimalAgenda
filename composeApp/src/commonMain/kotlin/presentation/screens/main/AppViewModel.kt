@@ -29,6 +29,9 @@ class AppViewModel(
     init {
         initializeRevenueCat()
         viewModelScope.launch {
+            if (launchCounterDataSource.getCount() == 0) {
+                setState { copy(shouldShowOnboarding = true) }
+            }
             launchCounterDataSource.increment()
             appThemeListenerUseCase().collectLatest {
                 setState { copy(appTheme = it) }
@@ -86,6 +89,7 @@ class AppViewModel(
                                     showTrialNotificationSuccess = true
                                 )
                             }
+
                             else -> setState { copy(showTrialNotificationError = true) }
                         }
                     }
@@ -93,6 +97,8 @@ class AppViewModel(
                     setState { copy(showTrialNotificationError = true) }
                 }
             }
+
+            Event.DismissOnboarding -> setState { copy(shouldShowOnboarding = false) }
         }
     }
 
