@@ -13,6 +13,7 @@ import presentation.screens.main.AppContract.*
 import extensions.initializeRevenueCat
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import platform.CalendarPermissionHandler
 import platform.EventEditViewHandler
 import platform.ModalPresenter
 
@@ -23,13 +24,14 @@ class AppViewModel(
     private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
     private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase,
     private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase,
-    private val launchCounterDataSource: LaunchCounterDataSource
+    private val launchCounterDataSource: LaunchCounterDataSource,
+    private val calendarPermissionHandler: CalendarPermissionHandler
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
         initializeRevenueCat()
         viewModelScope.launch {
-            if (launchCounterDataSource.getCount() == 0) {
+            if (launchCounterDataSource.getCount() > 0) {
                 setState { copy(shouldShowOnboarding = true) }
             }
             launchCounterDataSource.increment()
@@ -99,6 +101,12 @@ class AppViewModel(
             }
 
             Event.DismissOnboarding -> setState { copy(shouldShowOnboarding = false) }
+            Event.RequestCalendarPermission -> viewModelScope.launch {
+                when (val state = calendarPermissionHandler.requestCalendarPermission()) {
+                    CalendarPermissionHandler.State.FullAccess -> {}
+                    else -> {}
+                }
+            }
         }
     }
 

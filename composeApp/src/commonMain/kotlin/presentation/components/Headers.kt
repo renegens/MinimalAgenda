@@ -70,7 +70,7 @@ fun YearHeader(agendaYear: AgendaYear, currentDate: LocalDate) {
 }
 
 @Composable
-private fun HeaderLarge(modifier: Modifier = Modifier, label: AnnotatedString) {
+fun HeaderLarge(modifier: Modifier = Modifier, label: AnnotatedString) {
     Box(Modifier.height(84.dp).fillMaxWidth().padding(horizontal = 12.dp)) {
         Text(
             style = DMSansBlack250,

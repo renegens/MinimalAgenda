@@ -9,64 +9,60 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import domain.model.AppTheme
 import domain.model.AppThemeMode
+import presentation.components.BodyText
+import presentation.components.BodyTextBold
+import presentation.components.BodyTextBoldLight
 import presentation.components.MainButtonWholeWidth
+import presentation.components.MainCTAButton
 import presentation.components.PaperBackground
 import presentation.components.ParagraphDivider
-import presentation.theme.CustomColor
-import presentation.theme.DMSans24Medium120
-import presentation.theme.DMSansBlack150
+import presentation.components.Subtitle
+import presentation.theme.DMSansBlack120
 
 @Composable
-fun StepThree(onContinue: () -> Unit) {
+fun StepThree(onContinue: () -> Unit, requestCalendarPermission: () -> Unit) {
     PaperBackground(AppThemeMode.FollowSystem) {
         Column(
             modifier = Modifier.fillMaxSize().padding(16.dp),
         ) {
             Spacer(modifier = Modifier.height(40.dp))
             Text(
-                style = DMSansBlack150,
-                text = "Your Daily Planner helps you",
+                style = DMSansBlack120,
+                text = "Take Control of Your Schedule",
                 color = MaterialTheme.colorScheme.tertiary,
                 textAlign = TextAlign.Start
             )
-            Spacer(modifier = Modifier.weight(0.5F))
-            Text(
-                style = DMSans24Medium120,
-                text = "declutter your schedule",
-                color = MaterialTheme.colorScheme.tertiary,
-            )
+
+            Spacer(modifier = Modifier.height(16.dp))
+            Subtitle(text = "We work with your existing calendar to simplify your planning. No duplicates, no hassle—just clarity.")
             Spacer(modifier = Modifier.height(16.dp))
             ParagraphDivider()
+//            Icon(
+//                tint = MaterialTheme.colorScheme.tertiary,
+//                imageVector = Icons.Default.Lock,
+//                contentDescription = "A Sample Check Icon",
+//                modifier = Modifier.width(150.dp).height(150.dp).align(Alignment.CenterHorizontally)
+//            )
+
+            //Calendar
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                style = DMSans24Medium120,
-                text = "experience a calm day",
-                color = MaterialTheme.colorScheme.tertiary,
-            )
+            BodyText(text = "To declutter your real schedule, we need access to your calendar.")
             Spacer(modifier = Modifier.height(16.dp))
-            ParagraphDivider()
+            BodyTextBold(text = "Your data stays on your device.")
             Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                style = DMSans24Medium120.copy(fontWeight = FontWeight.SemiBold),
-                text = "enjoy piece of mind",
-                color = CustomColor.Orange_500,
-            )
+            BodyTextBold(text = "We don’t store or share your information.")
+            //Spacer(modifier = Modifier.height(32.dp))
+            //BodyText(text = "Not ready yet? Start with sample data and explore how we simplify your day.")
             Spacer(modifier = Modifier.weight(1F))
-            MainButtonWholeWidth(
-                label = "Let’s Begin",
-                textStyle = DMSansBlack150.copy(fontSize = 20.sp, letterSpacing = (0.sp)),
-                textColor = Color.White,
-                buttonColor = AppTheme.Default.appColor.color,
-                onClick = onContinue
-            )
-            Spacer(modifier = Modifier.height(32.dp))
+            MainCTAButton("continue", requestCalendarPermission)
+            Spacer(modifier = Modifier.height(54.dp))
+            MainButtonWholeWidth(label = "Try sample data", onClick = onContinue, buttonColor = MaterialTheme.colorScheme.tertiary, textColor = MaterialTheme.colorScheme.surface)
+            Spacer(modifier = Modifier.height(8.dp))
+            BodyTextBoldLight(text = "Preview the app with sample events—no data required.")
+            Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }

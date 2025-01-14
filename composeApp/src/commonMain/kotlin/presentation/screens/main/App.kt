@@ -42,11 +42,13 @@ fun App() {
         LaunchedEffect(Unit) {
             viewModel.effect.collectLatest {
                 when (it) {
-                    AppContract.Effect.DismissPaywall -> scope.launch { paywallSheetState.hide() }.invokeOnCompletion {
-                        if (!paywallSheetState.isVisible) {
-                            showPaywallBottomSheet = false
+                    AppContract.Effect.DismissPaywall -> scope.launch { paywallSheetState.hide() }
+                        .invokeOnCompletion {
+                            if (!paywallSheetState.isVisible) {
+                                showPaywallBottomSheet = false
+                            }
                         }
-                    }
+
                     AppContract.Effect.PresentPaywall -> showPaywallBottomSheet = true
                 }
             }
@@ -89,8 +91,10 @@ fun App() {
                 isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding()
             )
 
-            if (state.shouldShowOnboarding){
-                Onboarding { viewModel.setEvent(AppContract.Event.DismissOnboarding) }
+            if (state.shouldShowOnboarding) {
+                Onboarding(
+                    dismiss = { viewModel.setEvent(AppContract.Event.DismissOnboarding) },
+                    requestCalendarPermission = { viewModel.setEvent(AppContract.Event.RequestCalendarPermission) })
             }
 
             if (showPaywallBottomSheet) {

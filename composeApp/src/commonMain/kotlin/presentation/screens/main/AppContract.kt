@@ -32,6 +32,7 @@ class AppContract {
         object NewEvent : Event()
         object DismissTrialNotification : Event()
         class RequestNotificationPermission(val shouldRequest: Boolean) : Event()
+        object RequestCalendarPermission: Event()
         object NotEligible : Event()
         object OnDismissPaywall : Event()
         class OnPurchased(val purchase: Package?) : Event()

@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import domain.model.AppTheme
 import presentation.theme.DMSansBlack36
 
 @Composable
@@ -32,4 +33,14 @@ fun MainButtonWholeWidth(
             color = textColor
         )
     }
+}
+
+@Composable
+fun MainCTAButton(label: String, onClick: () -> Unit){
+    MainButtonWholeWidth(
+        label = label,
+        buttonColor = AppTheme.Default.appColor.color,
+        textColor = Color.White,
+        onClick = onClick
+    )
 }

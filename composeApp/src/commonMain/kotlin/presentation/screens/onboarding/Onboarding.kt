@@ -7,7 +7,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.launch
 
 @Composable
-fun Onboarding(dismiss: () -> Unit) {
+fun Onboarding(dismiss: () -> Unit, requestCalendarPermission: () -> Unit) {
     val pagerState = rememberPagerState(
         pageCount = { Onboarding.entries.size },
         initialPage = Onboarding.StepOne.position,
@@ -28,7 +28,7 @@ fun Onboarding(dismiss: () -> Unit) {
                 }
             }
 
-            Onboarding.StepThree.position -> StepThree(dismiss)
+            Onboarding.StepThree.position -> StepThree(dismiss, requestCalendarPermission)
         }
     }
 }
