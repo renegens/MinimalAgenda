@@ -15,7 +15,7 @@ class AppContract {
         val showTrialNotificationError: Boolean = false,
         val showTrialNotificationSuccess: Boolean = false,
         val showNotificationPermissionInfo: Boolean = false,
-        val shouldShowOnboarding: Boolean = false
+        val shouldShowOnboarding: Boolean = false,
     ) : UiState {
 
         fun isPresentingNotificationOnboarding() =
@@ -25,6 +25,7 @@ class AppContract {
     sealed class Effect : UiEffect {
         object PresentPaywall : Effect()
         object DismissPaywall : Effect()
+        object CloseOnboardingAndGoToCalendar: Effect()
     }
 
     sealed class Event : UiEvent {
@@ -32,7 +33,6 @@ class AppContract {
         object NewEvent : Event()
         object DismissTrialNotification : Event()
         class RequestNotificationPermission(val shouldRequest: Boolean) : Event()
-        object RequestCalendarPermission: Event()
         object NotEligible : Event()
         object OnDismissPaywall : Event()
         class OnPurchased(val purchase: Package?) : Event()

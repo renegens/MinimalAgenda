@@ -10,6 +10,7 @@ object CustomColor {
     val Mint_500 = Color(0xFF00b1a9)
     val Rosa_500 = Color(0xFFf84a6d)
     val Orange_500 = Color(0xFFf26803)
+    val Orange_700 = Color(0xFFE25602)
     val Lila_500 = Color(0xFFb453d9)
     val Blue_500 = Color(0xFF0078fb)
 

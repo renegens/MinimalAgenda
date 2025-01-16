@@ -8,6 +8,6 @@ class ShouldPresentSwipeToolTipUseCase(private val launchCounterDataSource: Laun
 
     suspend operator fun invoke(): Boolean {
         val count = launchCounterDataSource.getCount()
-        return count < MAX_SHOW
+        return count == MAX_SHOW
     }
 }

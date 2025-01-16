@@ -3,32 +3,53 @@ package presentation.screens.onboarding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import org.koin.compose.viewmodel.koinViewModel
+import platform.CalendarPermissionHandler
 
 @Composable
-fun Onboarding(dismiss: () -> Unit, requestCalendarPermission: () -> Unit) {
+fun Onboarding(dismiss: () -> Unit) {
+    val viewModel: OnboardingViewModel = koinViewModel()
+    val state by viewModel.uiState.collectAsState()
+
     val pagerState = rememberPagerState(
         pageCount = { Onboarding.entries.size },
         initialPage = Onboarding.StepOne.position,
     )
 
     val coroutineScope = rememberCoroutineScope()
+    LaunchedEffect(Unit) {
+        viewModel.effect.collectLatest {
+            when (it) {
+                OnboardingContract.Effect.CloseOnboarding -> dismiss.invoke()
+            }
+        }
+    }
     HorizontalPager(state = pagerState) { page ->
         when (page) {
-            Onboarding.StepOne.position -> StepOne {
+            Onboarding.StepOne.position -> StepWelcome{
                 coroutineScope.launch {
                     pagerState.animateScrollToPage(Onboarding.StepTwo.position)
                 }
             }
 
-            Onboarding.StepTwo.position -> StepTwo {
+            Onboarding.StepTwo.position -> StepHideDemo {
                 coroutineScope.launch {
                     pagerState.animateScrollToPage(Onboarding.StepThree.position)
                 }
             }
 
-            Onboarding.StepThree.position -> StepThree(dismiss, requestCalendarPermission)
+            Onboarding.StepThree.position -> StepCalendarPermission(
+                calendarPermissionState = state.calendarPermissionState,
+                //calendarPermissionState = CalendarPermissionHandler.State.Denied,
+                onContinue = dismiss,
+                openSettings = {viewModel.setEvent(OnboardingContract.Event.OnOpenSettings)},
+                requestCalendarPermission = { viewModel.setEvent(OnboardingContract.Event.OnRequestCalendarPermission) })
         }
     }
 }

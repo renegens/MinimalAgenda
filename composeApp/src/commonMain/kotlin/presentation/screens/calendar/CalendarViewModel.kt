@@ -61,8 +61,14 @@ class CalendarViewModel(
             is Event.OnYearClicked -> setEffect { Effect.GoToYear(event.agendaYear) }
 
             Event.OnRequestCalendarPermissionClicked -> viewModelScope.launch {
+                val shouldPresentSwipeTooltip = shouldPresentSwipeToolTipUseCase()
+
                 when (val state = permissionHandler.requestCalendarPermission()) {
-                    CalendarPermissionHandler.State.FullAccess -> loadEventsFastAndSlow(scrollToNow = true)
+                    CalendarPermissionHandler.State.FullAccess -> loadEventsFastAndSlow(
+                        scrollToNow = true,
+                        shouldShowSwipeToolTip = shouldPresentSwipeTooltip
+                    )
+
                     else -> setState {
                         copy(
                             agendaEvents = emptyList(), calendarPermission = state
@@ -93,9 +99,13 @@ class CalendarViewModel(
         when (val permissionState = permissionHandler.getPermissionState()) {
             CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
                 val eventsUIList = uiState.value.flatDaysAndEvents
+                val shouldPresentSwipeTooltip = shouldPresentSwipeToolTipUseCase()
 
                 if (eventsUIList.isEmpty()) {
-                    loadEventsFastAndSlow(scrollToNow = true)
+                    loadEventsFastAndSlow(
+                        scrollToNow = true,
+                        shouldShowSwipeToolTip = shouldPresentSwipeTooltip
+                    )
                     return@launch
                 }
 
@@ -104,6 +114,7 @@ class CalendarViewModel(
                         setState {
                             copy(
                                 currentDate = today,
+                                showSwipeToolTip = shouldPresentSwipeTooltip,
                                 flatDaysAndEvents = slowIteration.dayListViewTypes,
                                 agendaEvents = slowIteration.agendaEvents,
                                 scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size
@@ -153,7 +164,10 @@ class CalendarViewModel(
         }
     }
 
-    private suspend fun loadEventsFastAndSlow(scrollToNow: Boolean) {
+    private suspend fun loadEventsFastAndSlow(
+        scrollToNow: Boolean,
+        shouldShowSwipeToolTip: Boolean
+    ) {
         when (val fastIteration = getAllEventsUseCase(1)) {
             is GetAllEventsUseCase.State.Success -> {
                 setState {
@@ -164,6 +178,7 @@ class CalendarViewModel(
                         agendaEvents = fastIteration.agendaEvents,
                         calendarPermission = CalendarPermissionHandler.State.FullAccess,
                         scrollToNow = scrollToNow,
+                        showSwipeToolTip = shouldShowSwipeToolTip
                     )
                 }
                 when (val slowIteration = getAllEventsUseCase(24)) {

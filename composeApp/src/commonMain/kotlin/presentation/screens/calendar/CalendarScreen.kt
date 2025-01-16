@@ -65,7 +65,7 @@ fun CalendarScreen(
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
             haptic.addHapticFeedbackProminent()
-            if (page == Section.Settings.position && state.showSwipeToolTip){
+            if (page == Section.Settings.position && state.showSwipeToolTip) {
                 viewModel.setEvent(Event.HideSwipeToolTip)
             }
         }
@@ -143,7 +143,8 @@ fun CalendarScreen(
         SafeTransparentNavigationContainer {
             HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                 when (page) {
-                    CalendarContract.Section.Day.position -> DayScreen(appThemeMode = appThemeMode,
+                    CalendarContract.Section.Day.position -> DayScreen(
+                        appThemeMode = appThemeMode,
                         items = state.flatDaysAndEvents,
                         currentDate = state.currentDate,
                         scrollToNow = state.scrollToNow,

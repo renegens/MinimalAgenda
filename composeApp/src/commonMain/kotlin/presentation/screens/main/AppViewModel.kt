@@ -11,9 +11,11 @@ import extensions.guardPremium
 import presentation.base.BaseViewModel
 import presentation.screens.main.AppContract.*
 import extensions.initializeRevenueCat
+import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import platform.CalendarPermissionHandler
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withTimeout
 import platform.EventEditViewHandler
 import platform.ModalPresenter
 
@@ -24,17 +26,24 @@ class AppViewModel(
     private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
     private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase,
     private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase,
-    private val launchCounterDataSource: LaunchCounterDataSource,
-    private val calendarPermissionHandler: CalendarPermissionHandler
+    private val launchCounterDataSource: LaunchCounterDataSource
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
         initializeRevenueCat()
         viewModelScope.launch {
-            if (launchCounterDataSource.getCount() > 0) {
-                setState { copy(shouldShowOnboarding = true) }
+            runBlocking {
+                try {
+                    withTimeout(1000L) {
+                        if (launchCounterDataSource.getCount() > 0) {
+                            setState { copy(shouldShowOnboarding = true) }
+                        }
+                        launchCounterDataSource.increment()
+                    }
+                } catch (e: TimeoutCancellationException) {
+                    println("Task timed out: ${e.message}")
+                }
             }
-            launchCounterDataSource.increment()
             appThemeListenerUseCase().collectLatest {
                 setState { copy(appTheme = it) }
             }
@@ -100,13 +109,7 @@ class AppViewModel(
                 }
             }
 
-            Event.DismissOnboarding -> setState { copy(shouldShowOnboarding = false) }
-            Event.RequestCalendarPermission -> viewModelScope.launch {
-                when (val state = calendarPermissionHandler.requestCalendarPermission()) {
-                    CalendarPermissionHandler.State.FullAccess -> {}
-                    else -> {}
-                }
-            }
+            Event.DismissOnboarding -> setEffect { Effect.CloseOnboardingAndGoToCalendar }
         }
     }
 

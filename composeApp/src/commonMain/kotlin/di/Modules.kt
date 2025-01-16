@@ -25,6 +25,7 @@ import org.koin.dsl.module
 
 import presentation.screens.add_event.AddEventViewModel
 import presentation.screens.calendar.CalendarViewModel
+import presentation.screens.onboarding.OnboardingViewModel
 import presentation.screens.main.AppViewModel
 import presentation.screens.paywall.PaywallViewModel
 import presentation.screens.settings.SettingsViewModel
@@ -37,6 +38,7 @@ expect val platformModule: Module
 
 val sharedModule = module {
     viewModelOf(::AppViewModel)
+    viewModelOf(::OnboardingViewModel)
     viewModelOf(::CalendarViewModel)
     viewModelOf(::AddEventViewModel)
     viewModelOf(::PaywallViewModel)

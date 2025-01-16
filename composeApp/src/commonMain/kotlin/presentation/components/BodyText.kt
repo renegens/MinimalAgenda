@@ -45,7 +45,7 @@ fun BodyTextBoldLight(text: String) {
 }
 
 @Composable
-fun Subtitle(text: String) {
+fun TextSubtitle(text: String) {
     Text(
         text = text,
         modifier = Modifier.fillMaxWidth(),
