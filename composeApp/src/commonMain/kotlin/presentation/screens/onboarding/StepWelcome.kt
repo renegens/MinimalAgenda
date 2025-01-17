@@ -29,7 +29,7 @@ fun StepWelcome(onContinue: () -> Unit) {
             Spacer(modifier = Modifier.weight(0.5F))
             TextTitle(text = "Welcome,\nYour All in One $APP_DISPLAY_NAME")
             Spacer(modifier = Modifier.height(16.dp))
-            TextSubtitle("Simplify your schedule. Make the most of your day")
+            TextSubtitle("Simplify your schedule\nMake the most of your day")
             Spacer(modifier = Modifier.height(32.dp))
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
