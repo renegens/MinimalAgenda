@@ -22,7 +22,8 @@ import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.filled.LockCircle
 import io.github.alexzhirkevich.cupertino.icons.outlined.CalendarBadgePlus
 import platform.CalendarPermissionHandler
-import presentation.components.MainButtonWholeWidth
+import presentation.components.BodyText
+import presentation.components.ButtonWholeWidth
 import presentation.components.MainCTAButton
 import presentation.components.PaperBackground
 import presentation.components.TextSubtitle
@@ -69,30 +70,16 @@ private fun ColumnScope.PermissionDenied(
             modifier = Modifier.size(90.dp),
         )
         Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = "Enable calendar access in iOS settings to display your events.",
-            modifier = Modifier.fillMaxWidth(),
-            style = DMSans24Medium60,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.tertiary,
-        )
+        BodyText(text = "Enable calendar access in iOS settings to display your events.", textAlign = TextAlign.Center)
         Spacer(modifier = Modifier.height(16.dp))
-
-        Text(
-            text = "Your data is private and secure.",
-            modifier = Modifier.fillMaxWidth(),
-            style = DMSans24Medium60,
-            textAlign = TextAlign.Center,
-            color = MaterialTheme.colorScheme.tertiary,
-        )
-
+        BodyText(text = "Your data is private and secure.", textAlign = TextAlign.Center)
     }
     Spacer(modifier = Modifier.weight(1F))
 
     MainCTAButton("try demo", onContinue)
     Spacer(modifier = Modifier.height(48.dp))
 
-    MainButtonWholeWidth(
+    ButtonWholeWidth(
         label = "Go to Settings",
         onClick = openSettings,
         buttonColor = MaterialTheme.colorScheme.tertiary,
@@ -133,7 +120,7 @@ private fun ColumnScope.AskingForPermission(
     MainCTAButton("continue", requestCalendarPermission)
     Spacer(modifier = Modifier.height(48.dp))
 
-    MainButtonWholeWidth(
+    ButtonWholeWidth(
         label = "Try demo",
         onClick = onContinue,
         buttonColor = MaterialTheme.colorScheme.tertiary,

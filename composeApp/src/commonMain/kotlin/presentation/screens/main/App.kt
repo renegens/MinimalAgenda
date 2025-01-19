@@ -21,6 +21,7 @@ import kotlinx.coroutines.launch
 import navigation.Screen
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
+import platform.openSettings
 import presentation.components.ComposableLifecycle
 import presentation.screens.calendar.CalendarScreen
 import presentation.screens.onboarding.Onboarding
@@ -63,6 +64,8 @@ fun App() {
                     AppContract.Effect.CloseOnboardingAndGoToCalendar -> navController.navigate(
                         Screen.Agenda.route
                     )
+
+                    AppContract.Effect.OpenDeviceAppSettings -> openSettings()
                 }
             }
         }
@@ -92,12 +95,10 @@ fun App() {
             }
 
             NavHost(
-                navController = navController,
-                startDestination = start.route
+                navController = navController, startDestination = start.route
             ) {
                 composable(Screen.Agenda.route) {
-                    CalendarScreen(
-                        appThemeMode = state.appTheme.appThemeMode,
+                    CalendarScreen(appThemeMode = state.appTheme.appThemeMode,
                         forceEventLoad = state.forceEventLoad,
                         onAddEvent = {
                             viewModel.setEvent(AppContract.Event.NewEvent)
@@ -106,26 +107,30 @@ fun App() {
                         notEligible = {
                             viewModel.setEvent(AppContract.Event.NotEligible)
                         },
-                        isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding()
-                    )
+                        isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding(),
+                        onOpenDeviceSettings = { viewModel.setEvent(AppContract.Event.OnOpenDeviceSettings) })
                 }
 
                 composable(Screen.Onboarding.route) {
                     Onboarding(
-                        dismiss = { viewModel.setEvent(AppContract.Event.DismissOnboarding) }
+                        dismiss = { viewModel.setEvent(AppContract.Event.DismissOnboarding) },
+                        openSettings = { viewModel.setEvent(AppContract.Event.OnOpenDeviceSettings) }
                     )
                 }
             }
             if (showPaywallBottomSheet) {
                 ModalBottomSheet(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    onDismissRequest = {
+                    containerColor = MaterialTheme.colorScheme.surface, onDismissRequest = {
                         viewModel.setEvent(AppContract.Event.OnDismissPaywall)
-                    },
-                    sheetState = paywallSheetState
+                    }, sheetState = paywallSheetState
                 ) {
-                    PaywallScreen(
-                        onPurchaseComplete = { viewModel.setEvent(AppContract.Event.OnPurchased(it)) },
+                    PaywallScreen(onPurchaseComplete = {
+                        viewModel.setEvent(
+                            AppContract.Event.OnPurchased(
+                                it
+                            )
+                        )
+                    },
                         onCancel = { viewModel.setEvent(AppContract.Event.OnDismissPaywall) })
                 }
             }

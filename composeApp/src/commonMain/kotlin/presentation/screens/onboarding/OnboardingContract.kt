@@ -19,7 +19,6 @@ class OnboardingContract {
 
     sealed class Event : UiEvent {
         object OnRequestCalendarPermission : Event()
-        object OnOpenSettings : Event()
         object OnDismissOnboarding : Event()
     }
 }

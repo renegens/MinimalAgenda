@@ -41,6 +41,7 @@ fun CalendarScreen(
     onAddEvent: () -> Unit,
     onEditEvent: (AgendaEvent) -> Unit,
     notEligible: () -> Unit,
+    onOpenDeviceSettings: () -> Unit,
     forceEventLoad: Int,
     isPresentingNotificationOnboarding: Boolean
 ) {
@@ -159,7 +160,8 @@ fun CalendarScreen(
                             viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
                         },
                         isPresentingSwipeTip = state.showSwipeToolTip,
-                        isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding
+                        isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding,
+                        onOpenSettings = onOpenDeviceSettings
                     )
 
                     CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,

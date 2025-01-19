@@ -21,8 +21,6 @@ class OnboardingViewModel(
                     else -> setState { copy(calendarPermissionState = state) }
                 }
             }
-
-            Event.OnOpenSettings -> TODO()
         }
     }
 }

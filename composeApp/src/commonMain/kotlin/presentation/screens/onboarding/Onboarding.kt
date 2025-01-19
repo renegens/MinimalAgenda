@@ -10,10 +10,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
-import platform.CalendarPermissionHandler
 
 @Composable
-fun Onboarding(dismiss: () -> Unit) {
+fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
     val viewModel: OnboardingViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
 
@@ -32,7 +31,7 @@ fun Onboarding(dismiss: () -> Unit) {
     }
     HorizontalPager(state = pagerState) { page ->
         when (page) {
-            Onboarding.StepOne.position -> StepWelcome{
+            Onboarding.StepOne.position -> StepWelcome {
                 coroutineScope.launch {
                     pagerState.animateScrollToPage(Onboarding.StepTwo.position)
                 }
@@ -46,9 +45,8 @@ fun Onboarding(dismiss: () -> Unit) {
 
             Onboarding.StepThree.position -> StepCalendarPermission(
                 calendarPermissionState = state.calendarPermissionState,
-                //calendarPermissionState = CalendarPermissionHandler.State.Denied,
                 onContinue = dismiss,
-                openSettings = {viewModel.setEvent(OnboardingContract.Event.OnOpenSettings)},
+                openSettings = openSettings,
                 requestCalendarPermission = { viewModel.setEvent(OnboardingContract.Event.OnRequestCalendarPermission) })
         }
     }

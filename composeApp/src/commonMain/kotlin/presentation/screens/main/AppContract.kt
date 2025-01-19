@@ -26,11 +26,13 @@ class AppContract {
         object PresentPaywall : Effect()
         object DismissPaywall : Effect()
         object CloseOnboardingAndGoToCalendar: Effect()
+        object OpenDeviceAppSettings: Effect()
     }
 
     sealed class Event : UiEvent {
         class EditExternal(val agendaEvent: AgendaEvent) : Event()
         object NewEvent : Event()
+        object OnOpenDeviceSettings: Event()
         object DismissTrialNotification : Event()
         class RequestNotificationPermission(val shouldRequest: Boolean) : Event()
         object NotEligible : Event()

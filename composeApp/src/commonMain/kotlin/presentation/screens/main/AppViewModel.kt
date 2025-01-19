@@ -35,7 +35,7 @@ class AppViewModel(
             runBlocking {
                 try {
                     withTimeout(1000L) {
-                        if (launchCounterDataSource.getCount() > 0) {
+                        if (launchCounterDataSource.getCount() == 0) {
                             setState { copy(shouldShowOnboarding = true) }
                         }
                         launchCounterDataSource.increment()
@@ -110,6 +110,7 @@ class AppViewModel(
             }
 
             Event.DismissOnboarding -> setEffect { Effect.CloseOnboardingAndGoToCalendar }
+            Event.OnOpenDeviceSettings -> setEffect { Effect.OpenDeviceAppSettings }
         }
     }
 

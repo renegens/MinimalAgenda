@@ -37,7 +37,7 @@ import extensions.scrollToNowIfNeeded
 import extensions.today
 import kotlinx.datetime.LocalDate
 import platform.CalendarPermissionHandler
-import presentation.components.CalendarPermission
+import presentation.components.CalendarDayHeader
 import presentation.components.DayHeader
 import presentation.components.EventOptionsMenu
 import presentation.components.ScrollablePaperBackground
@@ -59,6 +59,7 @@ fun DayScreen(
     onHide: (AgendaEvent) -> Unit,
     calendarPermission: CalendarPermissionHandler.State,
     onRequestCalendarPermission: () -> Unit,
+    onOpenSettings: () -> Unit,
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
     isPresentingNotificationOnBoarding: Boolean,
@@ -68,7 +69,7 @@ fun DayScreen(
 
     val stickyHeaderPadding =
         if (calendarPermission == CalendarPermissionHandler.State.NotDetermined && isPresentingSwipeTip.not()) {
-            4
+            2
         } else {
             2
         }
@@ -110,8 +111,10 @@ fun DayScreen(
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
 
             if (isPresentingNotificationOnBoarding.not() && isPresentingSwipeTip.not()) {
-                CalendarPermission(
-                    onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
+                CalendarDayHeader(
+                    onPermissionRequest = onRequestCalendarPermission,
+                    openSettings = onOpenSettings,
+                    state = calendarPermission
                 )
             }
 
@@ -227,9 +230,9 @@ fun Event(
                 DMSans18Medium
             }
 
-            val title = if (event.isLastDayInMultiDayEvent){
+            val title = if (event.isLastDayInMultiDayEvent) {
                 "${event.title} (Ending)"
-            }else{
+            } else {
                 event.title
             }
             Text(
@@ -287,7 +290,7 @@ fun Time(agendaEvent: AgendaEvent, textColor: Color) {
                 style = DMSans18Bold60,
                 color = textColor
             )
-        }  else {
+        } else {
             Text(
                 modifier = Modifier.weight(0.6F),
                 text = time.hours,
