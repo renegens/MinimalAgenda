@@ -1,15 +1,20 @@
 package presentation.screens.calendar
 
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
@@ -20,9 +25,11 @@ import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AppThemeMode
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.ActionButton
 import presentation.components.ComposableLifecycle
+import presentation.components.HideToolTip
 import presentation.components.NotificationPermissionDialog
 import presentation.components.SafeTransparentNavigationContainer
 import presentation.components.addHapticFeedbackProminent
@@ -35,6 +42,7 @@ import presentation.screens.calendar.months.MonthsScreen
 import presentation.screens.calendar.years.YearsScreen
 import presentation.screens.settings.SettingsScreen
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CalendarScreen(
     appThemeMode: AppThemeMode,
@@ -51,6 +59,9 @@ fun CalendarScreen(
         pageCount = { Section.entries.size },
         initialPage = Section.Day.position,
     )
+    val tipSheetState = rememberModalBottomSheetState()
+    val scope = rememberCoroutineScope()
+    var showTipSheet by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
 
     var isScrolledToToday by remember { mutableStateOf(true) }
@@ -99,6 +110,12 @@ fun CalendarScreen(
 
                 is Effect.ShowPaywall -> notEligible.invoke()
                 is Effect.ShowEdit -> onEditEvent.invoke(it.agendaEvent)
+                Effect.ShowSheetTip -> showTipSheet = true
+                Effect.DismissSheet -> scope.launch { tipSheetState.hide() }.invokeOnCompletion {
+                    if (!tipSheetState.isVisible) {
+                        showTipSheet = false
+                    }
+                }
             }
         }
     }
@@ -115,13 +132,11 @@ fun CalendarScreen(
         }
     }
 
-    Scaffold(
-        containerColor = Color.Transparent,
+    Scaffold(containerColor = Color.Transparent,
         modifier = Modifier.statusBarsPadding(),
         floatingActionButton = {
             ActionButton(
                 currentSection = Section.fromInt(pagerState.currentPage),
-                calendarPermission = state.calendarPermission,
                 showAll = state.showAll,
                 nowClicked = {
                     viewModel.setEvent(
@@ -161,7 +176,8 @@ fun CalendarScreen(
                         },
                         isPresentingSwipeTip = state.showSwipeToolTip,
                         isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding,
-                        onOpenSettings = onOpenDeviceSettings
+                        onOpenSettings = onOpenDeviceSettings,
+                        isDemoMode = state.isDemoMode,
                     )
 
                     CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
@@ -191,6 +207,20 @@ fun CalendarScreen(
 
                     CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
                 }
+            }
+        }
+        if (showTipSheet) {
+            ModalBottomSheet(
+                contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
+                dragHandle = {},
+                onDismissRequest = {
+                    viewModel.setEvent(Event.DismissBottomSheet)
+                },
+                sheetState = tipSheetState
+            ) {
+                HideToolTip(openPaywall = {
+                    viewModel.setEvent(Event.ShowPaywallFromBottomSheet)
+                })
             }
         }
     }

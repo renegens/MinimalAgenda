@@ -51,7 +51,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
         modifier = Modifier.fillMaxSize().statusBarsPadding()
             .verticalScroll(state = rememberScrollState())
     ) {
-        PaperBackground(state.appThemeMode) {
+        PaperBackground(appThemeMode = state.appThemeMode) {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 Text(
                     style = iosExtraLargeTitle,
@@ -156,7 +156,7 @@ private fun SettingsItem(
     showDivider: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    PaperBackground(appThemeMode) {
+    PaperBackground(appThemeMode = appThemeMode) {
         Column {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 content.invoke()

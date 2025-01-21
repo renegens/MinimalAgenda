@@ -20,7 +20,9 @@ import presentation.theme.InvertedAppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
 fun LazyListScope.CalendarDayHeader(
-    onPermissionRequest: () -> Unit, openSettings: () -> Unit, state: State
+    onPermissionRequest: () -> Unit,
+    openSettings: () -> Unit,
+    state: State,
 ) {
     when (state) {
         State.FullAccess -> {}
@@ -76,7 +78,7 @@ private fun Denied(openSettings: () -> Unit) {
 private fun NotDetermined(onPermissionRequest: () -> Unit) {
     TextTitleSmall(text = "Explore Decluttering in Action")
     Spacer(modifier = Modifier.height(16.dp))
-    TextBodyRegular("Tap to hide an event. Once you’re ready, connect your calendar for the full experience.")
+    TextBodyRegular("Tap to hide events, or press All to view hidden ones. Connect your calendar for the full experience.")
     Spacer(modifier = Modifier.height(24.dp))
     MainCTAButton("continue", onPermissionRequest)
     Spacer(modifier = Modifier.height(16.dp))

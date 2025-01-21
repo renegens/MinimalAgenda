@@ -63,24 +63,21 @@ fun DayScreen(
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
     isPresentingNotificationOnBoarding: Boolean,
-    isPresentingSwipeTip: Boolean
+    isPresentingSwipeTip: Boolean,
+    isDemoMode: Boolean,
 ) {
     if (items.isEmpty()) return
 
-    val stickyHeaderPadding =
-        if (calendarPermission == CalendarPermissionHandler.State.NotDetermined && isPresentingSwipeTip.not()) {
-            2
-        } else {
-            2
-        }
+    val stickyHeaderPadding = when {
+        isPresentingSwipeTip -> 1
+        calendarPermission == CalendarPermissionHandler.State.Denied || calendarPermission == CalendarPermissionHandler.State.NotDetermined -> 2
+        else -> 0
+    }
 
     val currentEpochDay = currentDate.toEpochDays()
 
-    val todayIndex by if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
-        mutableStateOf(items.findIndexOf(currentEpochDay))
-    } else {
-        mutableStateOf(items.findIndexOf(currentEpochDay) - stickyHeaderPadding)
-    }
+    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay) - stickyHeaderPadding)
+
 
     val listState = rememberLazyListState()
 
@@ -114,7 +111,7 @@ fun DayScreen(
                 CalendarDayHeader(
                     onPermissionRequest = onRequestCalendarPermission,
                     openSettings = onOpenSettings,
-                    state = calendarPermission
+                    state = calendarPermission,
                 )
             }
 
@@ -154,7 +151,8 @@ fun DayScreen(
                             },
                             showAll = showAll,
                             hapticFeedback = hapticFeedback,
-                            appThemeMode = appThemeMode
+                            appThemeMode = appThemeMode,
+                            isDemoMode = isDemoMode
                         )
                     }
 
@@ -203,7 +201,8 @@ fun Event(
     onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean,
     hapticFeedback: HapticFeedback,
-    appThemeMode: AppThemeMode
+    appThemeMode: AppThemeMode,
+    isDemoMode: Boolean
 ) {
     if (showAll.not() && event.isHidden) return
     val textColor = if (selectedItem == event) {
@@ -251,7 +250,8 @@ fun Event(
             selectedItem = selectedItem,
             hapticFeedback = hapticFeedback,
             onItemSelected = onItemSelected,
-            appThemeMode = appThemeMode
+            appThemeMode = appThemeMode,
+            isDemoMode = isDemoMode
         )
     }
 }

@@ -1,8 +1,8 @@
 package domain.model
 
 import data.local.HiddenEventEntity
+import extensions.currentLocalDateTime
 import extensions.takingScreenshots
-import kotlinx.datetime.Clock
 import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -13,7 +13,7 @@ data class AgendaEvent(
     val title: String,
     val location: String? = "",
     val startTimeInUTC: Long,
-    val endTime: Long? = null,
+    val endTimeInUTC: Long? = null,
     val allDay: Boolean,
     var epochDay: Int?,
     var isRecurring: Boolean = false,
@@ -74,16 +74,12 @@ data class AgendaEvent(
     }
 
     fun getDuration(): Int {
-        return (endTime?.minus(startTimeInUTC))?.div(60)?.toInt() ?: 60
+        return (endTimeInUTC?.minus(startTimeInUTC))?.div(60)?.toInt() ?: 60
     }
 
     fun hasPassedForToday(today: Int): Boolean {
         if (takingScreenshots) return false
         if (epochDay != today) return false
-        val eventDate =
-            Instant.fromEpochSeconds(endTime ?: 0).toLocalDateTime(TimeZone.currentSystemDefault())
-        val currentLocalDateTime =
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        return eventDate < currentLocalDateTime
+        return endLocalDateTime < currentLocalDateTime
     }
 }

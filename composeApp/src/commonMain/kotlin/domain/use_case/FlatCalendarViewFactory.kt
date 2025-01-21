@@ -18,7 +18,7 @@ class FlatCalendarViewFactory(
                 events.sortedWith(compareBy({
 
                     if (it.isLastDayInMultiDayEvent) {
-                        it.endTime
+                        it.endTimeInUTC
                     } else {
                         it.startTimeInUTC
                     }

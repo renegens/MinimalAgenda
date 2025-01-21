@@ -27,7 +27,7 @@ import presentation.theme.DMSansBlack120
 
 @Composable
 fun StepInspirational(onContinue: () -> Unit) {
-    PaperBackground(AppThemeMode.FollowSystem) {
+    PaperBackground(appThemeMode = AppThemeMode.FollowSystem) {
         Column(
             modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
         ) {

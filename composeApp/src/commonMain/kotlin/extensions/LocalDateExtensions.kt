@@ -32,3 +32,6 @@ val nextHour: Int
             newHour
         }
     }
+
+val currentLocalDateTime =
+    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

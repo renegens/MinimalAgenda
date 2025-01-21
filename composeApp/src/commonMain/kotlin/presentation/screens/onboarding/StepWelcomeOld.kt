@@ -23,7 +23,7 @@ import presentation.theme.DMSans24Black100
 //Not used here for backup
 @Composable
 fun StepWelcomeOld(onContinue: () -> Unit) {
-    PaperBackground(AppThemeMode.FollowSystem) {
+    PaperBackground(appThemeMode = AppThemeMode.FollowSystem) {
         Column(
             modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally

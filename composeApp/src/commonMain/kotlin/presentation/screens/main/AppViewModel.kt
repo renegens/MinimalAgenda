@@ -16,6 +16,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
+import platform.CalendarPermissionHandler
 import platform.EventEditViewHandler
 import platform.ModalPresenter
 
@@ -26,7 +27,8 @@ class AppViewModel(
     private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
     private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase,
     private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase,
-    private val launchCounterDataSource: LaunchCounterDataSource
+    private val launchCounterDataSource: LaunchCounterDataSource,
+    private val permissionHandler: CalendarPermissionHandler
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
@@ -60,7 +62,7 @@ class AppViewModel(
             }
 
             Event.NewEvent ->
-                guardPremium(
+                guardPremiumLetThroughDemo(
                     onSubscribed = ::showNewEventScreen,
                     onPaywall = { setEvent(Event.NotEligible) })
 
@@ -118,5 +120,13 @@ class AppViewModel(
         modalPresenter.presentAddEvent(
             appTheme = uiState.value.appTheme,
             onSave = { setState { copy(forceEventLoad = uiState.value.forceEventLoad + 1) } })
+    }
+
+    private fun guardPremiumLetThroughDemo(onSubscribed: () -> Unit, onPaywall: () -> Unit) {
+        if (permissionHandler.getPermissionState() == CalendarPermissionHandler.State.FullAccess) {
+            guardPremium(onSubscribed = onSubscribed, onPaywall = onPaywall)
+        } else {
+            onSubscribed.invoke()
+        }
     }
 }

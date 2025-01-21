@@ -1,9 +1,11 @@
 package di
 
+import data.local.DemoModeDataSource
 import data.local.HiddenEventsLocalDataSource
 import data.local.LaunchCounterDataSource
 import data.local.PaywallLocalDataSource
 import data.local.SettingsLocalDataSource
+import data.local.SwipeToolTipDataSource
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.CalendarGenerator
 import domain.use_case.FlatCalendarViewFactory
@@ -14,7 +16,8 @@ import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ScheduleTrialNotificationUseCase
 import domain.use_case.ShowPaywallOncePerDayUseCase
-import domain.use_case.ShouldPresentSwipeToolTipUseCase
+import domain.use_case.DidSeeSwipeTooltipUseCase
+import domain.use_case.ShouldShowDemoModeUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
@@ -49,12 +52,13 @@ val sharedModule = module {
     singleOf(::GetAllEventsUseCase)
     factoryOf(::GetSettingsUseCase)
     factoryOf(::SaveSettingsUseCase)
-    factoryOf(::ShouldPresentSwipeToolTipUseCase)
+    factoryOf(::DidSeeSwipeTooltipUseCase)
     factoryOf(::ScheduleNotificationUseCase)
     factoryOf(::ScheduleTrialNotificationUseCase)
     factoryOf(::ShowPaywallOncePerDayUseCase)
     factoryOf(::SavePaywallTimestampUseCase)
     singleOf(::AppThemeListenerUseCase)
+    factoryOf(::ShouldShowDemoModeUseCase)
 
     factoryOf(::FlatCalendarViewFactory)
 
@@ -62,6 +66,8 @@ val sharedModule = module {
     single { HiddenEventsRepositoryImpl(get()) }.bind<HiddenEventsRepository>()
 
     singleOf(::SettingsLocalDataSource)
+    singleOf(::DemoModeDataSource)
+    singleOf(::SwipeToolTipDataSource)
     singleOf(::SettingsRepositoryImpl).bind<SettingsRepository>()
     singleOf(::PaywallLocalDataSource)
     singleOf(::LaunchCounterDataSource)

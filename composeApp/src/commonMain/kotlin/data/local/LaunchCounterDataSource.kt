@@ -7,7 +7,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
-class  LaunchCounterDataSource(private val dataStore: DataStore) {
+class LaunchCounterDataSource(private val dataStore: DataStore) {
 
     companion object {
         const val COUNTER = "launch counter"

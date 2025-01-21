@@ -39,8 +39,8 @@ fun DemonstrationDay() {
 
     val today by remember { mutableStateOf(today) }
     LaunchedEffect(Unit) {
-        delay(2000) // Delay before removing each event
-        while (calendarEntries.isNotEmpty()) {
+        delay(1000) // Delay before removing each event
+        while (calendarEntries.size > 3) {
             delay(1000) // Delay before removing each event
             calendarEntries = calendarEntries.drop(1) // Remove the first event
         }

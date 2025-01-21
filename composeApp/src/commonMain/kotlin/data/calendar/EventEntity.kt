@@ -27,7 +27,7 @@ fun EventEntity.toEvent(): AgendaEvent {
         title = title!!,
         location = location,
         startTimeInUTC = startTime!!,
-        endTime = endTime,
+        endTimeInUTC = endTime,
         allDay = allDay!!,
         isRecurring = isRecurring!!,
         isMultiDay = isMultiDay,

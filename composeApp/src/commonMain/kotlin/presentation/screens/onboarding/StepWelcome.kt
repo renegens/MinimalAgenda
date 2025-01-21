@@ -22,9 +22,8 @@ import presentation.components.TextTitle
 
 @Composable
 fun StepWelcome(onContinue: () -> Unit) {
-    PaperBackground(AppThemeMode.FollowSystem) {
         Column(
-            modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
+            modifier = Modifier.fillMaxSize().padding(16.dp),
         ) {
             Spacer(modifier = Modifier.weight(0.5F))
             TextTitle(text = "Welcome,\nYour All in One $APP_DISPLAY_NAME")
@@ -42,6 +41,6 @@ fun StepWelcome(onContinue: () -> Unit) {
                 onClick = onContinue
             )
             Spacer(modifier = Modifier.height(16.dp))
-        }
+
     }
 }

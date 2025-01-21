@@ -17,7 +17,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import domain.model.AppThemeMode
 import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
 import io.github.alexzhirkevich.cupertino.icons.filled.LockCircle
 import io.github.alexzhirkevich.cupertino.icons.outlined.CalendarBadgePlus
@@ -25,7 +24,6 @@ import platform.CalendarPermissionHandler
 import presentation.components.BodyText
 import presentation.components.ButtonWholeWidth
 import presentation.components.MainCTAButton
-import presentation.components.PaperBackground
 import presentation.components.TextSubtitle
 import presentation.components.TextTitle
 import presentation.theme.CustomColor
@@ -38,16 +36,13 @@ fun StepCalendarPermission(
     requestCalendarPermission: () -> Unit,
     openSettings: () -> Unit
 ) {
-    PaperBackground(AppThemeMode.FollowSystem) {
-        Column(
-            modifier = Modifier.fillMaxSize().padding(16.dp),
-        ) {
-            Spacer(modifier = Modifier.height(40.dp))
-            if (calendarPermissionState == CalendarPermissionHandler.State.Denied) {
-                PermissionDenied(onContinue, openSettings)
-            } else {
-                AskingForPermission(onContinue, requestCalendarPermission)
-            }
+    Column(
+        modifier = Modifier.fillMaxSize().padding(16.dp),
+    ) {
+        if (calendarPermissionState == CalendarPermissionHandler.State.Denied) {
+            PermissionDenied(onContinue, openSettings)
+        } else {
+            AskingForPermission(onContinue, requestCalendarPermission)
         }
     }
 }
@@ -70,7 +65,10 @@ private fun ColumnScope.PermissionDenied(
             modifier = Modifier.size(90.dp),
         )
         Spacer(modifier = Modifier.height(4.dp))
-        BodyText(text = "Enable calendar access in iOS settings to display your events.", textAlign = TextAlign.Center)
+        BodyText(
+            text = "Enable calendar access in iOS settings to display your events.",
+            textAlign = TextAlign.Center
+        )
         Spacer(modifier = Modifier.height(16.dp))
         BodyText(text = "Your data is private and secure.", textAlign = TextAlign.Center)
     }
