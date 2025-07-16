@@ -48,20 +48,20 @@ fun HideToolTip(openPaywall: () -> Unit) {
                     thickness = 4.dp,
                     color = MaterialTheme.colorScheme.tertiary
                 )
-                Spacer(modifier = Modifier.height(16.dp))
+                Spacer(modifier = Modifier.height(24.dp))
                 TextBodyRegular(
-                    "Tap an event to Hide it.",
+                    "Hide any event by tapping it",
                 )
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(12.dp))
                 TextBodyRegular(
-                    "Tap All to view hidden events.",
-                )
-                Spacer(modifier = Modifier.height(8.dp))
-                TextBodyRegular(
-                    "You can hide up to 5 events for free — upgrade for unlimited access",
+                    "View hidden events by tapping 'All'",
                 )
                 Spacer(modifier = Modifier.height(24.dp))
-                MainCTAButton("GO PREMIUM", openPaywall)
+                TextBodyRegular(
+                    "Free plan: Hide up to 5 events\nPremium: Unlimited event hiding",
+                )
+                Spacer(modifier = Modifier.height(24.dp))
+                MainCTAButton("Upgrade to Premium", openPaywall)
                 Spacer(modifier = Modifier.height(16.dp))
             }
         }

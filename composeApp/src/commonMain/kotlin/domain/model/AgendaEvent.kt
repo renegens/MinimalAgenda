@@ -7,6 +7,7 @@ import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
 data class AgendaEvent(
     val id: String,
@@ -67,6 +68,7 @@ data class AgendaEvent(
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     fun getHoursAndMinutes(): Pair<Int, Int> {
         val date = Instant.fromEpochSeconds(startTimeInUTC)
             .toLocalDateTime(TimeZone.currentSystemDefault())

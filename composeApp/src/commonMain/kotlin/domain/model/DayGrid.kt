@@ -20,7 +20,7 @@ fun createGridDay(agendaMonthYear: AgendaMonthYear): List<DayGrid> {
             monthNumber = agendaMonthYear.agendaMonth.number,
             dayOfMonth = day
         )
-        days.add(DayGrid(day, local.toEpochDays()))
+        days.add(DayGrid(day, local.toEpochDays().toInt()))
     }
 
     val totalRows = if (zerosToPrepend < MAX_ZEROES_TO_PREPEND) {

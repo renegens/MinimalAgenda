@@ -1,6 +1,5 @@
 package di
 
-import data.local.DemoModeDataSource
 import data.local.HiddenEventsLocalDataSource
 import data.local.LaunchCounterDataSource
 import data.local.PaywallLocalDataSource
@@ -66,7 +65,6 @@ val sharedModule = module {
     single { HiddenEventsRepositoryImpl(get()) }.bind<HiddenEventsRepository>()
 
     singleOf(::SettingsLocalDataSource)
-    singleOf(::DemoModeDataSource)
     singleOf(::SwipeToolTipDataSource)
     singleOf(::SettingsRepositoryImpl).bind<SettingsRepository>()
     singleOf(::PaywallLocalDataSource)

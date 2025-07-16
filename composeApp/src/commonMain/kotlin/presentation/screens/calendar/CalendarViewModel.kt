@@ -22,7 +22,7 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-    private val didSeeSwipeTooltipUseCase: DidSeeSwipeTooltipUseCase
+    private val didSeeSwipeTooltipUseCase: DidSeeSwipeTooltipUseCase,
 ) : BaseViewModel<Event, State, Effect>() {
 
     override fun createInitialState() = State()
@@ -90,11 +90,24 @@ class CalendarViewModel(
             is Event.OnEditEvent -> guardPremium(onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
                 onPaywall = { setEffect { Effect.ShowPaywall } })
 
-            Event.HideSwipeToolTip -> setState { copy(showSwipeToolTip = false) }
+            Event.HideSwipeToolTip -> {
+                setState { copy(showSwipeToolTip = false) }
+                setEvent(Event.ShowBottomSheet)
+            }
             Event.DismissBottomSheet -> setEffect { Effect.DismissSheet }
             Event.ShowPaywallFromBottomSheet -> {
                 setEffect { Effect.DismissSheet }
                 setEffect { Effect.ShowPaywall }
+            }
+
+            Event.ShowBottomSheet -> {
+                viewModelScope.launch {
+                    val isPremium = isPremium()
+                    if (permissionHandler.getPermissionState() == CalendarPermissionHandler.State.FullAccess && 
+                        isPremium.not() && !uiState.value.showSwipeToolTip) {
+                            setEffect { Effect.ShowSheetTip }
+                    }
+                }
             }
         }
     }
@@ -177,12 +190,6 @@ class CalendarViewModel(
                 }
             }
         }
-        //todo move to use case
-        val isPremium = isPremium()
-        if (calendarPermissionState == CalendarPermissionHandler.State.FullAccess && isPremium.not()) {
-            setEffect { Effect.ShowSheetTip }
-        }
-
     }
 
     private fun toggleEventVisibility(agendaEvent: AgendaEvent) {

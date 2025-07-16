@@ -80,6 +80,9 @@ fun CalendarScreen(
             if (page == Section.Settings.position && state.showSwipeToolTip) {
                 viewModel.setEvent(Event.HideSwipeToolTip)
             }
+            if (page == Section.Day.position){
+                viewModel.setEvent(Event.ShowBottomSheet)
+            }
         }
     }
 

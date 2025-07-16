@@ -54,6 +54,7 @@ class CalendarContract {
         object HideSwipeToolTip : Event()
         object DismissBottomSheet : Event()
         object ShowPaywallFromBottomSheet: Event()
+        object ShowBottomSheet: Event()
         class Notify(val agendaEvent: AgendaEvent) : Event()
     }
 
