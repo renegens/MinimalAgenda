@@ -10,6 +10,7 @@ import extensions.millisToEpochDay
 import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -20,8 +21,6 @@ import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 import kotlin.random.Random
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
 class AndroidCalendarRepository(private val context: Context) : CalendarRepository {
 
@@ -73,7 +72,6 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         return SimpleDateFormat("HH : mm").format(Date(milliseconds.toLong())).toString()
     }
 
-    @OptIn(ExperimentalTime::class)
     override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
         val list = emptyList<EventEntity>().toMutableList()
 
@@ -185,13 +183,11 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         return false
     }
 
-    @OptIn(ExperimentalTime::class)
     private fun calculateEpochDay(starTime: Long?, timeZone: TimeZone): Int {
-        return Instant.fromEpochSeconds(starTime ?: 0).toLocalDateTime(timeZone).date.toEpochDays().toInt()
+        return Instant.fromEpochSeconds(starTime ?: 0).toLocalDateTime(timeZone).date.toEpochDays()
     }
 }
 
-@OptIn(ExperimentalTime::class)
 fun getRandomTimestampWithinTwoYears(): Long {
     // Current time
     val startYear = LocalDate(year = today.year - 2, monthNumber = 1, dayOfMonth = 1)

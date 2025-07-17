@@ -94,7 +94,7 @@ fun CalendarDays(
         gridDays.forEach { gridItem ->
 
             val isToday by derivedStateOf {
-                gridItem.epochDay == currentDate.toEpochDays().toInt()
+                gridItem.epochDay == currentDate.toEpochDays()
             }
 
             if (gridItem.dayInMonth == DayGrid.DONT_RENDER) {

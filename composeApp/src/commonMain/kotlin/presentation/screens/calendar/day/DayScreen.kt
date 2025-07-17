@@ -76,7 +76,7 @@ fun DayScreen(
 
     val currentEpochDay = currentDate.toEpochDays()
 
-    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay.toInt()) - stickyHeaderPadding)
+    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay) - stickyHeaderPadding)
 
 
     val listState = rememberLazyListState()
@@ -129,7 +129,7 @@ fun DayScreen(
                             day = item.agendaDay.dayInWeek.short,
                             dayInMonth = item.agendaDay.dayOfMonth,
                             month = item.agendaDay.agendaMonthYear.agendaMonth.number,
-                            isToday = item.agendaDay.epochDay.toInt() == currentEpochDay.toInt()
+                            isToday = item.agendaDay.epochDay == currentEpochDay
                         )
                         Spacer(modifier = Modifier.height(16.dp))
                         EmptyDay(
@@ -159,7 +159,7 @@ fun DayScreen(
                     is DayListViewType.Divider -> {
                         Column {
                             Spacer(modifier = Modifier.height(32.dp))
-                            SectionDivider(isCurrent = item.epochDay == currentEpochDay.toInt())
+                            SectionDivider(isCurrent = item.epochDay == currentEpochDay)
                         }
                     }
                 }
@@ -223,7 +223,7 @@ fun Event(
     ) {
         Time(agendaEvent = event, textColor = textColor)
         Column(modifier = Modifier.fillMaxWidth()) {
-            val style = if (event.allDay.not() && event.hasPassedForToday(today.toEpochDays().toInt())) {
+            val style = if (event.allDay.not() && event.hasPassedForToday(today.toEpochDays())) {
                 DMSans18Medium.copy(textDecoration = TextDecoration.LineThrough)
             } else {
                 DMSans18Medium

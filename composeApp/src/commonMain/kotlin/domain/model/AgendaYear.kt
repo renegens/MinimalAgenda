@@ -27,6 +27,6 @@ data class AgendaYear(
             val lastDayOfYear = LocalDate(year, 12, 31)
             val lastEpochDay = lastDayOfYear.toEpochDays()
 
-            return Pair(firstEpochDay.toInt(), lastEpochDay.toInt())
+            return Pair(firstEpochDay, lastEpochDay)
         }
 }

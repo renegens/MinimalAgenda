@@ -42,7 +42,7 @@ class CalendarGenerator {
                 ),
                 dayInWeek = it.dayOfWeek.toDaysInWeek(),
                 dayOfMonth = it.dayOfMonth,
-                epochDay = it.toEpochDays().toInt(),
+                epochDay = it.toEpochDays(),
             )
             list.add(day)
         }

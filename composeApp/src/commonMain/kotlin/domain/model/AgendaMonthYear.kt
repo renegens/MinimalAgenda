@@ -15,7 +15,7 @@ data class AgendaMonthYear(val agendaYear: AgendaYear, val agendaMonth: AgendaMo
             val firstDayOfNextMonth = firstDayOfMonth.plus(DatePeriod(months = 1))
             val daysInMonth = firstDayOfNextMonth.toEpochDays() - firstDayOfMonth.toEpochDays()
 
-            return daysInMonth.toInt()
+            return daysInMonth
         }
 
     private val epochRange: Pair<Int, Int>
@@ -29,7 +29,7 @@ data class AgendaMonthYear(val agendaYear: AgendaYear, val agendaMonth: AgendaMo
 
             val lastEpochDay = lastDayOfMonth.toEpochDays()
 
-            return Pair(firstEpochDay.toInt(), lastEpochDay.toInt())
+            return Pair(firstEpochDay, lastEpochDay)
         }
 
     fun isEpochDayInRange(epochDay: Int): Boolean {

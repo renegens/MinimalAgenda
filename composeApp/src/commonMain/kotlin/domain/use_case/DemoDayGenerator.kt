@@ -7,7 +7,6 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import platform.uses24HourClock
-import kotlin.time.ExperimentalTime
 
 fun generateOnboardingDemoEvents(): List<Pair<FormattedTime, String>> {
     return if (uses24HourClock()) {
@@ -33,7 +32,6 @@ fun generateOnboardingDemoEvents(): List<Pair<FormattedTime, String>> {
     }
 }
 
-@OptIn(ExperimentalTime::class)
 fun generateDemoAgendaEvents(): List<AgendaEvent> {
     val uses24HourClock = uses24HourClock()
     val today = today
@@ -48,7 +46,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             endTimeInUTC = today.atTime(7, 30)
                 .toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
-            epochDay = today.toEpochDays().toInt(),
+            epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(6, 30),
@@ -65,7 +63,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             endTimeInUTC = today.atTime(7, 15)
                 .toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
-            epochDay = today.toEpochDays().toInt(),
+            epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(8, 45),
@@ -82,7 +80,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             endTimeInUTC = today.atTime(11, 0)
                 .toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
-            epochDay = today.toEpochDays().toInt(),
+            epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(10, 0),
@@ -99,7 +97,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             endTimeInUTC = today.atTime(15, 0)
                 .toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
-            epochDay = today.toEpochDays().toInt(),
+            epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(14, 0),
@@ -116,7 +114,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             endTimeInUTC = today.atTime(16, 15)
                 .toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
-            epochDay = today.toEpochDays().toInt(),
+            epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(15, 15),
@@ -133,7 +131,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             endTimeInUTC = today.atTime(18, 30)
                 .toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
-            epochDay = today.toEpochDays().toInt(),
+            epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(17, 30),
@@ -150,7 +148,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             endTimeInUTC = today.atTime(21, 45)
                 .toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
-            epochDay = today.toEpochDays().toInt(),
+            epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(20, 45),
