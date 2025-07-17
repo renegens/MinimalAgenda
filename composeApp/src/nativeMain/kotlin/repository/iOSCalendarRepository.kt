@@ -1,5 +1,6 @@
 package repository
 
+import androidx.compose.runtime.snapshots.toInt
 import data.calendar.CalendarEntity
 import data.calendar.EventEntity
 import kotlinx.cinterop.ExperimentalForeignApi
@@ -7,7 +8,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -24,6 +24,8 @@ import platform.Foundation.timeIntervalSince1970
 import platform.toEKEventDate
 import platform.uses24HourClock
 import kotlin.coroutines.resume
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 @Suppress("ClassName")
 class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
@@ -80,6 +82,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         return threeYearsInFuture ?: NSDate()
     }
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun getEvent(id: String): EventEntity? {
         return withContext(Dispatchers.IO) {
             suspendCancellableCoroutine { continuation ->
@@ -97,7 +100,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     ekEvent?.endDate?.timeIntervalSince1970?.toLong() ?: 0
                 ).toLocalDateTime(timeZone)
                 val epochDay = startLocalDateTime.date.toEpochDays()
-                val isMultiDay = isMultiDay(startEpochDay = epochDay, end = endLocalDateTime.date)
+                val isMultiDay = isMultiDay(startEpochDay = epochDay.toInt(), end = endLocalDateTime.date)
 
                 ekEvent as EKEvent
                 val event = EventEntity(
@@ -108,7 +111,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
                     allDay = ekEvent.allDay,
                     isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
-                    epochDay = epochDay,
+                    epochDay = epochDay.toInt(),
                     startLocalDateTime = startLocalDateTime,
                     endLocalDateTime = endLocalDateTime,
                     isMultiDay = isMultiDay,
@@ -158,6 +161,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         }
     }
 
+    @OptIn(ExperimentalTime::class)
     override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
         return withContext(Dispatchers.IO) {
             suspendCancellableCoroutine { continuation ->
@@ -180,7 +184,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     ).toLocalDateTime(timeZone)
 
                     val epochDay = startLocalDateTime.date.toEpochDays()
-                    val isMultiDay = isMultiDay(startEpochDay = epochDay, end = endLocalDateTime.date)
+                    val isMultiDay = isMultiDay(startEpochDay = epochDay.toInt(), end = endLocalDateTime.date)
 
                     EventEntity(
                         id = ekEvent.eventIdentifier,
@@ -189,7 +193,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                         startTime = ekEvent.startDate?.timeIntervalSince1970?.toLong(),
                         endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
                         allDay = ekEvent.allDay,
-                        epochDay = epochDay,
+                        epochDay = epochDay.toInt(),
                         isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
                         startLocalDateTime = startLocalDateTime,
                         endLocalDateTime = endLocalDateTime,
@@ -204,6 +208,6 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
     }
 
     private fun isMultiDay(startEpochDay: Int, end: LocalDate): Boolean {
-        return startEpochDay != end.toEpochDays()
+        return startEpochDay != end.toEpochDays().toInt()
     }
 }
