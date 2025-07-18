@@ -101,13 +101,13 @@ class CalendarViewModel(
             }
 
             Event.ShowBottomSheet -> {
-                viewModelScope.launch {
-                    val isPremium = isPremium()
-                    if (permissionHandler.getPermissionState() == CalendarPermissionHandler.State.FullAccess && 
-                        isPremium.not() && !uiState.value.showSwipeToolTip) {
-                            setEffect { Effect.ShowSheetTip }
-                    }
-                }
+//                viewModelScope.launch {
+//                    val isPremium = isPremium()
+//                    if (permissionHandler.getPermissionState() == CalendarPermissionHandler.State.FullAccess &&
+//                        isPremium.not() && !uiState.value.showSwipeToolTip) {
+//                            setEffect { Effect.ShowSheetTip }
+//                    }
+//                }
             }
         }
     }

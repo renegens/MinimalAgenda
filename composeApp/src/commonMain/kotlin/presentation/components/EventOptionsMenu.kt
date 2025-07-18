@@ -123,7 +123,7 @@ fun EventOptionsMenu(
 
 
 @Composable
-private fun Label(text: String) {
+fun Label(text: String) {
     Text(
         text = text,
         style = DMSans18Medium.copy(fontSize = 17.sp),

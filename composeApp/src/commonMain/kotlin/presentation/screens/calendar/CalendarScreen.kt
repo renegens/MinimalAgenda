@@ -1,6 +1,8 @@
 package presentation.screens.calendar
 
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -17,6 +19,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -28,11 +31,13 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.ActionButton
+import presentation.components.CalendarToolbarMenu
 import presentation.components.ComposableLifecycle
 import presentation.components.FloatingBottomNavigation
 import presentation.components.HideToolTip
 import presentation.components.NotificationPermissionDialog
 import presentation.components.SafeTransparentNavigationContainer
+import presentation.components.SimpleTransparentToolbar
 import presentation.components.addHapticFeedbackProminent
 import presentation.components.tooltip.SwipeToolTip
 import presentation.screens.calendar.CalendarContract.Effect
@@ -74,6 +79,9 @@ fun CalendarScreen(
     var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
 
     var shouldShowNotificationPermission by remember { mutableStateOf(false) }
+    
+    // Three-dot menu state
+    var showToolbarMenu by remember { mutableStateOf(false) }
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
@@ -136,107 +144,141 @@ fun CalendarScreen(
         }
     }
 
-    Scaffold(containerColor = Color.Transparent,
-        modifier = Modifier.statusBarsPadding(),
-        floatingActionButton = {
-            ActionButton(
-                currentSection = Section.fromInt(pagerState.currentPage),
-                showAll = state.showAll,
-                nowClicked = {
-                    viewModel.setEvent(
-                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                    )
-                },
-                toggleActive = {
-                    viewModel.setEvent(Event.ToggleActive)
-                },
-                onAdd = onAddEvent
-            )
-        },
-        bottomBar = {
-            FloatingBottomNavigation(
-                currentSection = Section.fromInt(pagerState.currentPage),
-                onSectionSelected = { section ->
-                    scope.launch {
-                        pagerState.animateScrollToPage(section.position)
+    Box(modifier = Modifier.fillMaxSize()) {
+        Scaffold(containerColor = Color.Transparent,
+            modifier = Modifier.statusBarsPadding(),
+            topBar = {
+                // Only show toolbar for Day, Month, and Year sections (not Settings)
+                if (Section.fromInt(pagerState.currentPage) != Section.Settings) {
+                    SimpleTransparentToolbar(
+                        backgroundColor = Color.Transparent,
+                        onMenuClick = { showToolbarMenu = true }
+                    ) {
+                        // Empty content - no title, just the menu button will be added separately
                     }
                 }
-            )
-        }) {
-        if (shouldShowNotificationPermission) {
-            NotificationPermissionDialog(onDismissRequest = {
-                shouldShowNotificationPermission = false
-            })
-        }
+            },
+            floatingActionButton = {
+                ActionButton(
+                    currentSection = Section.fromInt(pagerState.currentPage),
+                    showAll = state.showAll,
+                    nowClicked = {
+                        viewModel.setEvent(
+                            Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                        )
+                    },
+                    toggleActive = {
+                        viewModel.setEvent(Event.ToggleActive)
+                    },
+                    onAdd = onAddEvent
+                )
+            },
+            bottomBar = {
+                FloatingBottomNavigation(
+                    currentSection = Section.fromInt(pagerState.currentPage),
+                    onSectionSelected = { section ->
+                        scope.launch {
+                            pagerState.animateScrollToPage(section.position)
+                        }
+                    }
+                )
+            }) {
+            if (shouldShowNotificationPermission) {
+                NotificationPermissionDialog(onDismissRequest = {
+                    shouldShowNotificationPermission = false
+                })
+            }
 
-        SwipeToolTip(state.showSwipeToolTip)
-        SafeTransparentNavigationContainer {
-            HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
-                when (page) {
-                    CalendarContract.Section.Day.position -> DayScreen(
-                        appThemeMode = appThemeMode,
-                        items = state.flatDaysAndEvents,
-                        currentDate = state.currentDate,
-                        scrollToNow = state.scrollToNow,
-                        onNowClicked = isScrolledToToday,
-                        scrollToDay = dayScrollPosition,
-                        calendarPermission = state.calendarPermission,
-                        showAll = state.showAll,
-                        onNotify = { viewModel.setEvent(Event.Notify(it)) },
-                        onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
-                        onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
-                        onRequestCalendarPermission = {
-                            viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                        },
-                        isPresentingSwipeTip = state.showSwipeToolTip,
-                        isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding,
-                        onOpenSettings = onOpenDeviceSettings,
-                        isDemoMode = state.isDemoMode,
-                    )
+            //SwipeToolTip(state.showSwipeToolTip)
+            
+            SafeTransparentNavigationContainer {
+                HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
+                    when (page) {
+                        CalendarContract.Section.Day.position -> DayScreen(
+                            appThemeMode = appThemeMode,
+                            items = state.flatDaysAndEvents,
+                            currentDate = state.currentDate,
+                            scrollToNow = state.scrollToNow,
+                            onNowClicked = isScrolledToToday,
+                            scrollToDay = dayScrollPosition,
+                            calendarPermission = state.calendarPermission,
+                            showAll = state.showAll,
+                            onNotify = { viewModel.setEvent(Event.Notify(it)) },
+                            onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
+                            onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
+                            onRequestCalendarPermission = {
+                                viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
+                            },
+                            isPresentingSwipeTip = state.showSwipeToolTip,
+                            isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding,
+                            onOpenSettings = onOpenDeviceSettings,
+                            isDemoMode = state.isDemoMode,
+                        )
 
-                    CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
-                        days = state.days,
-                        events = state.agendaEvents,
-                        currentDate = state.currentDate,
-                        onNowClicked = isScrolledToMonth,
-                        scrollToMonth = monthScrollPosition,
-                        showAll = state.showAll,
-                        onDayClicked = {
-                            viewModel.setEvent(Event.OnDayClicked(epochDay = it))
-                        },
-                        onYearClicked = {
-                            viewModel.setEvent(Event.OnYearClicked(it))
-                        })
+                        CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
+                            days = state.days,
+                            events = state.agendaEvents,
+                            currentDate = state.currentDate,
+                            onNowClicked = isScrolledToMonth,
+                            scrollToMonth = monthScrollPosition,
+                            showAll = state.showAll,
+                            onDayClicked = {
+                                viewModel.setEvent(Event.OnDayClicked(epochDay = it))
+                            },
+                            onYearClicked = {
+                                viewModel.setEvent(Event.OnYearClicked(it))
+                            })
 
-                    CalendarContract.Section.Year.position -> YearsScreen(
-                        appThemeMode = appThemeMode,
-                        days = state.days,
-                        events = state.agendaEvents,
-                        showAll = state.showAll,
-                        currentDate = state.currentDate,
-                        onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
-                        onNowClicked = isScrolledToYear,
-                        scrollToYear = yearScrollPosition
-                    )
+                        CalendarContract.Section.Year.position -> YearsScreen(
+                            appThemeMode = appThemeMode,
+                            days = state.days,
+                            events = state.agendaEvents,
+                            showAll = state.showAll,
+                            currentDate = state.currentDate,
+                            onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
+                            onNowClicked = isScrolledToYear,
+                            scrollToYear = yearScrollPosition
+                        )
 
-                    CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
+                        CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
+                    }
+                }
+            }
+            
+            if (showTipSheet) {
+                ModalBottomSheet(
+                    contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
+                    dragHandle = {},
+                    onDismissRequest = {
+                        viewModel.setEvent(Event.DismissBottomSheet)
+                    },
+                    sheetState = tipSheetState
+                ) {
+                    HideToolTip(openPaywall = {
+                        viewModel.setEvent(Event.ShowPaywallFromBottomSheet)
+                    })
                 }
             }
         }
         
-        if (showTipSheet) {
-            ModalBottomSheet(
-                contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-                dragHandle = {},
-                onDismissRequest = {
-                    viewModel.setEvent(Event.DismissBottomSheet)
+        // Three-dot menu with proper anchoring - positioned at top-right
+        if (showToolbarMenu && Section.fromInt(pagerState.currentPage) != Section.Settings) {
+            CalendarToolbarMenu(
+                isVisible = showToolbarMenu,
+                onDismiss = { showToolbarMenu = false },
+                currentSection = Section.fromInt(pagerState.currentPage),
+                showAll = state.showAll,
+                onNowClicked = {
+                    viewModel.setEvent(
+                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                    )
                 },
-                sheetState = tipSheetState
-            ) {
-                HideToolTip(openPaywall = {
-                    viewModel.setEvent(Event.ShowPaywallFromBottomSheet)
-                })
-            }
+                onToggleActive = {
+                    viewModel.setEvent(Event.ToggleActive)
+                },
+                onAdd = onAddEvent,
+                appThemeMode = appThemeMode
+            )
         }
     }
 }
