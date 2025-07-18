@@ -29,6 +29,7 @@ import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.ActionButton
 import presentation.components.ComposableLifecycle
+import presentation.components.FloatingBottomNavigation
 import presentation.components.HideToolTip
 import presentation.components.NotificationPermissionDialog
 import presentation.components.SafeTransparentNavigationContainer
@@ -151,6 +152,16 @@ fun CalendarScreen(
                 },
                 onAdd = onAddEvent
             )
+        },
+        bottomBar = {
+            FloatingBottomNavigation(
+                currentSection = Section.fromInt(pagerState.currentPage),
+                onSectionSelected = { section ->
+                    scope.launch {
+                        pagerState.animateScrollToPage(section.position)
+                    }
+                }
+            )
         }) {
         if (shouldShowNotificationPermission) {
             NotificationPermissionDialog(onDismissRequest = {
@@ -212,6 +223,7 @@ fun CalendarScreen(
                 }
             }
         }
+        
         if (showTipSheet) {
             ModalBottomSheet(
                 contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
