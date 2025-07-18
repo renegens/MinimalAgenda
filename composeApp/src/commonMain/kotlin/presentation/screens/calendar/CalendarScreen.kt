@@ -158,21 +158,6 @@ fun CalendarScreen(
                     }
                 }
             },
-            floatingActionButton = {
-                ActionButton(
-                    currentSection = Section.fromInt(pagerState.currentPage),
-                    showAll = state.showAll,
-                    nowClicked = {
-                        viewModel.setEvent(
-                            Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                        )
-                    },
-                    toggleActive = {
-                        viewModel.setEvent(Event.ToggleActive)
-                    },
-                    onAdd = onAddEvent
-                )
-            },
             bottomBar = {
                 FloatingBottomNavigation(
                     currentSection = Section.fromInt(pagerState.currentPage),

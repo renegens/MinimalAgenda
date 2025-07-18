@@ -21,6 +21,7 @@ import presentation.theme.CustomColor
 import presentation.theme.DMSans18Regular
 import presentation.theme.DMSansBlack36
 
+//can be deleted
 @Composable
 fun ActionButton(
     currentSection: Section,
