@@ -18,10 +18,12 @@ class SettingsContract {
 
     sealed class Effect : UiEffect {
         object NotEligible: Effect()
+        object Dismiss: Effect()
     }
 
     sealed class Event : UiEvent {
         object Load : Event()
+        object OnDismiss : Event()
         class OnTogglePrivateNotifications(val checked: Boolean) : Event()
         class OnModeSelected(val appThemeMode: AppThemeMode) : Event()
         class OnColorSelected(val appColor: AppColor) : Event()

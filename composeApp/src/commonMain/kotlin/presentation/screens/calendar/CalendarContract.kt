@@ -38,6 +38,7 @@ class CalendarContract {
         object NotificationPermissionMissing : Effect()
         object ShowSheetTip : Effect()
         object DismissSheet : Effect()
+        object ShowSettings : Effect()
     }
 
     sealed class Event : UiEvent {
@@ -55,11 +56,12 @@ class CalendarContract {
         object DismissBottomSheet : Event()
         object ShowPaywallFromBottomSheet: Event()
         object ShowBottomSheet: Event()
+        object ShowSettings: Event()
         class Notify(val agendaEvent: AgendaEvent) : Event()
     }
 
     enum class Section(val position: Int) {
-        Day(0), Month(1), Year(2), Settings(3);
+        Day(0), Month(1), Year(2);
 
         companion object {
             fun fromInt(value: Int) = entries.first { it.position == value }

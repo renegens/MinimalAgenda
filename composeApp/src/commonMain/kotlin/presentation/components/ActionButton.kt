@@ -30,7 +30,8 @@ fun ActionButton(
     onAdd: () -> Unit,
     showAll: Boolean,
 ) {
-    if (currentSection == Section.Settings) return
+    // This component is deprecated and can be removed
+    return
     val haptic = LocalHapticFeedback.current
 
     Column(modifier = Modifier.padding(end = 16.dp)) {

@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -19,7 +20,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -30,7 +30,6 @@ import domain.model.AppThemeMode
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
-import presentation.components.ActionButton
 import presentation.components.CalendarToolbarMenu
 import presentation.components.ComposableLifecycle
 import presentation.components.FloatingBottomNavigation
@@ -39,7 +38,6 @@ import presentation.components.NotificationPermissionDialog
 import presentation.components.SafeTransparentNavigationContainer
 import presentation.components.SimpleTransparentToolbar
 import presentation.components.addHapticFeedbackProminent
-import presentation.components.tooltip.SwipeToolTip
 import presentation.screens.calendar.CalendarContract.Effect
 import presentation.screens.calendar.CalendarContract.Event
 import presentation.screens.calendar.CalendarContract.Section
@@ -82,13 +80,15 @@ fun CalendarScreen(
     
     // Three-dot menu state
     var showToolbarMenu by remember { mutableStateOf(false) }
+    
+    // Settings bottom sheet state
+    val settingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showSettingsBottomSheet by remember { mutableStateOf(false) }
 
     LaunchedEffect(pagerState) {
         snapshotFlow { pagerState.currentPage }.collect { page ->
             haptic.addHapticFeedbackProminent()
-            if (page == Section.Settings.position && state.showSwipeToolTip) {
-                viewModel.setEvent(Event.HideSwipeToolTip)
-            }
+            // Settings is now in a bottom sheet, so we don't need this check
             if (page == Section.Day.position){
                 viewModel.setEvent(Event.ShowBottomSheet)
             }
@@ -128,6 +128,7 @@ fun CalendarScreen(
                         showTipSheet = false
                     }
                 }
+                Effect.ShowSettings -> showSettingsBottomSheet = true
             }
         }
     }
@@ -148,14 +149,11 @@ fun CalendarScreen(
         Scaffold(containerColor = Color.Transparent,
             modifier = Modifier.statusBarsPadding(),
             topBar = {
-                // Only show toolbar for Day, Month, and Year sections (not Settings)
-                if (Section.fromInt(pagerState.currentPage) != Section.Settings) {
-                    SimpleTransparentToolbar(
-                        backgroundColor = Color.Transparent,
-                        onMenuClick = { showToolbarMenu = true }
-                    ) {
-                        // Empty content - no title, just the menu button will be added separately
-                    }
+                SimpleTransparentToolbar(
+                    backgroundColor = Color.Transparent,
+                    onMenuClick = { showToolbarMenu = true }
+                ) {
+                    // Empty content - no title, just the menu button will be added separately
                 }
             },
             bottomBar = {
@@ -179,7 +177,7 @@ fun CalendarScreen(
             SafeTransparentNavigationContainer {
                 HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                     when (page) {
-                        CalendarContract.Section.Day.position -> DayScreen(
+                        Section.Day.position -> DayScreen(
                             appThemeMode = appThemeMode,
                             items = state.flatDaysAndEvents,
                             currentDate = state.currentDate,
@@ -200,7 +198,7 @@ fun CalendarScreen(
                             isDemoMode = state.isDemoMode,
                         )
 
-                        CalendarContract.Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
+                        Section.Month.position -> MonthsScreen(appThemeMode = appThemeMode,
                             days = state.days,
                             events = state.agendaEvents,
                             currentDate = state.currentDate,
@@ -214,7 +212,7 @@ fun CalendarScreen(
                                 viewModel.setEvent(Event.OnYearClicked(it))
                             })
 
-                        CalendarContract.Section.Year.position -> YearsScreen(
+                        Section.Year.position -> YearsScreen(
                             appThemeMode = appThemeMode,
                             days = state.days,
                             events = state.agendaEvents,
@@ -224,8 +222,6 @@ fun CalendarScreen(
                             onNowClicked = isScrolledToYear,
                             scrollToYear = yearScrollPosition
                         )
-
-                        CalendarContract.Section.Settings.position -> SettingsScreen(notEligible = notEligible)
                     }
                 }
             }
@@ -244,14 +240,38 @@ fun CalendarScreen(
                     })
                 }
             }
+            
+            if (showSettingsBottomSheet) {
+                ModalBottomSheet(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    onDismissRequest = {
+                        scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
+                            if (!settingsSheetState.isVisible) {
+                                showSettingsBottomSheet = false
+                            }
+                        }
+                    },
+                    sheetState = settingsSheetState
+                ) {
+                    SettingsScreen(
+                        notEligible = notEligible,
+                        onDismiss = {
+                            scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
+                                if (!settingsSheetState.isVisible) {
+                                    showSettingsBottomSheet = false
+                                }
+                            }
+                        }
+                    )
+                }
+            }
         }
         
         // Three-dot menu with proper anchoring - positioned at top-right
-        if (showToolbarMenu && Section.fromInt(pagerState.currentPage) != Section.Settings) {
+        if (showToolbarMenu) {
             CalendarToolbarMenu(
                 isVisible = showToolbarMenu,
                 onDismiss = { showToolbarMenu = false },
-                currentSection = Section.fromInt(pagerState.currentPage),
                 showAll = state.showAll,
                 onNowClicked = {
                     viewModel.setEvent(
@@ -262,7 +282,9 @@ fun CalendarScreen(
                     viewModel.setEvent(Event.ToggleActive)
                 },
                 onAdd = onAddEvent,
-                appThemeMode = appThemeMode
+                onSettings = {
+                    viewModel.setEvent(Event.ShowSettings)
+                },
             )
         }
     }

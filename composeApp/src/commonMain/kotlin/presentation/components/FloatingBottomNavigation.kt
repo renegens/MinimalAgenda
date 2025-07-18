@@ -3,14 +3,9 @@ package presentation.components
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,12 +14,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-
 import presentation.screens.calendar.CalendarContract.Section
-import presentation.theme.CustomColor
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
-import presentation.theme.DMSans18Regular
 
 @Composable
 fun FloatingBottomNavigation(
@@ -37,7 +29,7 @@ fun FloatingBottomNavigation(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+            .padding(horizontal = 16.dp, vertical = 20.dp)
     ) {
         FloatingBackground(
             modifier = Modifier.fillMaxWidth()
@@ -110,7 +102,7 @@ fun NavigationItem(
     ) {
         Text(
             text = label,
-            style = if (isSelected) DMSans18Medium else DMSans18Bold60,
+            style = if (isSelected) DMSans18Bold60 else DMSans18Medium,
             color = if (isSelected) {
                 MaterialTheme.colorScheme.primary
             } else {

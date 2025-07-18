@@ -12,7 +12,6 @@ import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
 import domain.use_case.DidSeeSwipeTooltipUseCase
 import extensions.guardPremium
-import extensions.isPremium
 import extensions.today
 import platform.CalendarPermissionHandler
 
@@ -45,8 +44,6 @@ class CalendarViewModel(
                 Section.Year -> setEffect {
                     Effect.ScrollYearToToday
                 }
-
-                Section.Settings -> {}
             }
 
             is Event.OnDayClicked -> setEffect {
@@ -109,6 +106,8 @@ class CalendarViewModel(
 //                    }
 //                }
             }
+            
+            Event.ShowSettings -> setEffect { Effect.ShowSettings }
         }
     }
 
