@@ -65,6 +65,7 @@ kotlin {
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.purchases.core)
+            implementation(libs.purchases.ui)
             implementation(libs.cupertino.theme)
             implementation(libs.cupertino.theme.icons)
         }

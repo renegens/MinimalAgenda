@@ -1,23 +1,23 @@
 package presentation.screens.main
 
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.ModalBottomSheet
-import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.revenuecat.purchases.kmp.models.CustomerInfo
+import com.revenuecat.purchases.kmp.models.StoreTransaction
+import com.revenuecat.purchases.kmp.ui.revenuecatui.Paywall
+import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallListener
+import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import navigation.Screen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
@@ -26,7 +26,6 @@ import platform.openSettings
 import presentation.components.ComposableLifecycle
 import presentation.screens.calendar.CalendarScreen
 import presentation.screens.onboarding.Onboarding
-import presentation.screens.paywall.PaywallScreen
 import presentation.theme.AppTheme
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -35,9 +34,7 @@ fun App() {
     KoinContext {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
-        val paywallSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-        val scope = rememberCoroutineScope()
-        var showPaywallBottomSheet by remember { mutableStateOf(false) }
+        var showPaywall by remember { mutableStateOf(true) }
         val navController = rememberNavController()
         val start = if (state.shouldShowOnboarding) {
             Screen.Onboarding
@@ -54,14 +51,8 @@ fun App() {
         LaunchedEffect(Unit) {
             viewModel.effect.collectLatest {
                 when (it) {
-                    AppContract.Effect.DismissPaywall -> scope.launch { paywallSheetState.hide() }
-                        .invokeOnCompletion {
-                            if (!paywallSheetState.isVisible) {
-                                showPaywallBottomSheet = false
-                            }
-                        }
-
-                    AppContract.Effect.PresentPaywall -> showPaywallBottomSheet = true
+                    AppContract.Effect.DismissPaywall -> showPaywall = false
+                    AppContract.Effect.PresentPaywall -> showPaywall = true
                     AppContract.Effect.CloseOnboardingAndGoToCalendar -> navController.navigate(
                         Screen.Agenda.route
                     )
@@ -97,21 +88,33 @@ fun App() {
                     )
                 }
             }
-            if (showPaywallBottomSheet) {
-                ModalBottomSheet(
-                    containerColor = MaterialTheme.colorScheme.surface, onDismissRequest = {
+            if (showPaywall) {
+                val listener = object : PaywallListener {
+                    override fun onPurchaseCompleted(
+                        customerInfo: CustomerInfo,
+                        storeTransaction: StoreTransaction
+                    ) {
+                        viewModel.setEvent(AppContract.Event.OnPurchased)
+                    }
+
+                    override fun onPurchaseCancelled() {
                         viewModel.setEvent(AppContract.Event.OnDismissPaywall)
-                    }, sheetState = paywallSheetState
-                ) {
-                    PaywallScreen(onPurchaseComplete = {
-                        viewModel.setEvent(
-                            AppContract.Event.OnPurchased(
-                                it
-                            )
-                        )
-                    },
-                        onCancel = { viewModel.setEvent(AppContract.Event.OnDismissPaywall) })
+                    }
+
+                    override fun onRestoreCompleted(customerInfo: CustomerInfo) {
+                    }
                 }
+
+                val options = PaywallOptions(
+                    dismissRequest = {
+                        viewModel.setEvent(AppContract.Event.OnDismissPaywall)
+                    }
+                ) {
+                    this.listener = listener
+                    shouldDisplayDismissButton = true
+                }
+
+                Paywall(options = options)
             }
         }
     }
