@@ -1,24 +1,41 @@
 package presentation.screens.settings
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
-import domain.model.AppThemeMode
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import platform.sendEmail
 import presentation.components.AppAlertDialog
-import presentation.components.PaperBackground
 import presentation.components.noRippleClickable
-import presentation.screens.settings.SettingsContract.*
+import presentation.screens.settings.SettingsContract.Effect
+import presentation.screens.settings.SettingsContract.Event
 import presentation.screens.settings.components.ColorSelection
 import presentation.screens.settings.components.ItemBody
 import presentation.screens.settings.components.ItemHeadline
@@ -30,7 +47,7 @@ import presentation.theme.iosBody
 import presentation.theme.iosExtraLargeTitle
 
 @Composable
-fun SettingsScreen(notEligible: () -> Unit) {
+fun SettingsScreen(notEligible: () -> Unit, onDismiss: () -> Unit = {}) {
     val viewModel: SettingsViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
@@ -43,30 +60,45 @@ fun SettingsScreen(notEligible: () -> Unit) {
                     focusManager.clearFocus()
                     notEligible.invoke()
                 }
+                Effect.Dismiss -> {
+                    onDismiss.invoke()
+                }
             }
         }
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().statusBarsPadding()
+        modifier = Modifier.fillMaxSize()
             .verticalScroll(state = rememberScrollState())
     ) {
-        PaperBackground(state.appThemeMode) {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
                     style = iosExtraLargeTitle,
                     text = "Settings",
                     color = MaterialTheme.colorScheme.tertiary,
                 )
-                Spacer(modifier = Modifier.height(24.dp))
+                IconButton(
+                    onClick = { viewModel.setEvent(Event.OnDismiss) }
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Clear,
+                        contentDescription = "Close settings",
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                }
             }
-        }
+            Spacer(modifier = Modifier.height(24.dp))
 
         if (state.isLoading) {
             return
         }
 
-        SettingsItem(state.appThemeMode) {
+        SettingsItem() {
             SwitchSettingItem(title = "Private Notifications",
                 isChecked = state.privateNotifications,
                 onCheckedChange = { viewModel.setEvent(Event.OnTogglePrivateNotifications(it)) })
@@ -75,7 +107,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
             )
         }
 
-        SettingsItem(state.appThemeMode) {
+        SettingsItem() {
             NotificationTimeInput(
                 focusRequester = focusRequester,
                 time = state.notificationTime,
@@ -84,7 +116,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
                 })
         }
 
-        SettingsItem(state.appThemeMode) {
+        SettingsItem() {
             ItemTitle("Select your preferred mode")
             Spacer(modifier = Modifier.height(4.dp))
             ModeSelection(
@@ -92,7 +124,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
             ) { viewModel.setEvent(Event.OnModeSelected(it)) }
         }
 
-        SettingsItem(state.appThemeMode) {
+        SettingsItem() {
             ItemTitle("Choose Your Color")
             Spacer(modifier = Modifier.height(4.dp))
             ItemBody("Select the perfect shade to match your style (Premium)")
@@ -100,7 +132,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
             ColorSelection(state.appColor) { viewModel.setEvent(Event.OnColorSelected(it)) }
         }
 
-        SettingsItem(state.appThemeMode, showDivider = true) {
+        SettingsItem(showDivider = true) {
             ItemTitle("What happens with your data")
             Spacer(modifier = Modifier.height(16.dp))
             ItemHeadline("Accessing Existing Calendars")
@@ -116,7 +148,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
             ItemBody("The app can't share your calendar data. It only uses the existing events to provide functionality directly on your device")
         }
 
-        SettingsItem(state.appThemeMode) {
+        SettingsItem() {
             var showEmailError by remember { mutableStateOf(false) }
             if (showEmailError) {
                 AppAlertDialog(
@@ -124,7 +156,7 @@ fun SettingsScreen(notEligible: () -> Unit) {
                     message = "Mail services are not available",
                     onContinueRequest = { showEmailError = false })
             }
-            ItemTitle("Help us improve by sharing your feedback – we’d love to hear from you")
+            ItemTitle("Help us improve by sharing your feedback – we'd love to hear from you")
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 "Send Feedback",
@@ -135,8 +167,8 @@ fun SettingsScreen(notEligible: () -> Unit) {
             )
         }
 
-        SettingsItem(state.appThemeMode, showDivider = false) {
-            ItemTitle("Don’t Miss Important Notifications")
+        SettingsItem(showDivider = false) {
+            ItemTitle("Don't Miss Important Notifications")
             Spacer(modifier = Modifier.height(16.dp))
             ItemBody("Open your Settings on iOS")
             Spacer(modifier = Modifier.height(4.dp))
@@ -152,11 +184,10 @@ fun SettingsScreen(notEligible: () -> Unit) {
 
 @Composable
 private fun SettingsItem(
-    appThemeMode: AppThemeMode,
     showDivider: Boolean = true,
     content: @Composable () -> Unit
 ) {
-    PaperBackground(appThemeMode) {
+
         Column {
             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                 content.invoke()
@@ -167,5 +198,5 @@ private fun SettingsItem(
                 Spacer(modifier = Modifier.height(32.dp))
             }
         }
-    }
+
 }

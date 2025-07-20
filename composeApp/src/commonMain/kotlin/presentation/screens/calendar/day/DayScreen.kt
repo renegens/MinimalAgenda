@@ -36,8 +36,6 @@ import domain.model.DayListViewType
 import extensions.scrollToNowIfNeeded
 import extensions.today
 import kotlinx.datetime.LocalDate
-import platform.CalendarPermissionHandler
-import presentation.components.CalendarPermission
 import presentation.components.DayHeader
 import presentation.components.EventOptionsMenu
 import presentation.components.ScrollablePaperBackground
@@ -57,29 +55,15 @@ fun DayScreen(
     showAll: Boolean,
     scrollToNow: Boolean,
     onHide: (AgendaEvent) -> Unit,
-    calendarPermission: CalendarPermissionHandler.State,
-    onRequestCalendarPermission: () -> Unit,
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
-    isPresentingNotificationOnBoarding: Boolean,
-    isPresentingSwipeTip: Boolean
+    isDemoMode: Boolean,
 ) {
     if (items.isEmpty()) return
 
-    val stickyHeaderPadding =
-        if (calendarPermission == CalendarPermissionHandler.State.NotDetermined && isPresentingSwipeTip.not()) {
-            4
-        } else {
-            2
-        }
-
     val currentEpochDay = currentDate.toEpochDays()
 
-    val todayIndex by if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
-        mutableStateOf(items.findIndexOf(currentEpochDay))
-    } else {
-        mutableStateOf(items.findIndexOf(currentEpochDay) - stickyHeaderPadding)
-    }
+    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay))
 
     val listState = rememberLazyListState()
 
@@ -108,13 +92,6 @@ fun DayScreen(
     ScrollablePaperBackground(appThemeMode, listState) {
 
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-
-            if (isPresentingNotificationOnBoarding.not() && isPresentingSwipeTip.not()) {
-                CalendarPermission(
-                    onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
-                )
-            }
-
             items(items = items, key = { item -> item.uniqueId }, contentType = { item ->
                 when (item) {
                     is DayListViewType.Header -> "header"
@@ -151,7 +128,8 @@ fun DayScreen(
                             },
                             showAll = showAll,
                             hapticFeedback = hapticFeedback,
-                            appThemeMode = appThemeMode
+                            appThemeMode = appThemeMode,
+                            isDemoMode = isDemoMode
                         )
                     }
 
@@ -200,7 +178,8 @@ fun Event(
     onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean,
     hapticFeedback: HapticFeedback,
-    appThemeMode: AppThemeMode
+    appThemeMode: AppThemeMode,
+    isDemoMode: Boolean
 ) {
     if (showAll.not() && event.isHidden) return
     val textColor = if (selectedItem == event) {
@@ -227,9 +206,9 @@ fun Event(
                 DMSans18Medium
             }
 
-            val title = if (event.isLastDayInMultiDayEvent){
+            val title = if (event.isLastDayInMultiDayEvent) {
                 "${event.title} (Ending)"
-            }else{
+            } else {
                 event.title
             }
             Text(
@@ -248,7 +227,8 @@ fun Event(
             selectedItem = selectedItem,
             hapticFeedback = hapticFeedback,
             onItemSelected = onItemSelected,
-            appThemeMode = appThemeMode
+            appThemeMode = appThemeMode,
+            isDemoMode = isDemoMode
         )
     }
 }
@@ -287,7 +267,7 @@ fun Time(agendaEvent: AgendaEvent, textColor: Color) {
                 style = DMSans18Bold60,
                 color = textColor
             )
-        }  else {
+        } else {
             Text(
                 modifier = Modifier.weight(0.6F),
                 text = time.hours,

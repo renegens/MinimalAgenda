@@ -10,8 +10,7 @@ import domain.use_case.GetAllEventsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
-import domain.use_case.FlatCalendarViewFactory
-import domain.use_case.ShouldPresentSwipeToolTipUseCase
+import domain.use_case.DidSeeSwipeTooltipUseCase
 import extensions.guardPremium
 import extensions.today
 import platform.CalendarPermissionHandler
@@ -22,8 +21,7 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-    private val flatCalendarViewFactory: FlatCalendarViewFactory,
-    private val shouldPresentSwipeToolTipUseCase: ShouldPresentSwipeToolTipUseCase
+    private val didSeeSwipeTooltipUseCase: DidSeeSwipeTooltipUseCase,
 ) : BaseViewModel<Event, State, Effect>() {
 
     override fun createInitialState() = State()
@@ -46,8 +44,6 @@ class CalendarViewModel(
                 Section.Year -> setEffect {
                     Effect.ScrollYearToToday
                 }
-
-                Section.Settings -> {}
             }
 
             is Event.OnDayClicked -> setEffect {
@@ -61,8 +57,13 @@ class CalendarViewModel(
             is Event.OnYearClicked -> setEffect { Effect.GoToYear(event.agendaYear) }
 
             Event.OnRequestCalendarPermissionClicked -> viewModelScope.launch {
+                val didSeeSwipeTooltip = didSeeSwipeTooltipUseCase()
+
                 when (val state = permissionHandler.requestCalendarPermission()) {
-                    CalendarPermissionHandler.State.FullAccess -> loadEventsFastAndSlow(scrollToNow = true)
+                    CalendarPermissionHandler.State.FullAccess -> loadEventsFastAndSlow(
+                        scrollToNow = true, shouldShowSwipeToolTip = didSeeSwipeTooltip.not()
+                    )
+
                     else -> setState {
                         copy(
                             agendaEvents = emptyList(), calendarPermission = state
@@ -71,89 +72,76 @@ class CalendarViewModel(
                 }
             }
 
-            is Event.ToggleEventVisibility -> guardPremium(onSubscribed = {
+            is Event.ToggleEventVisibility -> guardPremiumLetThroughDemo(onSubscribed = {
                 toggleEventVisibility(
                     event.agendaEvent
                 )
-            },
-                onPaywall = { setEffect { Effect.ShowPaywall } })
+            }, onPaywall = { setEffect { Effect.ShowPaywall } })
 
-            is Event.Notify -> guardPremium(onSubscribed = { notifyEvent(event.agendaEvent) },
-                onPaywall = { setEffect { Effect.ShowPaywall } })
+            is Event.Notify -> {
+                guardPremiumLetThroughDemo(onSubscribed = { notifyEvent(event.agendaEvent) },
+                    onPaywall = { setEffect { Effect.ShowPaywall } })
+            }
 
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
             is Event.OnEditEvent -> guardPremium(onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
                 onPaywall = { setEffect { Effect.ShowPaywall } })
-
-            Event.HideSwipeToolTip -> setState { copy(showSwipeToolTip = false) }
+            Event.ShowSettings -> setEffect { Effect.ShowSettings }
         }
     }
 
     private fun loadData() {
-        when (val permissionState = permissionHandler.getPermissionState()) {
-            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
-                val eventsUIList = uiState.value.flatDaysAndEvents
+        viewModelScope.launch {
+            val eventsUIList = uiState.value.flatDaysAndEvents
+            val didSeeSwipeTooltip = didSeeSwipeTooltipUseCase()
+            val calendarPermissionState = permissionHandler.getPermissionState()
 
-                if (eventsUIList.isEmpty()) {
-                    loadEventsFastAndSlow(scrollToNow = true)
-                    return@launch
-                }
-
-                when (val slowIteration = getAllEventsUseCase(24)) {
-                    is GetAllEventsUseCase.State.Success -> {
-                        setState {
-                            copy(
-                                currentDate = today,
-                                flatDaysAndEvents = slowIteration.dayListViewTypes,
-                                agendaEvents = slowIteration.agendaEvents,
-                                scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size
-                            )
-                        }
-                    }
-                }
+            if (eventsUIList.isEmpty()) {
+                loadEventsFastAndSlow(
+                    scrollToNow = true, shouldShowSwipeToolTip = didSeeSwipeTooltip.not()
+                )
+                return@launch
             }
 
-            else -> viewModelScope.launch {
-                val shouldPresentSwipeTooltip = shouldPresentSwipeToolTipUseCase()
-                setState {
-                    State(
-                        days = calendarGenerator.calendar,
-                        flatDaysAndEvents = flatCalendarViewFactory.build(),
-                        showSwipeToolTip = shouldPresentSwipeTooltip,
-                        calendarPermission = permissionState
-                    )
+            when (val slowIteration = getAllEventsUseCase(24)) {
+                is GetAllEventsUseCase.State.Success -> {
+                    setState {
+                        copy(
+                            currentDate = today,
+                            calendarPermission = calendarPermissionState,
+                            showSwipeToolTip = didSeeSwipeTooltip.not(),
+                            flatDaysAndEvents = slowIteration.dayListViewTypes,
+                            agendaEvents = slowIteration.agendaEvents,
+                            isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
+                            scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size
+                        )
+                    }
                 }
             }
         }
     }
 
     private fun reloadData() {
-        when (val permissionState = permissionHandler.getPermissionState()) {
-            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
-                when (val slowIteration = getAllEventsUseCase(24)) {
-                    is GetAllEventsUseCase.State.Success -> {
-                        setState {
-                            copy(
-                                flatDaysAndEvents = slowIteration.dayListViewTypes,
-                                agendaEvents = slowIteration.agendaEvents,
-                                scrollToNow = false
-                            )
-                        }
+        viewModelScope.launch {
+            when (val slowIteration = getAllEventsUseCase(24)) {
+                is GetAllEventsUseCase.State.Success -> {
+                    setState {
+                        copy(
+                            flatDaysAndEvents = slowIteration.dayListViewTypes,
+                            agendaEvents = slowIteration.agendaEvents,
+                            scrollToNow = false
+                        )
                     }
                 }
-            }
-
-            else -> setState {
-                State(
-                    days = calendarGenerator.calendar,
-                    flatDaysAndEvents = flatCalendarViewFactory.build(),
-                    calendarPermission = permissionState
-                )
             }
         }
     }
 
-    private suspend fun loadEventsFastAndSlow(scrollToNow: Boolean) {
+    private suspend fun loadEventsFastAndSlow(
+        scrollToNow: Boolean, shouldShowSwipeToolTip: Boolean
+    ) {
+        val calendarPermissionState = permissionHandler.getPermissionState()
+
         when (val fastIteration = getAllEventsUseCase(1)) {
             is GetAllEventsUseCase.State.Success -> {
                 setState {
@@ -162,8 +150,10 @@ class CalendarViewModel(
                         days = calendarGenerator.calendar,
                         flatDaysAndEvents = fastIteration.dayListViewTypes,
                         agendaEvents = fastIteration.agendaEvents,
-                        calendarPermission = CalendarPermissionHandler.State.FullAccess,
+                        isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
+                        calendarPermission = calendarPermissionState,
                         scrollToNow = scrollToNow,
+                        showSwipeToolTip = shouldShowSwipeToolTip
                     )
                 }
                 when (val slowIteration = getAllEventsUseCase(24)) {
@@ -205,6 +195,14 @@ class CalendarViewModel(
 
                 ScheduleNotificationUseCase.State.Success -> {}
             }
+        }
+    }
+
+    private fun guardPremiumLetThroughDemo(onSubscribed: () -> Unit, onPaywall: () -> Unit) {
+        if (permissionHandler.getPermissionState() == CalendarPermissionHandler.State.FullAccess) {
+            guardPremium(onSubscribed = onSubscribed, onPaywall = onPaywall)
+        } else {
+            onSubscribed.invoke()
         }
     }
 }

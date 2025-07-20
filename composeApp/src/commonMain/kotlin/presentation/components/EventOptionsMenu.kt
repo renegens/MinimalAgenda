@@ -35,7 +35,8 @@ fun EventOptionsMenu(
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
     hapticFeedback: HapticFeedback,
-    appThemeMode: AppThemeMode
+    appThemeMode: AppThemeMode,
+    isDemoMode: Boolean
 ) {
 
     CupertinoTheme {
@@ -91,23 +92,29 @@ fun EventOptionsMenu(
                     ) {
                         Label("Remind me")
                     }
-                    HorizontalDivider()
-                    MenuAction(
-                        onClick = {
-                            hapticFeedback.addHapticFeedbackProminent()
-                            onEdit.invoke(event)
-                            onItemSelected.invoke(null)
-                        },
-                        icon = {
-                            CupertinoIcon(
-                                imageVector = CupertinoIcons.Default.Pencil,
-                                contentDescription = "pencil",
-                                tint = MaterialTheme.colorScheme.tertiary
+                        HorizontalDivider()
+                        MenuAction(
+                            onClick = {
+                                hapticFeedback.addHapticFeedbackProminent()
+                                onEdit.invoke(event)
+                                onItemSelected.invoke(null)
+                            },
+                            icon = {
+                                CupertinoIcon(
+                                    imageVector = CupertinoIcons.Default.Pencil,
+                                    contentDescription = "pencil",
+                                    tint = MaterialTheme.colorScheme.tertiary
+                                )
+                            },
+                            enabled = isDemoMode.not()
+                        ) {
+                            Text(
+                                text = "Edit",
+                                style = DMSans18Medium.copy(fontSize = 17.sp),
+                                color = if (isDemoMode) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5F) else MaterialTheme.colorScheme.tertiary,
                             )
                         }
-                    ) {
-                        Label("Edit")
-                    }
+
                 }
             }
        }
@@ -116,7 +123,7 @@ fun EventOptionsMenu(
 
 
 @Composable
-private fun Label(text: String) {
+fun Label(text: String) {
     Text(
         text = text,
         style = DMSans18Medium.copy(fontSize = 17.sp),

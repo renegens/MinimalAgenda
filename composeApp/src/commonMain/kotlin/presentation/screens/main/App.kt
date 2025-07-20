@@ -13,10 +13,16 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.Lifecycle
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import navigation.Screen
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
+import platform.openSettings
 import presentation.components.ComposableLifecycle
 import presentation.screens.calendar.CalendarScreen
 import presentation.screens.onboarding.Onboarding
@@ -32,6 +38,12 @@ fun App() {
         val paywallSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
         val scope = rememberCoroutineScope()
         var showPaywallBottomSheet by remember { mutableStateOf(false) }
+        val navController = rememberNavController()
+        val start = if (state.shouldShowOnboarding) {
+            Screen.Onboarding
+        } else {
+            Screen.Agenda
+        }
 
         ComposableLifecycle {
             if (it == Lifecycle.Event.ON_START) {
@@ -42,12 +54,19 @@ fun App() {
         LaunchedEffect(Unit) {
             viewModel.effect.collectLatest {
                 when (it) {
-                    AppContract.Effect.DismissPaywall -> scope.launch { paywallSheetState.hide() }.invokeOnCompletion {
-                        if (!paywallSheetState.isVisible) {
-                            showPaywallBottomSheet = false
+                    AppContract.Effect.DismissPaywall -> scope.launch { paywallSheetState.hide() }
+                        .invokeOnCompletion {
+                            if (!paywallSheetState.isVisible) {
+                                showPaywallBottomSheet = false
+                            }
                         }
-                    }
+
                     AppContract.Effect.PresentPaywall -> showPaywallBottomSheet = true
+                    AppContract.Effect.CloseOnboardingAndGoToCalendar -> navController.navigate(
+                        Screen.Agenda.route
+                    )
+
+                    AppContract.Effect.OpenDeviceAppSettings -> openSettings()
                 }
             }
         }
@@ -55,57 +74,51 @@ fun App() {
         AppTheme(
             appThemeMode = state.appTheme.appThemeMode, appColor = state.appTheme.appColor
         ) {
+            NavHost(
+                navController = navController, startDestination = start.route
+            ) {
+                composable(Screen.Agenda.route) {
+                    CalendarScreen(appThemeMode = state.appTheme.appThemeMode,
+                        forceEventLoad = state.forceEventLoad,
+                        onAddEvent = {
+                            viewModel.setEvent(AppContract.Event.NewEvent)
+                        },
+                        onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
+                        notEligible = {
+                            viewModel.setEvent(AppContract.Event.NotEligible)
+                        },
+                        onOpenDeviceSettings = { viewModel.setEvent(AppContract.Event.OnOpenDeviceSettings) })
+                }
 
-            if (state.showTrialNotificationError) {
-                TrialNotificationError { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
-            }
-
-            if (state.showTrialNotificationSuccess) {
-                TrialNotificationSuccess { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
-            }
-
-            if (state.showNotificationPermissionInfo) {
-                TrialNotificationAskForNotificationPermission(onContinue = {
-                    viewModel.setEvent(
-                        AppContract.Event.RequestNotificationPermission(true)
+                composable(Screen.Onboarding.route) {
+                    Onboarding(
+                        dismiss = { viewModel.setEvent(AppContract.Event.DismissOnboarding) },
+                        openSettings = { viewModel.setEvent(AppContract.Event.OnOpenDeviceSettings) }
                     )
-                }, onCancel = {
-                    viewModel.setEvent(
-                        AppContract.Event.RequestNotificationPermission(false)
-                    )
-                })
+                }
             }
-
-            CalendarScreen(
-                appThemeMode = state.appTheme.appThemeMode,
-                forceEventLoad = state.forceEventLoad,
-                onAddEvent = {
-                    viewModel.setEvent(AppContract.Event.NewEvent)
-                },
-                onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
-                notEligible = {
-                    viewModel.setEvent(AppContract.Event.NotEligible)
-                },
-                isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding()
-            )
-
-            if (state.shouldShowOnboarding){
-                Onboarding { viewModel.setEvent(AppContract.Event.DismissOnboarding) }
-            }
-
             if (showPaywallBottomSheet) {
                 ModalBottomSheet(
-                    containerColor = MaterialTheme.colorScheme.surface,
-                    onDismissRequest = {
+                    containerColor = MaterialTheme.colorScheme.surface, onDismissRequest = {
                         viewModel.setEvent(AppContract.Event.OnDismissPaywall)
-                    },
-                    sheetState = paywallSheetState
+                    }, sheetState = paywallSheetState
                 ) {
-                    PaywallScreen(
-                        onPurchaseComplete = { viewModel.setEvent(AppContract.Event.OnPurchased(it)) },
+                    PaywallScreen(onPurchaseComplete = {
+                        viewModel.setEvent(
+                            AppContract.Event.OnPurchased(
+                                it
+                            )
+                        )
+                    },
                         onCancel = { viewModel.setEvent(AppContract.Event.OnDismissPaywall) })
                 }
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun MainApp() {
+    App()
 }

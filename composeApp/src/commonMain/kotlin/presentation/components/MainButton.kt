@@ -11,10 +11,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
+import domain.model.AppTheme
+import presentation.theme.ButtonShape
 import presentation.theme.DMSansBlack36
 
 @Composable
-fun MainButtonWholeWidth(
+fun ButtonWholeWidth(
     label: String,
     buttonColor: Color = MaterialTheme.colorScheme.inverseSurface,
     textColor: Color = MaterialTheme.colorScheme.inversePrimary,
@@ -24,7 +26,8 @@ fun MainButtonWholeWidth(
     Button(
         onClick = onClick,
         modifier = Modifier.fillMaxWidth().height(56.dp),
-        colors = ButtonDefaults.buttonColors(containerColor = buttonColor)
+        colors = ButtonDefaults.buttonColors(containerColor = buttonColor),
+        shape = ButtonShape
     ) {
         Text(
             label.uppercase(),
@@ -32,4 +35,14 @@ fun MainButtonWholeWidth(
             color = textColor
         )
     }
+}
+
+@Composable
+fun MainCTAButton(label: String, onClick: () -> Unit) {
+    ButtonWholeWidth(
+        label = label,
+        buttonColor = AppTheme.Default.appColor.color,
+        textColor = Color.White,
+        onClick = onClick
+    )
 }

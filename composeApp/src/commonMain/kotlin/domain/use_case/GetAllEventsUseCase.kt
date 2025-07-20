@@ -9,7 +9,8 @@ import repository.HiddenEventsRepository
 class GetAllEventsUseCase(
     private val calendarRepository: CalendarRepository,
     private val hiddenEventsRepository: HiddenEventsRepository,
-    private val flatCalendarViewFactory: FlatCalendarViewFactory
+    private val flatCalendarViewFactory: FlatCalendarViewFactory,
+    private val showDemoModeUseCase: ShouldShowDemoModeUseCase
 ) {
 
     sealed class State {
@@ -19,7 +20,13 @@ class GetAllEventsUseCase(
     }
 
     suspend operator fun invoke(durationInMonths: Int): State {
-        val allEvents = calendarRepository.getEvents(durationInMonths).map { it.toEvent() }
+
+        val allEvents = if (showDemoModeUseCase()){
+            generateDemoAgendaEvents()
+        }else{
+            calendarRepository.getEvents(durationInMonths).map { it.toEvent() }
+        }
+
         val hiddenEvents = hiddenEventsRepository.getEvents()
 
         // Create a mutable list to hold expanded events

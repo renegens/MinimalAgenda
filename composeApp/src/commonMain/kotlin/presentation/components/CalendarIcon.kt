@@ -20,6 +20,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import extensions.today
 import presentation.theme.AppCornerShape
 import presentation.theme.CustomColor
 import presentation.theme.DMSans24Black100
@@ -31,40 +32,42 @@ fun CalendarIcon() {
     } else {
         CustomColor.APP_ICON_BACKGROUND_LIGHT
     }
-    Box(
-        modifier = Modifier
-            .size(120.dp)
-            .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
-            .background(
-                color = color,
-                shape = AppCornerShape,
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
+
+        Box(
+            modifier = Modifier
+                .size(140.dp)
+                .shadow(elevation = 8.dp, shape = RoundedCornerShape(16.dp))
+                .background(
+                    color = color,
+                    shape = AppCornerShape,
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Text(
-                text = "31",
-                style = DMSans24Black100,
-                color = MaterialTheme.colorScheme.tertiary,
-                textAlign = TextAlign.Center
-            )
-            Box(
-                modifier = Modifier
-                    .padding(start = 4.dp)
-                    .width(40.dp)
-                    .height(2.dp)
-                    .background(MaterialTheme.colorScheme.primary)
-            )
-            Spacer(modifier = Modifier.height(4.dp))
-            Text(
-                text = "JAN",
-                style = DMSans24Black100.copy(fontSize = 24.sp),
-                color = MaterialTheme.colorScheme.tertiary,
-                textAlign = TextAlign.Center
-            )
-        }
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = today.dayOfMonth.toString(),
+                    style = DMSans24Black100,
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textAlign = TextAlign.Center
+                )
+                Box(
+                    modifier = Modifier
+                        .padding(start = 4.dp)
+                        .width(40.dp)
+                        .height(2.dp)
+                        .background(MaterialTheme.colorScheme.primary)
+                )
+                Spacer(modifier = Modifier.height(4.dp))
+                Text(
+                    text = today.month.name.substring(0,3),
+                    style = DMSans24Black100.copy(fontSize = 24.sp),
+                    color = MaterialTheme.colorScheme.tertiary,
+                    textAlign = TextAlign.Center
+                )
+            }
+
     }
 }

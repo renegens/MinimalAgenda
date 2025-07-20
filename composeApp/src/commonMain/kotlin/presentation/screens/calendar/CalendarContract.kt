@@ -22,7 +22,8 @@ class CalendarContract {
         val scrollToNow: Boolean = true,
         val currentDate: LocalDate = today,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined,
-        val showSwipeToolTip: Boolean = false
+        val showSwipeToolTip: Boolean = false,
+        val isDemoMode: Boolean = false,
     ) : UiState
 
     sealed class Effect : UiEffect {
@@ -33,8 +34,9 @@ class CalendarContract {
         class GoToMonth(val agendaMonthYear: AgendaMonthYear) : Effect()
         class GoToYear(val agendaYear: AgendaYear) : Effect()
         object ShowPaywall : Effect()
-        class ShowEdit(val agendaEvent: AgendaEvent): Effect()
+        class ShowEdit(val agendaEvent: AgendaEvent) : Effect()
         object NotificationPermissionMissing : Effect()
+        object ShowSettings : Effect()
     }
 
     sealed class Event : UiEvent {
@@ -48,12 +50,12 @@ class CalendarContract {
         class ToggleEventVisibility(val agendaEvent: AgendaEvent) : Event()
         class OnEditEvent(val agendaEvent: AgendaEvent) : Event()
         object ToggleActive : Event()
-        object HideSwipeToolTip: Event()
+        object ShowSettings: Event()
         class Notify(val agendaEvent: AgendaEvent) : Event()
     }
 
     enum class Section(val position: Int) {
-        Day(0), Month(1), Year(2), Settings(3);
+        Day(0), Month(1), Year(2);
 
         companion object {
             fun fromInt(value: Int) = entries.first { it.position == value }

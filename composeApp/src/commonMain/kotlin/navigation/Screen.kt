@@ -12,4 +12,5 @@ sealed class Screen(
         "updateEvent/{$ID}") {
         fun route(eventId: String) = "updateEvent/$eventId"
     }
+    object Onboarding: Screen(route = "onboarding")
 }

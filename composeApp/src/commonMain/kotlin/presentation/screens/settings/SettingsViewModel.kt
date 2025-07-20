@@ -28,6 +28,7 @@ class SettingsViewModel(
 
     override fun handleEvent(event: Event) {
         when (event) {
+            Event.OnDismiss -> setEffect { Effect.Dismiss }
             is Event.OnModeSelected -> setAppThemeMode(event.appThemeMode)
             is Event.OnColorSelected -> guardPremium(
                 onSubscribed = { setAppColor(event.appColor) }, onPaywall = ::showPaywall
