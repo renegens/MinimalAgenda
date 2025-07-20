@@ -27,9 +27,12 @@ import androidx.lifecycle.Lifecycle
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AppThemeMode
+import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+import presentation.components.AppAlertDialog
+import presentation.components.CalendarDayHeader
 import presentation.components.CalendarToolbarMenu
 import presentation.components.ComposableLifecycle
 import presentation.components.FloatingBottomNavigation
@@ -55,7 +58,6 @@ fun CalendarScreen(
     notEligible: () -> Unit,
     onOpenDeviceSettings: () -> Unit,
     forceEventLoad: Int,
-    isPresentingNotificationOnboarding: Boolean
 ) {
     val viewModel: CalendarViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
@@ -66,7 +68,6 @@ fun CalendarScreen(
     val tipSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
     var showTipSheet by remember { mutableStateOf(false) }
-    val haptic = LocalHapticFeedback.current
 
     var isScrolledToToday by remember { mutableStateOf(true) }
     var isScrolledToMonth by remember { mutableStateOf(true) }
@@ -84,16 +85,6 @@ fun CalendarScreen(
     // Settings bottom sheet state
     val settingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
-
-    LaunchedEffect(pagerState) {
-        snapshotFlow { pagerState.currentPage }.collect { page ->
-            haptic.addHapticFeedbackProminent()
-            // Settings is now in a bottom sheet, so we don't need this check
-            if (page == Section.Day.position){
-                viewModel.setEvent(Event.ShowBottomSheet)
-            }
-        }
-    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -145,6 +136,15 @@ fun CalendarScreen(
         }
     }
 
+//    if (isPresentingNotificationOnboarding.not()) {
+//        AppAlertDialog(
+//            title = "Demo mode is active",
+//            message = "Give permissions",
+//            confirmButtonLabel = "settings",
+//            onContinueRequest = {  }
+//        )
+//    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         Scaffold(containerColor = Color.Transparent,
             modifier = Modifier.statusBarsPadding(),
@@ -166,14 +166,13 @@ fun CalendarScreen(
                     }
                 )
             }) {
+
             if (shouldShowNotificationPermission) {
                 NotificationPermissionDialog(onDismissRequest = {
                     shouldShowNotificationPermission = false
                 })
             }
 
-            //SwipeToolTip(state.showSwipeToolTip)
-            
             SafeTransparentNavigationContainer {
                 HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                     when (page) {
@@ -192,8 +191,6 @@ fun CalendarScreen(
                             onRequestCalendarPermission = {
                                 viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
                             },
-                            isPresentingSwipeTip = state.showSwipeToolTip,
-                            isPresentingNotificationOnBoarding = isPresentingNotificationOnboarding,
                             onOpenSettings = onOpenDeviceSettings,
                             isDemoMode = state.isDemoMode,
                         )
@@ -225,21 +222,14 @@ fun CalendarScreen(
                     }
                 }
             }
-            
-            if (showTipSheet) {
-                ModalBottomSheet(
-                    contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
-                    dragHandle = {},
-                    onDismissRequest = {
-                        viewModel.setEvent(Event.DismissBottomSheet)
-                    },
-                    sheetState = tipSheetState
-                ) {
-                    HideToolTip(openPaywall = {
-                        viewModel.setEvent(Event.ShowPaywallFromBottomSheet)
-                    })
-                }
-            }
+
+            CalendarDayHeader(
+                onPermissionRequest = {
+                    viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
+                },
+                openSettings = onOpenDeviceSettings,
+                state = state.calendarPermission,
+            )
             
             if (showSettingsBottomSheet) {
                 ModalBottomSheet(

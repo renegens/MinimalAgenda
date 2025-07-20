@@ -62,22 +62,13 @@ fun DayScreen(
     onOpenSettings: () -> Unit,
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
-    isPresentingNotificationOnBoarding: Boolean,
-    isPresentingSwipeTip: Boolean,
     isDemoMode: Boolean,
 ) {
     if (items.isEmpty()) return
 
-    val stickyHeaderPadding = when {
-        isPresentingSwipeTip -> 1
-        calendarPermission == CalendarPermissionHandler.State.Denied || calendarPermission == CalendarPermissionHandler.State.NotDetermined -> 2
-        else -> 0
-    }
-
     val currentEpochDay = currentDate.toEpochDays()
 
-    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay) - stickyHeaderPadding)
-
+    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay))
 
     val listState = rememberLazyListState()
 
@@ -106,15 +97,6 @@ fun DayScreen(
     ScrollablePaperBackground(appThemeMode, listState) {
 
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-
-            if (isPresentingNotificationOnBoarding.not() && isPresentingSwipeTip.not()) {
-                CalendarDayHeader(
-                    onPermissionRequest = onRequestCalendarPermission,
-                    openSettings = onOpenSettings,
-                    state = calendarPermission,
-                )
-            }
-
             items(items = items, key = { item -> item.uniqueId }, contentType = { item ->
                 when (item) {
                     is DayListViewType.Header -> "header"

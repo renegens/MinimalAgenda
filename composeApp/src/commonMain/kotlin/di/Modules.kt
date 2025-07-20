@@ -13,7 +13,6 @@ import domain.use_case.GetSettingsUseCase
 import domain.use_case.SavePaywallTimestampUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
-import domain.use_case.ScheduleTrialNotificationUseCase
 import domain.use_case.ShowPaywallOncePerDayUseCase
 import domain.use_case.DidSeeSwipeTooltipUseCase
 import domain.use_case.ShouldShowDemoModeUseCase
@@ -53,7 +52,6 @@ val sharedModule = module {
     factoryOf(::SaveSettingsUseCase)
     factoryOf(::DidSeeSwipeTooltipUseCase)
     factoryOf(::ScheduleNotificationUseCase)
-    factoryOf(::ScheduleTrialNotificationUseCase)
     factoryOf(::ShowPaywallOncePerDayUseCase)
     factoryOf(::SavePaywallTimestampUseCase)
     singleOf(::AppThemeListenerUseCase)

@@ -19,6 +19,7 @@ import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import navigation.Screen
+import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 import platform.openSettings
@@ -73,27 +74,6 @@ fun App() {
         AppTheme(
             appThemeMode = state.appTheme.appThemeMode, appColor = state.appTheme.appColor
         ) {
-
-            if (state.showTrialNotificationError) {
-                TrialNotificationError { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
-            }
-
-            if (state.showTrialNotificationSuccess) {
-                TrialNotificationSuccess { viewModel.setEvent(AppContract.Event.DismissTrialNotification) }
-            }
-
-            if (state.showNotificationPermissionInfo) {
-                TrialNotificationAskForNotificationPermission(onContinue = {
-                    viewModel.setEvent(
-                        AppContract.Event.RequestNotificationPermission(true)
-                    )
-                }, onCancel = {
-                    viewModel.setEvent(
-                        AppContract.Event.RequestNotificationPermission(false)
-                    )
-                })
-            }
-
             NavHost(
                 navController = navController, startDestination = start.route
             ) {
@@ -107,7 +87,6 @@ fun App() {
                         notEligible = {
                             viewModel.setEvent(AppContract.Event.NotEligible)
                         },
-                        isPresentingNotificationOnboarding = state.isPresentingNotificationOnboarding(),
                         onOpenDeviceSettings = { viewModel.setEvent(AppContract.Event.OnOpenDeviceSettings) })
                 }
 
@@ -136,4 +115,10 @@ fun App() {
             }
         }
     }
+}
+
+@Preview
+@Composable
+fun MainApp() {
+    App()
 }

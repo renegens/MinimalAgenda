@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentHeight
+import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -19,20 +20,20 @@ import presentation.theme.AppCornerShape
 import presentation.theme.InvertedAppTheme
 
 @OptIn(ExperimentalFoundationApi::class)
-fun LazyListScope.CalendarDayHeader(
+@Composable
+fun CalendarDayHeader(
     onPermissionRequest: () -> Unit,
     openSettings: () -> Unit,
     state: State,
 ) {
     when (state) {
         State.FullAccess -> {}
-        State.Denied -> stickyHeader { AskForPermission(onPermissionRequest, openSettings, state) }
-        State.NotDetermined -> stickyHeader {
+        State.Denied -> AskForPermission(onPermissionRequest, openSettings, state)
+        State.NotDetermined ->
             AskForPermission(
                 onPermissionRequest, openSettings, state
             )
         }
-    }
 }
 
 @Composable
@@ -47,7 +48,7 @@ private fun AskForPermission(
     ) {
         InvertedAppTheme {
             Column(
-                modifier = Modifier.fillMaxWidth().wrapContentHeight().clip(AppCornerShape)
+                modifier = Modifier.wrapContentWidth().wrapContentHeight().clip(AppCornerShape)
                     .padding(16.dp),
             ) {
                 when (state) {

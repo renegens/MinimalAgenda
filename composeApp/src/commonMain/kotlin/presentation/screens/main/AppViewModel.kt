@@ -5,7 +5,6 @@ import com.revenuecat.purchases.kmp.models.PackageType
 import data.local.LaunchCounterDataSource
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.SavePaywallTimestampUseCase
-import domain.use_case.ScheduleTrialNotificationUseCase
 import domain.use_case.ShowPaywallOncePerDayUseCase
 import extensions.guardPremium
 import presentation.base.BaseViewModel
@@ -24,7 +23,6 @@ class AppViewModel(
     private val appThemeListenerUseCase: AppThemeListenerUseCase,
     private val eventEditViewHandler: EventEditViewHandler,
     private val modalPresenter: ModalPresenter,
-    private val scheduleTrialNotificationUseCase: ScheduleTrialNotificationUseCase,
     private val showPaywallOncePerDayUseCase: ShowPaywallOncePerDayUseCase,
     private val savePaywallTimestampUseCase: SavePaywallTimestampUseCase,
     private val launchCounterDataSource: LaunchCounterDataSource,
@@ -72,45 +70,12 @@ class AppViewModel(
             }
 
             Event.OnDismissPaywall -> setEffect { Effect.DismissPaywall }
-            is Event.OnPurchased -> {
-                setEffect { Effect.DismissPaywall }
-                if (event.purchase?.packageType == PackageType.ANNUAL) {
-                    setState { copy(showNotificationPermissionInfo = true) }
-                }
-            }
-
-            Event.DismissTrialNotification -> setState {
-                copy(
-                    showTrialNotificationSuccess = false,
-                    showTrialNotificationError = false
-                )
-            }
-
+            is Event.OnPurchased -> setEffect { Effect.DismissPaywall }
             Event.CheckPaywall -> viewModelScope.launch {
                 if (showPaywallOncePerDayUseCase.shouldPresentPaywall()) {
                     setEffect { Effect.PresentPaywall }
                 }
             }
-
-            is Event.RequestNotificationPermission -> {
-                setState { copy(showNotificationPermissionInfo = false) }
-                if (event.shouldRequest) {
-                    viewModelScope.launch {
-                        when (scheduleTrialNotificationUseCase()) {
-                            ScheduleTrialNotificationUseCase.State.Success -> setState {
-                                copy(
-                                    showTrialNotificationSuccess = true
-                                )
-                            }
-
-                            else -> setState { copy(showTrialNotificationError = true) }
-                        }
-                    }
-                } else {
-                    setState { copy(showTrialNotificationError = true) }
-                }
-            }
-
             Event.DismissOnboarding -> setEffect { Effect.CloseOnboardingAndGoToCalendar }
             Event.OnOpenDeviceSettings -> setEffect { Effect.OpenDeviceAppSettings }
         }
