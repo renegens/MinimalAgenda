@@ -36,8 +36,6 @@ import domain.model.DayListViewType
 import extensions.scrollToNowIfNeeded
 import extensions.today
 import kotlinx.datetime.LocalDate
-import platform.CalendarPermissionHandler
-import presentation.components.CalendarDayHeader
 import presentation.components.DayHeader
 import presentation.components.EventOptionsMenu
 import presentation.components.ScrollablePaperBackground
@@ -57,9 +55,6 @@ fun DayScreen(
     showAll: Boolean,
     scrollToNow: Boolean,
     onHide: (AgendaEvent) -> Unit,
-    calendarPermission: CalendarPermissionHandler.State,
-    onRequestCalendarPermission: () -> Unit,
-    onOpenSettings: () -> Unit,
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
     isDemoMode: Boolean,

@@ -1,7 +1,6 @@
 package presentation.screens.calendar
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.pager.HorizontalPager
@@ -19,28 +18,23 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.lifecycle.Lifecycle
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AppThemeMode
-import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
+import platform.CalendarPermissionHandler
 import presentation.components.AppAlertDialog
-import presentation.components.CalendarDayHeader
 import presentation.components.CalendarToolbarMenu
 import presentation.components.ComposableLifecycle
 import presentation.components.FloatingBottomNavigation
-import presentation.components.HideToolTip
 import presentation.components.NotificationPermissionDialog
 import presentation.components.SafeTransparentNavigationContainer
 import presentation.components.SimpleTransparentToolbar
-import presentation.components.addHapticFeedbackProminent
 import presentation.screens.calendar.CalendarContract.Effect
 import presentation.screens.calendar.CalendarContract.Event
 import presentation.screens.calendar.CalendarContract.Section
@@ -65,9 +59,7 @@ fun CalendarScreen(
         pageCount = { Section.entries.size },
         initialPage = Section.Day.position,
     )
-    val tipSheetState = rememberModalBottomSheetState()
     val scope = rememberCoroutineScope()
-    var showTipSheet by remember { mutableStateOf(false) }
 
     var isScrolledToToday by remember { mutableStateOf(true) }
     var isScrolledToMonth by remember { mutableStateOf(true) }
@@ -78,6 +70,9 @@ fun CalendarScreen(
     var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
 
     var shouldShowNotificationPermission by remember { mutableStateOf(false) }
+    
+    // Calendar permission dialog state
+    var showCalendarPermissionDialog by remember { mutableStateOf(false) }
     
     // Three-dot menu state
     var showToolbarMenu by remember { mutableStateOf(false) }
@@ -113,12 +108,6 @@ fun CalendarScreen(
 
                 is Effect.ShowPaywall -> notEligible.invoke()
                 is Effect.ShowEdit -> onEditEvent.invoke(it.agendaEvent)
-                Effect.ShowSheetTip -> showTipSheet = true
-                Effect.DismissSheet -> scope.launch { tipSheetState.hide() }.invokeOnCompletion {
-                    if (!tipSheetState.isVisible) {
-                        showTipSheet = false
-                    }
-                }
                 Effect.ShowSettings -> showSettingsBottomSheet = true
             }
         }
@@ -136,16 +125,50 @@ fun CalendarScreen(
         }
     }
 
-//    if (isPresentingNotificationOnboarding.not()) {
-//        AppAlertDialog(
-//            title = "Demo mode is active",
-//            message = "Give permissions",
-//            confirmButtonLabel = "settings",
-//            onContinueRequest = {  }
-//        )
-//    }
+    // Show calendar permission dialog when state changes
+    LaunchedEffect(state.calendarPermission) {
+        when (state.calendarPermission) {
+            CalendarPermissionHandler.State.Denied, CalendarPermissionHandler.State.NotDetermined -> {
+                showCalendarPermissionDialog = true
+            }
+            CalendarPermissionHandler.State.FullAccess -> {
+                showCalendarPermissionDialog = false
+            }
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
+        // Calendar permission dialog - positioned at top level to appear above all content
+        if (showCalendarPermissionDialog) {
+            when (state.calendarPermission) {
+                CalendarPermissionHandler.State.Denied -> {
+                    AppAlertDialog(
+                        title = "Permissions Denied",
+                        message = "You're exploring with demo data. To declutter your real schedule, grant calendar access in your device settings",
+                        confirmButtonLabel = "Go to settings",
+                        onContinueRequest = {
+                            showCalendarPermissionDialog = false
+                            onOpenDeviceSettings()
+                        }
+                    )
+                }
+                CalendarPermissionHandler.State.NotDetermined -> {
+                    AppAlertDialog(
+                        title = "Explore Decluttering in Action",
+                        message = "Tap to hide events, or press All to view hidden ones. Connect your calendar for the full experience.",
+                        confirmButtonLabel = "Continue",
+                        onContinueRequest = {
+                            showCalendarPermissionDialog = false
+                            viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
+                        }
+                    )
+                }
+                CalendarPermissionHandler.State.FullAccess -> {
+                    // No dialog needed
+                }
+            }
+        }
+        
         Scaffold(containerColor = Color.Transparent,
             modifier = Modifier.statusBarsPadding(),
             topBar = {
@@ -183,15 +206,10 @@ fun CalendarScreen(
                             scrollToNow = state.scrollToNow,
                             onNowClicked = isScrolledToToday,
                             scrollToDay = dayScrollPosition,
-                            calendarPermission = state.calendarPermission,
                             showAll = state.showAll,
                             onNotify = { viewModel.setEvent(Event.Notify(it)) },
                             onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
                             onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
-                            onRequestCalendarPermission = {
-                                viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                            },
-                            onOpenSettings = onOpenDeviceSettings,
                             isDemoMode = state.isDemoMode,
                         )
 
@@ -223,14 +241,6 @@ fun CalendarScreen(
                 }
             }
 
-            CalendarDayHeader(
-                onPermissionRequest = {
-                    viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                },
-                openSettings = onOpenDeviceSettings,
-                state = state.calendarPermission,
-            )
-            
             if (showSettingsBottomSheet) {
                 ModalBottomSheet(
                     containerColor = MaterialTheme.colorScheme.surface,

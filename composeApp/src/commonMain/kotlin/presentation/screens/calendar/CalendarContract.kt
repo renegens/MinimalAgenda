@@ -36,8 +36,6 @@ class CalendarContract {
         object ShowPaywall : Effect()
         class ShowEdit(val agendaEvent: AgendaEvent) : Effect()
         object NotificationPermissionMissing : Effect()
-        object ShowSheetTip : Effect()
-        object DismissSheet : Effect()
         object ShowSettings : Effect()
     }
 
@@ -52,10 +50,6 @@ class CalendarContract {
         class ToggleEventVisibility(val agendaEvent: AgendaEvent) : Event()
         class OnEditEvent(val agendaEvent: AgendaEvent) : Event()
         object ToggleActive : Event()
-        object HideSwipeToolTip : Event()
-        object DismissBottomSheet : Event()
-        object ShowPaywallFromBottomSheet: Event()
-        object ShowBottomSheet: Event()
         object ShowSettings: Event()
         class Notify(val agendaEvent: AgendaEvent) : Event()
     }

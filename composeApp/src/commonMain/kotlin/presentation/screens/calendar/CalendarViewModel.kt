@@ -86,27 +86,6 @@ class CalendarViewModel(
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
             is Event.OnEditEvent -> guardPremium(onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
                 onPaywall = { setEffect { Effect.ShowPaywall } })
-
-            Event.HideSwipeToolTip -> {
-                setState { copy(showSwipeToolTip = false) }
-                setEvent(Event.ShowBottomSheet)
-            }
-            Event.DismissBottomSheet -> setEffect { Effect.DismissSheet }
-            Event.ShowPaywallFromBottomSheet -> {
-                setEffect { Effect.DismissSheet }
-                setEffect { Effect.ShowPaywall }
-            }
-
-            Event.ShowBottomSheet -> {
-//                viewModelScope.launch {
-//                    val isPremium = isPremium()
-//                    if (permissionHandler.getPermissionState() == CalendarPermissionHandler.State.FullAccess &&
-//                        isPremium.not() && !uiState.value.showSwipeToolTip) {
-//                            setEffect { Effect.ShowSheetTip }
-//                    }
-//                }
-            }
-            
             Event.ShowSettings -> setEffect { Effect.ShowSettings }
         }
     }
