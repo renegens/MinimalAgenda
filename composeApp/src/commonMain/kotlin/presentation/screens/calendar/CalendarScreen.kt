@@ -143,9 +143,13 @@ fun CalendarScreen(
             when (state.calendarPermission) {
                 CalendarPermissionHandler.State.Denied -> {
                     AppAlertDialog(
-                        title = "Permissions Denied",
-                        message = "You're exploring with demo data. To declutter your real schedule, grant calendar access in your device settings",
+                        title = "Calendar Permissions Denied",
+                        message = "You're exploring with demo data. To focus on your real schedule, grant calendar access in your device settings",
                         confirmButtonLabel = "Go to settings",
+                        negativeButtonLabel = "Ok",
+                        onNegativeRequest = {
+                            showCalendarPermissionDialog = false
+                        },
                         onContinueRequest = {
                             showCalendarPermissionDialog = false
                             onOpenDeviceSettings()
@@ -154,8 +158,8 @@ fun CalendarScreen(
                 }
                 CalendarPermissionHandler.State.NotDetermined -> {
                     AppAlertDialog(
-                        title = "Explore Decluttering in Action",
-                        message = "Tap to hide events, or press All to view hidden ones. Connect your calendar for the full experience.",
+                        title = "Explore Focus mode in Action",
+                        message = "Tap on a event to see available options. Connect your calendar for the full focus experience.",
                         confirmButtonLabel = "Continue",
                         onContinueRequest = {
                             showCalendarPermissionDialog = false
@@ -182,9 +186,13 @@ fun CalendarScreen(
             bottomBar = {
                 FloatingBottomNavigation(
                     currentSection = Section.fromInt(pagerState.currentPage),
-                    onSectionSelected = { section ->
-                        scope.launch {
-                            pagerState.animateScrollToPage(section.position)
+                    onSectionSelected = { tappedSection, currentSection ->
+                        if (tappedSection == currentSection) {
+                            viewModel.setEvent(Event.OnNowClicked(currentSection))
+                        } else {
+                            scope.launch {
+                                pagerState.animateScrollToPage(tappedSection.position)
+                            }
                         }
                     }
                 )
@@ -254,7 +262,14 @@ fun CalendarScreen(
                     sheetState = settingsSheetState
                 ) {
                     SettingsScreen(
-                        notEligible = notEligible,
+                        notEligible = {
+                            scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
+                                if (!settingsSheetState.isVisible) {
+                                    showSettingsBottomSheet = false
+                                }
+                            }
+                            notEligible.invoke()
+                        },
                         onDismiss = {
                             scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
                                 if (!settingsSheetState.isVisible) {

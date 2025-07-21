@@ -21,7 +21,7 @@ import presentation.theme.DMSans18Medium
 @Composable
 fun FloatingBottomNavigation(
     currentSection: Section,
-    onSectionSelected: (Section) -> Unit,
+    onSectionSelected: (tappedSection: Section, currentSection: Section) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -47,7 +47,7 @@ fun FloatingBottomNavigation(
                     label = "Day",
                     onClick = {
                         haptic.addHapticFeedback()
-                        onSectionSelected(Section.Day)
+                        onSectionSelected(Section.Day, currentSection)
                     }
                 )
 
@@ -57,7 +57,7 @@ fun FloatingBottomNavigation(
                     label = "Month",
                     onClick = {
                         haptic.addHapticFeedback()
-                        onSectionSelected(Section.Month)
+                        onSectionSelected(Section.Month, currentSection)
                     }
                 )
 
@@ -67,7 +67,7 @@ fun FloatingBottomNavigation(
                     label = "Year",
                     onClick = {
                         haptic.addHapticFeedback()
-                        onSectionSelected(Section.Year)
+                        onSectionSelected(Section.Year, currentSection)
                     }
                 )
 

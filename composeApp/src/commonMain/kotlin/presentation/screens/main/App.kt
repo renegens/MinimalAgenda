@@ -34,7 +34,7 @@ fun App() {
     KoinContext {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
-        var showPaywall by remember { mutableStateOf(true) }
+        var showPaywall by remember { mutableStateOf(false) }
         val navController = rememberNavController()
         val start = if (state.shouldShowOnboarding) {
             Screen.Onboarding
