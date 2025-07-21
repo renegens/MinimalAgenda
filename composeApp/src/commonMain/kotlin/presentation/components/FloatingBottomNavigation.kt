@@ -15,7 +15,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import presentation.screens.calendar.CalendarContract.Section
-import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 
 @Composable
@@ -70,16 +69,6 @@ fun FloatingBottomNavigation(
                         onSectionSelected(Section.Year, currentSection)
                     }
                 )
-
-//            NavigationItem(
-//                section = Section.Settings,
-//                currentSection = currentSection,
-//                label = "Settings",
-//                onClick = {
-//                    haptic.addHapticFeedback()
-//                    onSectionSelected(Section.Settings)
-//                }
-//            )
             }
         }
     }
@@ -102,7 +91,7 @@ fun NavigationItem(
     ) {
         Text(
             text = label,
-            style = if (isSelected) DMSans18Bold60 else DMSans18Medium,
+            style = if (isSelected) DMSans18Medium else DMSans18Medium,
             color = if (isSelected) {
                 MaterialTheme.colorScheme.primary
             } else {

@@ -1,7 +1,7 @@
 package presentation.components
 
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -12,7 +12,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import domain.model.AgendaEvent
-import domain.model.AppThemeMode
 import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
 import io.github.alexzhirkevich.cupertino.CupertinoIcon
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
@@ -35,89 +34,88 @@ fun EventOptionsMenu(
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
     hapticFeedback: HapticFeedback,
-    appThemeMode: AppThemeMode,
     isDemoMode: Boolean
 ) {
-
     CupertinoTheme {
         CupertinoDropdownMenu(
             offset = DpOffset(16.dp, -(4).dp),
             expanded = selectedItem == event,
+            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
             onDismissRequest = {
                 hapticFeedback.addHapticFeedbackProminent()
                 onItemSelected.invoke(null)
             }
         ) {
-          PaperBackground(appThemeMode = appThemeMode) {
-                Column(modifier = Modifier.fillMaxSize()) {
-                    MenuAction(
-                        onClick = {
-                            onHide.invoke(event)
-                            onItemSelected.invoke(null)
-                        },
-                        icon = {
-                            val image = if (event.isHidden) {
-                                CupertinoIcons.Default.Eye
-                            } else {
-                                CupertinoIcons.Default.EyeSlash
-                            }
-                            CupertinoIcon(
-                                imageVector = image,
-                                contentDescription = "eye",
-                                tint = MaterialTheme.colorScheme.tertiary
-                            )
-                        }
-                    ) {
-                        val text = if (event.isHidden) {
-                            "Show"
+            Column(
+                modifier = Modifier
+                    .padding(vertical = 8.dp)
+            ) {
+                MenuAction(
+                    onClick = {
+                        onHide.invoke(event)
+                        onItemSelected.invoke(null)
+                    },
+                    icon = {
+                        val image = if (event.isHidden) {
+                            CupertinoIcons.Default.Eye
                         } else {
-                            "Hide"
+                            CupertinoIcons.Default.EyeSlash
                         }
-                        Label(text)
+                        CupertinoIcon(
+                            imageVector = image,
+                            contentDescription = "eye",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
                     }
-                    HorizontalDivider()
-                    MenuAction(
-                        onClick = {
-                            onNotify.invoke(event)
-                            hapticFeedback.addHapticFeedbackProminent()
-                            onItemSelected.invoke(null)
-                        },
-                        icon = {
-                            CupertinoIcon(
-                                imageVector = CupertinoIcons.Default.Bell,
-                                contentDescription = "bell",
-                                tint = MaterialTheme.colorScheme.tertiary
-                            )
-                        }
-                    ) {
-                        Label("Remind me")
+                ) {
+                    val text = if (event.isHidden) {
+                        "Show"
+                    } else {
+                        "Hide"
                     }
-                        HorizontalDivider()
-                        MenuAction(
-                            onClick = {
-                                hapticFeedback.addHapticFeedbackProminent()
-                                onEdit.invoke(event)
-                                onItemSelected.invoke(null)
-                            },
-                            icon = {
-                                CupertinoIcon(
-                                    imageVector = CupertinoIcons.Default.Pencil,
-                                    contentDescription = "pencil",
-                                    tint = MaterialTheme.colorScheme.tertiary
-                                )
-                            },
-                            enabled = isDemoMode.not()
-                        ) {
-                            Text(
-                                text = "Edit",
-                                style = DMSans18Medium.copy(fontSize = 17.sp),
-                                color = if (isDemoMode) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5F) else MaterialTheme.colorScheme.tertiary,
-                            )
-                        }
-
+                    Label(text)
+                }
+                HorizontalDivider()
+                MenuAction(
+                    onClick = {
+                        onNotify.invoke(event)
+                        hapticFeedback.addHapticFeedbackProminent()
+                        onItemSelected.invoke(null)
+                    },
+                    icon = {
+                        CupertinoIcon(
+                            imageVector = CupertinoIcons.Default.Bell,
+                            contentDescription = "bell",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                ) {
+                    Label("Remind me")
+                }
+                HorizontalDivider()
+                MenuAction(
+                    onClick = {
+                        hapticFeedback.addHapticFeedbackProminent()
+                        onEdit.invoke(event)
+                        onItemSelected.invoke(null)
+                    },
+                    icon = {
+                        CupertinoIcon(
+                            imageVector = CupertinoIcons.Default.Pencil,
+                            contentDescription = "pencil",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    },
+                    enabled = isDemoMode.not()
+                ) {
+                    Text(
+                        text = "Edit",
+                        style = DMSans18Medium.copy(fontSize = 17.sp),
+                        color = if (isDemoMode) MaterialTheme.colorScheme.tertiary.copy(alpha = 0.5F) else MaterialTheme.colorScheme.tertiary,
+                    )
                 }
             }
-       }
+        }
     }
 }
 

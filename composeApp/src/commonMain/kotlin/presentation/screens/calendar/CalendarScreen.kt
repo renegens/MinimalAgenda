@@ -180,7 +180,25 @@ fun CalendarScreen(
                     backgroundColor = Color.Transparent,
                     onMenuClick = { showToolbarMenu = true }
                 ) {
-                    // Empty content - no title, just the menu button will be added separately
+                    if (showToolbarMenu) {
+                        CalendarToolbarMenu(
+                            isVisible = showToolbarMenu,
+                            onDismiss = { showToolbarMenu = false },
+                            showAll = state.showAll,
+                            onNowClicked = {
+                                viewModel.setEvent(
+                                    Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                                )
+                            },
+                            onToggleActive = {
+                                viewModel.setEvent(Event.ToggleActive)
+                            },
+                            onAdd = onAddEvent,
+                            onSettings = {
+                                viewModel.setEvent(Event.ShowSettings)
+                            },
+                        )
+                    }
                 }
             },
             bottomBar = {
@@ -280,27 +298,6 @@ fun CalendarScreen(
                     )
                 }
             }
-        }
-        
-        // Three-dot menu with proper anchoring - positioned at top-right
-        if (showToolbarMenu) {
-            CalendarToolbarMenu(
-                isVisible = showToolbarMenu,
-                onDismiss = { showToolbarMenu = false },
-                showAll = state.showAll,
-                onNowClicked = {
-                    viewModel.setEvent(
-                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                    )
-                },
-                onToggleActive = {
-                    viewModel.setEvent(Event.ToggleActive)
-                },
-                onAdd = onAddEvent,
-                onSettings = {
-                    viewModel.setEvent(Event.ShowSettings)
-                },
-            )
         }
     }
 }
