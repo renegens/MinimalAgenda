@@ -37,19 +37,7 @@ class AndroidModalPresenter : ModalPresenter {
 //        }
     }
 
-    override fun presentPaywall(appTheme: AppTheme, onCompletion: () -> Unit) {
 
-        //navController.navigate(Screen.Paywall.route)
-
-        //        composable(
-//            route = Screen.Paywall.route,
-//            enterTransition = enterPush,
-//            exitTransition = exitPush
-//        ) {
-//            PaywallScreen(onCancel = { navController.navigateUp() },
-//                onPurchaseComplete = { navController.navigateUp() })
-//        }
-    }
 
 
 }

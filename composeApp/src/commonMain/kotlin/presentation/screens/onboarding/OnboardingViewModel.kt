@@ -17,7 +17,7 @@ class OnboardingViewModel(
             Event.OnDismissOnboarding -> setEffect { Effect.CloseOnboarding }
             Event.OnRequestCalendarPermission -> viewModelScope.launch {
                 when (val state = calendarPermissionHandler.requestCalendarPermission()) {
-                    CalendarPermissionHandler.State.FullAccess -> setEffect { Effect.CloseOnboarding }
+                    CalendarPermissionHandler.State.FullAccess -> setEffect { Effect.ShowPaywall }
                     else -> setState { copy(calendarPermissionState = state) }
                 }
             }

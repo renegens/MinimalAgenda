@@ -1,6 +1,5 @@
 package presentation.screens.main
 
-import com.revenuecat.purchases.kmp.models.Package
 import domain.model.AgendaEvent
 import domain.model.AppTheme
 import presentation.base.UiEffect
@@ -28,7 +27,7 @@ class AppContract {
         object OnOpenDeviceSettings: Event()
         object NotEligible : Event()
         object OnDismissPaywall : Event()
-        class OnPurchased(val purchase: Package?) : Event()
+        object OnPurchased : Event()
         object CheckPaywall : Event()
         object DismissOnboarding : Event()
     }

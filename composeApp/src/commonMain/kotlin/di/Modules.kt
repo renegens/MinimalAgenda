@@ -28,7 +28,6 @@ import presentation.screens.add_event.AddEventViewModel
 import presentation.screens.calendar.CalendarViewModel
 import presentation.screens.onboarding.OnboardingViewModel
 import presentation.screens.main.AppViewModel
-import presentation.screens.paywall.PaywallViewModel
 import presentation.screens.settings.SettingsViewModel
 import repository.HiddenEventsRepository
 import repository.HiddenEventsRepositoryImpl
@@ -42,7 +41,6 @@ val sharedModule = module {
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::CalendarViewModel)
     viewModelOf(::AddEventViewModel)
-    viewModelOf(::PaywallViewModel)
     viewModelOf(::SettingsViewModel)
 
     singleOf(::CalendarGenerator)

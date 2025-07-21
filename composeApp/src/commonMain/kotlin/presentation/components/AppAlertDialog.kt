@@ -12,6 +12,7 @@ import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
 import io.github.alexzhirkevich.cupertino.CupertinoText
 import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
 import io.github.alexzhirkevich.cupertino.default
+import io.github.alexzhirkevich.cupertino.destructive
 import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
 import presentation.theme.DMSans18Regular
 
@@ -21,7 +22,9 @@ fun AppAlertDialog(
     title: String,
     message: String,
     confirmButtonLabel: String = "OK",
-    onContinueRequest: () -> Unit
+    negativeButtonLabel: String? = null,
+    onContinueRequest: () -> Unit,
+    onNegativeRequest: (() -> Unit)? = null
 ) {
     if (getPlatform().isAndroid) {
         AlertDialog(
@@ -44,7 +47,16 @@ fun AppAlertDialog(
                 ) {
                     Text(confirmButtonLabel)
                 }
-            }
+            },
+            dismissButton = if (negativeButtonLabel != null) {
+                {
+                    TextButton(
+                        onClick = { onNegativeRequest?.invoke() ?: onContinueRequest() }
+                    ) {
+                        Text(negativeButtonLabel)
+                    }
+                }
+            } else null
         )
     } else {
         CupertinoTheme {
@@ -58,6 +70,15 @@ fun AppAlertDialog(
                     CupertinoText(message)
                 }
             ) {
+                if (negativeButtonLabel != null) {
+                    destructive(
+                        onClick = {
+                            onNegativeRequest?.invoke() ?: onContinueRequest()
+                        }
+                    ) {
+                        CupertinoText(negativeButtonLabel)
+                    }
+                }
                 default(
                     onClick = {
                         onContinueRequest.invoke()

@@ -128,7 +128,6 @@ fun DayScreen(
                             },
                             showAll = showAll,
                             hapticFeedback = hapticFeedback,
-                            appThemeMode = appThemeMode,
                             isDemoMode = isDemoMode
                         )
                     }
@@ -178,7 +177,6 @@ fun Event(
     onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean,
     hapticFeedback: HapticFeedback,
-    appThemeMode: AppThemeMode,
     isDemoMode: Boolean
 ) {
     if (showAll.not() && event.isHidden) return
@@ -227,7 +225,6 @@ fun Event(
             selectedItem = selectedItem,
             hapticFeedback = hapticFeedback,
             onItemSelected = onItemSelected,
-            appThemeMode = appThemeMode,
             isDemoMode = isDemoMode
         )
     }

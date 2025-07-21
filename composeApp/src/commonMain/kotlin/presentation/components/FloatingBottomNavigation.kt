@@ -15,13 +15,12 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import presentation.screens.calendar.CalendarContract.Section
-import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 
 @Composable
 fun FloatingBottomNavigation(
     currentSection: Section,
-    onSectionSelected: (Section) -> Unit,
+    onSectionSelected: (tappedSection: Section, currentSection: Section) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -47,7 +46,7 @@ fun FloatingBottomNavigation(
                     label = "Day",
                     onClick = {
                         haptic.addHapticFeedback()
-                        onSectionSelected(Section.Day)
+                        onSectionSelected(Section.Day, currentSection)
                     }
                 )
 
@@ -57,7 +56,7 @@ fun FloatingBottomNavigation(
                     label = "Month",
                     onClick = {
                         haptic.addHapticFeedback()
-                        onSectionSelected(Section.Month)
+                        onSectionSelected(Section.Month, currentSection)
                     }
                 )
 
@@ -67,19 +66,9 @@ fun FloatingBottomNavigation(
                     label = "Year",
                     onClick = {
                         haptic.addHapticFeedback()
-                        onSectionSelected(Section.Year)
+                        onSectionSelected(Section.Year, currentSection)
                     }
                 )
-
-//            NavigationItem(
-//                section = Section.Settings,
-//                currentSection = currentSection,
-//                label = "Settings",
-//                onClick = {
-//                    haptic.addHapticFeedback()
-//                    onSectionSelected(Section.Settings)
-//                }
-//            )
             }
         }
     }
@@ -102,7 +91,7 @@ fun NavigationItem(
     ) {
         Text(
             text = label,
-            style = if (isSelected) DMSans18Bold60 else DMSans18Medium,
+            style = if (isSelected) DMSans18Medium else DMSans18Medium,
             color = if (isSelected) {
                 MaterialTheme.colorScheme.primary
             } else {
