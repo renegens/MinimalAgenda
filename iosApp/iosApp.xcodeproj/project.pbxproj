@@ -12,6 +12,7 @@
 		1C57F38A2E2F62A500CEB9DD /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1C57F3892E2F62A500CEB9DD /* PurchasesHybridCommon */; };
 		1C57F38C2E2F62A500CEB9DD /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 1C57F38B2E2F62A500CEB9DD /* PurchasesHybridCommonUI */; };
 		1CC22FF82CA4235500E2D6AE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1CC22FF72CA4235500E2D6AE /* Launch Screen.storyboard */; };
+		1CD1ED392E2FAB3F00CCA7FB /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 1CD1ED382E2FAB3F00CCA7FB /* Mixpanel */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
@@ -33,6 +34,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1CD1ED392E2FAB3F00CCA7FB /* Mixpanel in Frameworks */,
 				1C57F38C2E2F62A500CEB9DD /* PurchasesHybridCommonUI in Frameworks */,
 				1C57F38A2E2F62A500CEB9DD /* PurchasesHybridCommon in Frameworks */,
 			);
@@ -136,6 +138,7 @@
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
 				1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */,
+				1CD1ED372E2FAB3F00CCA7FB /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -413,6 +416,14 @@
 				version = 15.0.0;
 			};
 		};
+		1CD1ED372E2FAB3F00CCA7FB /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/mixpanel/mixpanel-swift";
+			requirement = {
+				branch = master;
+				kind = branch;
+			};
+		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
@@ -425,6 +436,11 @@
 			isa = XCSwiftPackageProductDependency;
 			package = 1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
 			productName = PurchasesHybridCommonUI;
+		};
+		1CD1ED382E2FAB3F00CCA7FB /* Mixpanel */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 1CD1ED372E2FAB3F00CCA7FB /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
+			productName = Mixpanel;
 		};
 /* End XCSwiftPackageProductDependency section */
 	};
