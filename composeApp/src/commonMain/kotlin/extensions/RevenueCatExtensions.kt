@@ -4,8 +4,6 @@ import com.revenuecat.purchases.kmp.LogLevel
 import com.revenuecat.purchases.kmp.Purchases
 import com.revenuecat.purchases.kmp.PurchasesConfiguration
 import com.revenuecat.purchases.kmp.models.CustomerInfo
-import com.revenuecat.purchases.kmp.models.Package
-import com.revenuecat.purchases.kmp.models.PackageType
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlin.coroutines.resume
 
@@ -47,20 +45,4 @@ suspend fun isPremium(): Boolean = suspendCancellableCoroutine { continuation ->
             }
         }
     )
-}
-
-fun Package.getOfferText(): String {
-    return when (packageType) {
-        PackageType.MONTHLY -> "Full access for just ${storeProduct.price.formatted}/mo"
-        PackageType.ANNUAL -> "First week free, then ${storeProduct.price.formatted}/yr"
-        PackageType.LIFETIME -> "Full access for just ${storeProduct.price.formatted}"
-        else -> ""
-    }
-}
-
-fun Package.getOfferContinueButtonText(): String {
-    return when (packageType) {
-        PackageType.ANNUAL -> "Start Your FREE Trial"
-        else -> "Continue"
-    }
 }
