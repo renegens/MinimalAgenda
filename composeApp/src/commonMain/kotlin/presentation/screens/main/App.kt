@@ -102,6 +102,7 @@ fun App() {
                     }
 
                     override fun onRestoreCompleted(customerInfo: CustomerInfo) {
+                        viewModel.setEvent(AppContract.Event.OnDismissPaywall)
                     }
                 }
 
