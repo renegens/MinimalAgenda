@@ -9,8 +9,8 @@
 /* Begin PBXBuildFile section */
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
-		1C2417B52E27A52800B0BCAD /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1C2417B42E27A52800B0BCAD /* PurchasesHybridCommon */; };
-		1C2417B72E27A52800B0BCAD /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 1C2417B62E27A52800B0BCAD /* PurchasesHybridCommonUI */; };
+		1C57F38A2E2F62A500CEB9DD /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1C57F3892E2F62A500CEB9DD /* PurchasesHybridCommon */; };
+		1C57F38C2E2F62A500CEB9DD /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 1C57F38B2E2F62A500CEB9DD /* PurchasesHybridCommonUI */; };
 		1CC22FF82CA4235500E2D6AE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1CC22FF72CA4235500E2D6AE /* Launch Screen.storyboard */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
@@ -33,8 +33,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1C2417B72E27A52800B0BCAD /* PurchasesHybridCommonUI in Frameworks */,
-				1C2417B52E27A52800B0BCAD /* PurchasesHybridCommon in Frameworks */,
+				1C57F38C2E2F62A500CEB9DD /* PurchasesHybridCommonUI in Frameworks */,
+				1C57F38A2E2F62A500CEB9DD /* PurchasesHybridCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -135,7 +135,7 @@
 			);
 			mainGroup = 7555FF72242A565900829871;
 			packageReferences = (
-				1C2417B32E27A52800B0BCAD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */,
+				1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */,
 			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
@@ -405,25 +405,25 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
-		1C2417B32E27A52800B0BCAD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */ = {
+		1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/RevenueCat/purchases-hybrid-common";
 			requirement = {
 				kind = exactVersion;
-				version = 14.2.0;
+				version = 15.0.0;
 			};
 		};
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
-		1C2417B42E27A52800B0BCAD /* PurchasesHybridCommon */ = {
+		1C57F3892E2F62A500CEB9DD /* PurchasesHybridCommon */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1C2417B32E27A52800B0BCAD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
+			package = 1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
 			productName = PurchasesHybridCommon;
 		};
-		1C2417B62E27A52800B0BCAD /* PurchasesHybridCommonUI */ = {
+		1C57F38B2E2F62A500CEB9DD /* PurchasesHybridCommonUI */ = {
 			isa = XCSwiftPackageProductDependency;
-			package = 1C2417B32E27A52800B0BCAD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
+			package = 1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
 			productName = PurchasesHybridCommonUI;
 		};
 /* End XCSwiftPackageProductDependency section */
