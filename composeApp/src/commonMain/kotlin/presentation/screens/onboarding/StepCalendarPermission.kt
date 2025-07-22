@@ -54,7 +54,7 @@ private fun ColumnScope.PermissionDenied(
 ) {
     TextTitle(text = "Permission Denied")
     Spacer(modifier = Modifier.height(16.dp))
-    TextSubtitle(text = "We can’t sync your calendar without access.")
+    TextSubtitle(text = "We can’t sync your calendar without your permission")
     Spacer(modifier = Modifier.weight(1F))
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {

@@ -37,6 +37,7 @@ import com.revenuecat.purchases.kmp.models.StoreTransaction
 import com.revenuecat.purchases.kmp.ui.revenuecatui.Paywall
 import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallListener
 import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions
+import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
 fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
@@ -133,7 +134,7 @@ fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
                             shouldDisplayDismissButton = true
                         }
 
-                        Paywall(options = options)
+                       Paywall(options = options)
                     }
                 }
             }
@@ -143,4 +144,10 @@ fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
 
 enum class Onboarding(val position: Int) {
     StepOne(0), StepTwo(1), StepThree(2), StepPaywall(3);
+}
+
+@Preview
+@Composable
+fun OnboardingPreview() {
+    Onboarding(dismiss = {}, openSettings = {})
 }

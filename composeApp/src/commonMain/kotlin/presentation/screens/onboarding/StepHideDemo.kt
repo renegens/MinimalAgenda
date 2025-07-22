@@ -21,7 +21,7 @@ fun StepHideDemo(onContinue: () -> Unit) {
     ) {
         TextTitle(text = "Keep Only What Matters")
         Spacer(modifier = Modifier.height(16.dp))
-        TextSubtitle(text = "Hide meetings to clean up your schedule in seconds")
+        TextSubtitle(text = "Tap to hide any event and focus on what is important")
         Spacer(modifier = Modifier.height(32.dp))
         DemonstrationDay()
         Spacer(modifier = Modifier.weight(1F))

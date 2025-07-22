@@ -7,16 +7,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import data.APP_DISPLAY_NAME
-import domain.model.AppThemeMode
 import presentation.components.CalendarIcon
 import presentation.components.MainCTAButton
-import presentation.components.PaperBackground
 import presentation.components.TextSubtitle
 import presentation.components.TextTitle
 
@@ -28,7 +25,7 @@ fun StepWelcome(onContinue: () -> Unit) {
             Spacer(modifier = Modifier.weight(0.5F))
             TextTitle(text = "Welcome,\nYour All in One $APP_DISPLAY_NAME")
             Spacer(modifier = Modifier.height(16.dp))
-            TextSubtitle("Simplify your schedule\nMake the most of your day")
+            TextSubtitle("Stay focused with a daily lens on your life.")
             Spacer(modifier = Modifier.height(32.dp))
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
