@@ -126,10 +126,12 @@ fun CalendarScreen(
     }
 
     // Show calendar permission dialog when state changes
-    LaunchedEffect(state.calendarPermission) {
+    // Only show dialog if we have actual data loaded (not just initial state)
+    LaunchedEffect(state.calendarPermission, state.flatDaysAndEvents.isNotEmpty()) {
         showCalendarPermissionDialog = when (state.calendarPermission) {
             CalendarPermissionHandler.State.Denied, CalendarPermissionHandler.State.NotDetermined -> {
-                true
+                // Only show dialog if we have data loaded, indicating the ViewModel has checked permissions
+                state.flatDaysAndEvents.isNotEmpty()
             }
 
             CalendarPermissionHandler.State.FullAccess -> {
