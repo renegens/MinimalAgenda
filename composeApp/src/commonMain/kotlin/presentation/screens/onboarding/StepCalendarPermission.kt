@@ -74,7 +74,7 @@ private fun ColumnScope.PermissionDenied(
     }
     Spacer(modifier = Modifier.weight(1F))
 
-    MainCTAButton("try demo", onContinue)
+    MainCTAButton("Try with sample events", onContinue)
     Spacer(modifier = Modifier.height(48.dp))
 
     ButtonWholeWidth(
@@ -105,7 +105,7 @@ private fun ColumnScope.AskingForPermission(
     Spacer(modifier = Modifier.height(4.dp))
     Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
         Text(
-            text = "We don’t store or share your information.",
+            text = "Your calendar data stays on your device. We never access, store, or share your personal information.",
             modifier = Modifier.fillMaxWidth(),
             style = DMSans24Medium60,
             textAlign = TextAlign.Center,
@@ -119,7 +119,7 @@ private fun ColumnScope.AskingForPermission(
     Spacer(modifier = Modifier.height(48.dp))
 
     ButtonWholeWidth(
-        label = "Try demo",
+        label = "Try with sample events",
         onClick = onContinue,
         buttonColor = MaterialTheme.colorScheme.tertiary,
         textColor = MaterialTheme.colorScheme.surface

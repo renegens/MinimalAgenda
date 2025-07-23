@@ -144,7 +144,7 @@ fun CalendarScreen(
                 CalendarPermissionHandler.State.Denied -> {
                     AppAlertDialog(
                         title = "Calendar Permissions Denied",
-                        message = "You're exploring with demo data. To focus on your real schedule, grant calendar access in your device settings",
+                        message = "You're currently viewing sample events. Connect your calendar to see your actual schedule and focus on what matters to you.",
                         confirmButtonLabel = "Go to settings",
                         negativeButtonLabel = "Ok",
                         onNegativeRequest = {
@@ -159,7 +159,7 @@ fun CalendarScreen(
                 CalendarPermissionHandler.State.NotDetermined -> {
                     AppAlertDialog(
                         title = "Explore Focus mode in Action",
-                        message = "Tap on a event to see available options. Connect your calendar for the full focus experience.",
+                        message = "See how focus mode works with sample events. Connect your calendar to start managing your real schedule.",
                         confirmButtonLabel = "Continue",
                         onContinueRequest = {
                             showCalendarPermissionDialog = false

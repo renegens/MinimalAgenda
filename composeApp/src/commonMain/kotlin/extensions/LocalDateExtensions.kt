@@ -7,12 +7,13 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 
 val takingScreenshots = false
-private val epochDay4September2024 = 1725408000L
+//private val epochDay4September2024 = 1725408000L
+private val epochDay4September2025 = 1757097600L
 
 val today: LocalDate
     get() {
         return if (takingScreenshots) {
-            Instant.fromEpochSeconds(epochDay4September2024).toLocalDateTime(TimeZone.currentSystemDefault()).date
+            Instant.fromEpochSeconds(epochDay4September2025).toLocalDateTime(TimeZone.currentSystemDefault()).date
         }else{
             Clock.System.now()
                 .toLocalDateTime(TimeZone.currentSystemDefault()).date

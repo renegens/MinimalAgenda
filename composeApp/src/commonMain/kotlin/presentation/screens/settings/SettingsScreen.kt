@@ -103,7 +103,7 @@ fun SettingsScreen(notEligible: () -> Unit, onDismiss: () -> Unit = {}) {
                 isChecked = state.privateNotifications,
                 onCheckedChange = { viewModel.setEvent(Event.OnTogglePrivateNotifications(it)) })
             ItemBody(
-                "When enabled, notifications will use a generic title (Premium)",
+                "When enabled, notifications will use a generic title (Premium feature)",
             )
         }
 
@@ -127,7 +127,7 @@ fun SettingsScreen(notEligible: () -> Unit, onDismiss: () -> Unit = {}) {
         SettingsItem() {
             ItemTitle("Choose Your Color")
             Spacer(modifier = Modifier.height(4.dp))
-            ItemBody("Select the perfect shade to match your style (Premium)")
+            ItemBody("Customize colors to match your style (Premium feature)")
             Spacer(modifier = Modifier.height(16.dp))
             ColorSelection(state.appColor) { viewModel.setEvent(Event.OnColorSelected(it)) }
         }
