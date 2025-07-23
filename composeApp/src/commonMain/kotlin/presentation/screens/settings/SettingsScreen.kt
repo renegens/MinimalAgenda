@@ -108,6 +108,15 @@ fun SettingsScreen(notEligible: () -> Unit, onDismiss: () -> Unit = {}) {
         }
 
         SettingsItem() {
+            SwitchSettingItem(title = "Hide Bottom Navigation",
+                isChecked = state.hideBottomNavigation,
+                onCheckedChange = { viewModel.setEvent(Event.OnToggleHideBottomNavigation(it)) })
+            ItemBody(
+                "When enabled, the bottom navigation bar will be hidden to maximize your viewing area",
+            )
+        }
+
+        SettingsItem() {
             NotificationTimeInput(
                 focusRequester = focusRequester,
                 time = state.notificationTime,

@@ -5,4 +5,5 @@ data class Settings(
     val appColor: AppColor = AppColor.Orange,
     val privateNotifications: Boolean = false,
     val notificationTimeInMinutes: Int = 5,
+    val hideBottomNavigation: Boolean = false,
 )

@@ -21,8 +21,8 @@ class CalendarContract {
         val showAll: Boolean = false,
         val scrollToNow: Boolean = true,
         val currentDate: LocalDate = today,
+        val hideBottomNavigation: Boolean = false,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined,
-        val showSwipeToolTip: Boolean = false,
         val isDemoMode: Boolean = false,
     ) : UiState
 
@@ -51,6 +51,7 @@ class CalendarContract {
         class OnEditEvent(val agendaEvent: AgendaEvent) : Event()
         object ToggleActive : Event()
         object ShowSettings: Event()
+        object RefreshSettings: Event()
         class Notify(val agendaEvent: AgendaEvent) : Event()
     }
 

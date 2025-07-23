@@ -13,7 +13,8 @@ class SettingsContract {
         val appThemeMode: AppThemeMode = AppThemeMode.FollowSystem,
         val appColor: AppColor = AppColor.Red,
         val privateNotifications: Boolean = true,
-        val notificationTime: Int = 5
+        val notificationTime: Int = 5,
+        val hideBottomNavigation: Boolean = false
     ) : UiState
 
     sealed class Effect : UiEffect {
@@ -25,6 +26,7 @@ class SettingsContract {
         object Load : Event()
         object OnDismiss : Event()
         class OnTogglePrivateNotifications(val checked: Boolean) : Event()
+        class OnToggleHideBottomNavigation(val checked: Boolean) : Event()
         class OnModeSelected(val appThemeMode: AppThemeMode) : Event()
         class OnColorSelected(val appColor: AppColor) : Event()
         object OnSentFeedback : Event()

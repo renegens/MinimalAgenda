@@ -2,6 +2,7 @@ package repository
 
 import data.local.AppColorEntity
 import data.local.AppThemeModeEntity
+import data.local.OldSettingsEntity
 import data.local.SettingsEntity
 import data.local.SettingsLocalDataSource
 import domain.model.AppColor
@@ -10,12 +11,13 @@ import domain.model.AppThemeMode
 import domain.model.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
 class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalDataSource) :
     SettingsRepository {
 
+    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getSettings(): Settings {
         val json = settingsLocalDataSource.getSettings()
         if (json.isEmpty()) {
@@ -24,9 +26,22 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
             return defaultSettings
         }
 
-        val entity = Json.decodeFromString<SettingsEntity>(json)
-
-        return entity.asDomainModel()
+        return try {
+            val entity = Json.decodeFromString<SettingsEntity>(json)
+            entity.asDomainModel()
+        } catch (_: kotlinx.serialization.MissingFieldException) {
+            // Handle migration from old settings format - preserve existing settings
+            val oldEntity = Json.decodeFromString<OldSettingsEntity>(json)
+            val migratedSettings = Settings(
+                appThemeMode = oldEntity.appTheme.asDomainModel(),
+                appColor = oldEntity.appColor.asDomainModel(),
+                privateNotifications = oldEntity.privateNotifications,
+                notificationTimeInMinutes = oldEntity.notificationTimeInMinutes,
+                hideBottomNavigation = false // Default value for new field
+            )
+            saveSettings(migratedSettings)
+            migratedSettings
+        }
     }
 
     override suspend fun saveSettings(settings: Settings) {
@@ -34,6 +49,7 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
         settingsLocalDataSource.saveSettings(objectToSave)
     }
 
+    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun appTheme(): Flow<AppTheme> {
         return settingsLocalDataSource.settings().map {
             if (it.isEmpty()) {
@@ -46,9 +62,22 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
 
                 return@map appTheme
             }
-            val entity = Json.decodeFromString<SettingsEntity>(it)
-
-            val settings = entity.asDomainModel()
+            val settings = try {
+                val entity = Json.decodeFromString<SettingsEntity>(it)
+                entity.asDomainModel()
+            } catch (_: kotlinx.serialization.MissingFieldException) {
+                // Handle migration from old settings format - preserve existing settings
+                val oldEntity = Json.decodeFromString<OldSettingsEntity>(it)
+                val migratedSettings = Settings(
+                    appThemeMode = oldEntity.appTheme.asDomainModel(),
+                    appColor = oldEntity.appColor.asDomainModel(),
+                    privateNotifications = oldEntity.privateNotifications,
+                    notificationTimeInMinutes = oldEntity.notificationTimeInMinutes,
+                    hideBottomNavigation = false // Default value for new field
+                )
+                saveSettings(migratedSettings)
+                migratedSettings
+            }
 
             return@map AppTheme(
                 appColor = settings.appColor,
@@ -61,14 +90,16 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
         appTheme = appThemeMode.asEntity(),
         appColor = appColor.asEntity(),
         privateNotifications = privateNotifications,
-        notificationTimeInMinutes = notificationTimeInMinutes
+        notificationTimeInMinutes = notificationTimeInMinutes,
+        hideBottomNavigation = hideBottomNavigation
     )
 
     private fun SettingsEntity.asDomainModel() = Settings(
         appThemeMode = appTheme.asDomainModel(),
         appColor = appColor.asDomainModel(),
         privateNotifications = privateNotifications,
-        notificationTimeInMinutes = notificationTimeInMinutes
+        notificationTimeInMinutes = notificationTimeInMinutes,
+        hideBottomNavigation = hideBottomNavigation
     )
 
     private fun AppThemeModeEntity.asDomainModel() = when (this) {

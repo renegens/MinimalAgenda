@@ -38,6 +38,8 @@ class SettingsViewModel(
                 onSubscribed = { setPrivateNotification(event.checked) }, onPaywall = ::showPaywall
             )
 
+            is Event.OnToggleHideBottomNavigation -> setHideBottomNavigation(event.checked)
+
             is Event.OnNotificationTimeEntered -> guardPremium(
                 onSubscribed = { setNotificationTime(event.time) }, onPaywall = ::showPaywall
             )
@@ -52,7 +54,8 @@ class SettingsViewModel(
                             appColor = settings.appColor,
                             appThemeMode = settings.appThemeMode,
                             privateNotifications = settings.privateNotifications,
-                            notificationTime = settings.notificationTimeInMinutes
+                            notificationTime = settings.notificationTimeInMinutes,
+                            hideBottomNavigation = settings.hideBottomNavigation
                         )
                     }
                 }
@@ -92,6 +95,14 @@ class SettingsViewModel(
         }
     }
 
+    private fun setHideBottomNavigation(isChecked: Boolean) {
+        viewModelScope.launch {
+            val currentSettings = uiState.value.toSettings()
+            saveSettingsUseCase.invoke(currentSettings.copy(hideBottomNavigation = isChecked))
+            setState { copy(hideBottomNavigation = isChecked) }
+        }
+    }
+
     private fun showPaywall() {
         setEffect { Effect.NotEligible }
     }
@@ -101,7 +112,8 @@ class SettingsViewModel(
             appThemeMode = appThemeMode,
             appColor = appColor,
             privateNotifications = privateNotifications,
-            notificationTimeInMinutes = notificationTime
+            notificationTimeInMinutes = notificationTime,
+            hideBottomNavigation = hideBottomNavigation
         )
     }
 }

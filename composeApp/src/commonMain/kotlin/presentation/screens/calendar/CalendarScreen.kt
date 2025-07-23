@@ -127,12 +127,13 @@ fun CalendarScreen(
 
     // Show calendar permission dialog when state changes
     LaunchedEffect(state.calendarPermission) {
-        when (state.calendarPermission) {
+        showCalendarPermissionDialog = when (state.calendarPermission) {
             CalendarPermissionHandler.State.Denied, CalendarPermissionHandler.State.NotDetermined -> {
-                showCalendarPermissionDialog = true
+                true
             }
+
             CalendarPermissionHandler.State.FullAccess -> {
-                showCalendarPermissionDialog = false
+                false
             }
         }
     }
@@ -202,18 +203,20 @@ fun CalendarScreen(
                 }
             },
             bottomBar = {
-                FloatingBottomNavigation(
-                    currentSection = Section.fromInt(pagerState.currentPage),
-                    onSectionSelected = { tappedSection, currentSection ->
-                        if (tappedSection == currentSection) {
-                            viewModel.setEvent(Event.OnNowClicked(currentSection))
-                        } else {
-                            scope.launch {
-                                pagerState.animateScrollToPage(tappedSection.position)
+                if (state.hideBottomNavigation.not()) {
+                    FloatingBottomNavigation(
+                        currentSection = Section.fromInt(pagerState.currentPage),
+                        onSectionSelected = { tappedSection, currentSection ->
+                            if (tappedSection == currentSection) {
+                                viewModel.setEvent(Event.OnNowClicked(currentSection))
+                            } else {
+                                scope.launch {
+                                    pagerState.animateScrollToPage(tappedSection.position)
+                                }
                             }
                         }
-                    }
-                )
+                    )
+                }
             }) {
 
             if (shouldShowNotificationPermission) {
@@ -292,6 +295,7 @@ fun CalendarScreen(
                             scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
                                 if (!settingsSheetState.isVisible) {
                                     showSettingsBottomSheet = false
+                                    viewModel.setEvent(Event.RefreshSettings)
                                 }
                             }
                         }

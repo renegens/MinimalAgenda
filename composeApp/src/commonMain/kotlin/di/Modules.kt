@@ -14,7 +14,6 @@ import domain.use_case.SavePaywallTimestampUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ShowPaywallOncePerDayUseCase
-import domain.use_case.DidSeeSwipeTooltipUseCase
 import domain.use_case.ShouldShowDemoModeUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.Module
@@ -48,7 +47,6 @@ val sharedModule = module {
     singleOf(::GetAllEventsUseCase)
     factoryOf(::GetSettingsUseCase)
     factoryOf(::SaveSettingsUseCase)
-    factoryOf(::DidSeeSwipeTooltipUseCase)
     factoryOf(::ScheduleNotificationUseCase)
     factoryOf(::ShowPaywallOncePerDayUseCase)
     factoryOf(::SavePaywallTimestampUseCase)
