@@ -9,7 +9,7 @@ import kotlinx.datetime.plus
 
 data class AgendaMonthYear(val agendaYear: AgendaYear, val agendaMonth: AgendaMonth) {
 
-    val daysInMonth: Int
+    val daysInMonth: Long
         get() {
             val firstDayOfMonth = LocalDate(agendaYear.year, agendaMonth.number, 1)
             val firstDayOfNextMonth = firstDayOfMonth.plus(DatePeriod(months = 1))
@@ -18,7 +18,7 @@ data class AgendaMonthYear(val agendaYear: AgendaYear, val agendaMonth: AgendaMo
             return daysInMonth
         }
 
-    private val epochRange: Pair<Int, Int>
+    private val epochRange: Pair<Long, Long>
         get() {
             val firstDayOfMonth = LocalDate(agendaYear.year, agendaMonth.number, 1)
             val firstEpochDay = firstDayOfMonth.toEpochDays()
@@ -32,9 +32,9 @@ data class AgendaMonthYear(val agendaYear: AgendaYear, val agendaMonth: AgendaMo
             return Pair(firstEpochDay, lastEpochDay)
         }
 
-    fun isEpochDayInRange(epochDay: Int): Boolean {
+    fun isEpochDayInRange(epochDay: Long): Boolean {
         val range = epochRange
-        return IntRange(range.first, range.second).contains(epochDay)
+        return LongRange(range.first, range.second).contains(epochDay)
     }
 
     val startDayOfMonth: Int

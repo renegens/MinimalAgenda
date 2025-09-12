@@ -11,7 +11,7 @@ data class EventEntity(
     val endTime: Long?,
     val allDay: Boolean?,
     val isRecurring: Boolean?,
-    var epochDay: Int,
+    var epochDay: Long,
     val startLocalDateTime: LocalDateTime,
     val endLocalDateTime: LocalDateTime,
     val isMultiDay: Boolean,

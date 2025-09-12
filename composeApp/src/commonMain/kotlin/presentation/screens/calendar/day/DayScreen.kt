@@ -50,7 +50,7 @@ fun DayScreen(
     items: List<DayListViewType>,
     appThemeMode: AppThemeMode,
     onNowClicked: Boolean,
-    scrollToDay: Int,
+    scrollToDay: Long,
     currentDate: LocalDate,
     showAll: Boolean,
     scrollToNow: Boolean,
@@ -73,7 +73,7 @@ fun DayScreen(
 
     LaunchedEffect(scrollToDay) {
         if (scrollToDay > 0) {
-            val index = items.findIndexOf(scrollToDay)
+            val index = items.findIndexOf(scrollToDay.toLong())
             listState.scrollToItem(index)
         }
     }
@@ -86,7 +86,7 @@ fun DayScreen(
 
     var selectedItem by remember { mutableStateOf<AgendaEvent?>(null) }
     val hapticFeedback = LocalHapticFeedback.current
-    val eventsByEpochDay: Map<Int, List<DayListViewType.Event>> =
+    val eventsByEpochDay: Map<Long, List<DayListViewType.Event>> =
         items.filterIsInstance<DayListViewType.Event>().groupBy { it.event.epochDay!! }
 
     ScrollablePaperBackground(appThemeMode, listState) {
@@ -146,8 +146,8 @@ fun DayScreen(
 
 @Composable
 fun EmptyDay(
-    eventsByEpochDay: Map<Int, List<DayListViewType.Event>>,
-    epochDay: Int,
+    eventsByEpochDay: Map<Long, List<DayListViewType.Event>>,
+    epochDay: Long,
     showAll: Boolean
 ) {
     if (eventsByEpochDay[epochDay] == null) {
@@ -289,7 +289,7 @@ fun Time(agendaEvent: AgendaEvent, textColor: Color) {
     }
 }
 
-private fun List<DayListViewType>.findIndexOf(epochDay: Int): Int {
+private fun List<DayListViewType>.findIndexOf(epochDay: Long): Int {
     return indexOfFirst {
         (it is DayListViewType.Header) && it.agendaDay.epochDay == epochDay
     }

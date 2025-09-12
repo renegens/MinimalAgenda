@@ -65,7 +65,7 @@ fun CalendarScreen(
     var isScrolledToMonth by remember { mutableStateOf(true) }
     var isScrolledToYear by remember { mutableStateOf(true) }
 
-    var dayScrollPosition by remember { mutableStateOf(-1) }
+    var dayScrollPosition by remember { mutableStateOf(-1L) }
     var yearScrollPosition by remember { mutableStateOf(-1) }
     var monthScrollPosition by remember { mutableStateOf<AgendaMonthYear?>(null) }
 

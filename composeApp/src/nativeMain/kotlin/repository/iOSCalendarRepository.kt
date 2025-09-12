@@ -24,8 +24,10 @@ import platform.Foundation.timeIntervalSince1970
 import platform.toEKEventDate
 import platform.uses24HourClock
 import kotlin.coroutines.resume
+import kotlin.time.ExperimentalTime
 
 @Suppress("ClassName")
+@OptIn(ExperimentalTime::class)
 class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
     private val eventStore = eventKit.eventStore
@@ -203,7 +205,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         }
     }
 
-    private fun isMultiDay(startEpochDay: Int, end: LocalDate): Boolean {
+    private fun isMultiDay(startEpochDay: Long, end: LocalDate): Boolean {
         return startEpochDay != end.toEpochDays()
     }
 }

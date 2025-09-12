@@ -28,6 +28,8 @@ kotlin {
         iosTarget.binaries.framework {
             baseName = "ComposeApp"
             isStatic = true
+            freeCompilerArgs += "-Xbinary=bundleId=eu.giant.agenda.MinimalAgenda"
+
         }
     }
 
@@ -36,6 +38,7 @@ kotlin {
         named { it.lowercase().startsWith("ios") }.configureEach {
             languageSettings {
                 optIn("kotlinx.cinterop.ExperimentalForeignApi")
+                optIn("kotlin.time.ExperimentalTime")
             }
         }
 
@@ -66,8 +69,9 @@ kotlin {
             implementation(libs.koin.compose.viewmodel)
             implementation(libs.purchases.core)
             implementation(libs.purchases.ui)
-            implementation(libs.cupertino.theme)
-            implementation(libs.cupertino.theme.icons)
+            implementation(libs.cupertino)
+            implementation(libs.cupertino.native)
+            implementation(libs.cupertino.icons.extended)
         }
     }
 }

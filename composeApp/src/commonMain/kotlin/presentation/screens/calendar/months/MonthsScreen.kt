@@ -28,7 +28,7 @@ fun MonthsScreen(
     onNowClicked: Boolean,
     scrollToMonth: AgendaMonthYear?,
     showAll: Boolean,
-    onDayClicked: (Int) -> Unit,
+    onDayClicked: (Long) -> Unit,
     onYearClicked: (AgendaYear) -> Unit
 ) {
     if (days.isEmpty()) return
