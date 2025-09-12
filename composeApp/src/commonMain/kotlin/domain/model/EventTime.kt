@@ -1,10 +1,11 @@
 package domain.model
 
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
 data class EventTime(
     private val startTimestampInMillis: Long,
@@ -31,6 +32,7 @@ data class EventTime(
         )
     }
 
+    @OptIn(ExperimentalTime::class)
     private fun getLocalDateTime(timestamp: Long, hours: Int, minutes: Int): LocalDateTime {
         val instant = Instant.fromEpochMilliseconds(timestamp)
             .toLocalDateTime(TimeZone.currentSystemDefault())

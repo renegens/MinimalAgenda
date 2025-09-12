@@ -59,7 +59,7 @@ kotlin {
             implementation(compose.materialIconsExtended)
 
             implementation(libs.kotlinx.datetime)
-            implementation(libs.androidx.lifecycle.viewmodel)
+           // implementation(libs.lifecycle.viewmodel)
             implementation(libs.kotlinx.serialization.json)
             implementation(libs.navigation.compose)
             api(libs.androidx.datastore)

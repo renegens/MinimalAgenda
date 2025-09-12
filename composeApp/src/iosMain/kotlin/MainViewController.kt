@@ -10,13 +10,5 @@ fun MainViewController() = ComposeUIViewController(
         initKoin()
     }
 ) {
-    //App()
-    CalendarScreen(
-        appThemeMode = AppTheme.Default.appThemeMode,
-        onAddEvent = {},
-        onEditEvent = {},
-        notEligible = {},
-        onOpenDeviceSettings = {},
-        forceEventLoad = 1
-    )
+    App()
 }
