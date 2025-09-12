@@ -31,7 +31,6 @@ import presentation.theme.AppTheme
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun App() {
-    KoinContext {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
         var showPaywall by remember { mutableStateOf(false) }
@@ -118,7 +117,7 @@ fun App() {
                 Paywall(options = options)
             }
         }
-    }
+
 }
 
 @Preview
