@@ -8,12 +8,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import getPlatform
-import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
-import io.github.alexzhirkevich.cupertino.CupertinoText
-import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.default
-import io.github.alexzhirkevich.cupertino.destructive
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import com.slapps.cupertino.CupertinoAlertDialog
+import com.slapps.cupertino.CupertinoText
+import com.slapps.cupertino.ExperimentalCupertinoApi
+import com.slapps.cupertino.default
+import com.slapps.cupertino.destructive
+import com.slapps.cupertino.theme.CupertinoTheme
 import presentation.theme.DMSans18Regular
 
 @OptIn(ExperimentalCupertinoApi::class)

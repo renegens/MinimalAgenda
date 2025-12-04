@@ -19,18 +19,18 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
-import io.github.alexzhirkevich.cupertino.CupertinoIcon
-import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.MenuAction
-import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
-import io.github.alexzhirkevich.cupertino.icons.outlined.Clock
-import io.github.alexzhirkevich.cupertino.icons.outlined.Ellipsis
-import io.github.alexzhirkevich.cupertino.icons.outlined.Eye
-import io.github.alexzhirkevich.cupertino.icons.outlined.EyeSlash
-import io.github.alexzhirkevich.cupertino.icons.outlined.Gear
-import io.github.alexzhirkevich.cupertino.icons.outlined.Plus
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import com.slapps.cupertino.CupertinoDropdownMenu
+import com.slapps.cupertino.CupertinoIcon
+import com.slapps.cupertino.MenuAction
+import com.slapps.cupertino.icons.CupertinoIcons
+import com.slapps.cupertino.icons.outlined.Clock
+import com.slapps.cupertino.icons.outlined.Ellipsis
+import com.slapps.cupertino.icons.outlined.Eye
+import com.slapps.cupertino.icons.outlined.EyeSlash
+import com.slapps.cupertino.icons.outlined.Gear
+import com.slapps.cupertino.icons.outlined.Plus
+import com.slapps.cupertino.theme.CupertinoTheme
+
 
 @Composable
 fun SimpleTransparentToolbar(
@@ -79,7 +79,6 @@ fun SimpleTransparentToolbar(
     }
 }
 
-@OptIn(ExperimentalCupertinoApi::class)
 @Composable
 fun CalendarToolbarMenu(
     isVisible: Boolean,

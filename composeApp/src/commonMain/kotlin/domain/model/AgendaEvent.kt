@@ -15,7 +15,7 @@ data class AgendaEvent(
     val startTimeInUTC: Long,
     val endTimeInUTC: Long? = null,
     val allDay: Boolean,
-    var epochDay: Int?,
+    var epochDay: Long?,
     var isRecurring: Boolean = false,
     var isHidden: Boolean,
     val startLocalDateTime: LocalDateTime,
@@ -67,17 +67,7 @@ data class AgendaEvent(
         }
     }
 
-    fun getHoursAndMinutes(): Pair<Int, Int> {
-        val date = Instant.fromEpochSeconds(startTimeInUTC)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-        return date.hour to date.minute
-    }
-
-    fun getDuration(): Int {
-        return (endTimeInUTC?.minus(startTimeInUTC))?.div(60)?.toInt() ?: 60
-    }
-
-    fun hasPassedForToday(today: Int): Boolean {
+    fun hasPassedForToday(today: Long): Boolean {
         if (takingScreenshots) return false
         if (epochDay != today) return false
         return endLocalDateTime < currentLocalDateTime

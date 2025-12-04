@@ -17,9 +17,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
-import io.github.alexzhirkevich.cupertino.icons.filled.LockCircle
-import io.github.alexzhirkevich.cupertino.icons.outlined.CalendarBadgePlus
+import com.slapps.cupertino.icons.CupertinoIcons
+import com.slapps.cupertino.icons.filled.LockCircle
+import com.slapps.cupertino.icons.outlined.CalendarBadgePlus
 import platform.CalendarPermissionHandler
 import presentation.components.BodyText
 import presentation.components.ButtonWholeWidth

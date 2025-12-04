@@ -38,7 +38,7 @@ class GetAllEventsUseCase(
                 val daysInSpan = event.startLocalDateTime.date.toEpochDays()..event.endLocalDateTime.date.toEpochDays()
 
                 daysInSpan.forEachIndexed { index, day ->
-                    val isLastDay = (index == daysInSpan.last - daysInSpan.first) // Check if it's the last day
+                    val isLastDay = (index.toLong() == daysInSpan.last - daysInSpan.first) // Check if it's the last day
                     val isIntermediateDay = index > 0 && !isLastDay // Any day after the start but before the last
 
                     val dailyEvent = when {

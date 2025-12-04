@@ -12,16 +12,16 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import domain.model.AgendaEvent
-import io.github.alexzhirkevich.cupertino.CupertinoDropdownMenu
-import io.github.alexzhirkevich.cupertino.CupertinoIcon
-import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.MenuAction
-import io.github.alexzhirkevich.cupertino.icons.CupertinoIcons
-import io.github.alexzhirkevich.cupertino.icons.outlined.Bell
-import io.github.alexzhirkevich.cupertino.icons.outlined.Eye
-import io.github.alexzhirkevich.cupertino.icons.outlined.EyeSlash
-import io.github.alexzhirkevich.cupertino.icons.outlined.Pencil
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import com.slapps.cupertino.CupertinoDropdownMenu
+import com.slapps.cupertino.CupertinoIcon
+import com.slapps.cupertino.ExperimentalCupertinoApi
+import com.slapps.cupertino.MenuAction
+import com.slapps.cupertino.icons.CupertinoIcons
+import com.slapps.cupertino.icons.outlined.Bell
+import com.slapps.cupertino.icons.outlined.Eye
+import com.slapps.cupertino.icons.outlined.EyeSlash
+import com.slapps.cupertino.icons.outlined.Pencil
+import com.slapps.cupertino.theme.CupertinoTheme
 import presentation.theme.DMSans18Medium
 
 @OptIn(ExperimentalCupertinoApi::class)

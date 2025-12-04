@@ -7,6 +7,7 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atTime
 import kotlinx.datetime.toInstant
 import platform.uses24HourClock
+import kotlin.time.ExperimentalTime
 
 fun generateOnboardingDemoEvents(): List<Pair<FormattedTime, String>> {
     return if (uses24HourClock()) {
@@ -32,6 +33,7 @@ fun generateOnboardingDemoEvents(): List<Pair<FormattedTime, String>> {
     }
 }
 
+@OptIn(ExperimentalTime::class)
 fun generateDemoAgendaEvents(): List<AgendaEvent> {
     val uses24HourClock = uses24HourClock()
     val today = today

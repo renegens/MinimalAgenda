@@ -33,7 +33,7 @@ fun YearsScreen(
     events: List<AgendaEvent>,
     currentDate: LocalDate,
     showAll: Boolean,
-    onNowClicked: Boolean,
+    onNowClicked: Int,
     scrollToYear: Int,
     onMonthClicked: (AgendaMonthYear) -> Unit
 ) {

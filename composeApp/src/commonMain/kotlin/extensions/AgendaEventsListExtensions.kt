@@ -5,15 +5,15 @@ import domain.model.AgendaMonth
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
 
-private fun List<AgendaEvent>.hasEventsForDay(epochDay: Int): Boolean {
+private fun List<AgendaEvent>.hasEventsForDay(epochDay: Long): Boolean {
     return this.any { it.epochDay!! == epochDay }
 }
 
-private fun List<AgendaEvent>.hasHiddenEventsForDay(epochDay: Int): Boolean {
+private fun List<AgendaEvent>.hasHiddenEventsForDay(epochDay: Long): Boolean {
     return this.filter { it.epochDay == epochDay }.any { it.isHidden.not() }
 }
 
-fun List<AgendaEvent>.hasEvents(epochDay: Int, showAll: Boolean): Boolean {
+fun List<AgendaEvent>.hasEvents(epochDay: Long, showAll: Boolean): Boolean {
     return if (showAll) {
         this.hasEventsForDay(epochDay)
     } else {
@@ -38,7 +38,7 @@ fun List<AgendaEvent>.getInRangeOf(
     return this.filter { event -> agendaMonthYear.isEpochDayInRange(event.epochDay!!) }
 }
 
-fun List<AgendaEvent>.today(epochDay: Int): List<AgendaEvent>{
+fun List<AgendaEvent>.today(epochDay: Long): List<AgendaEvent>{
     return this.filter { it.epochDay == epochDay }
 }
 
