@@ -25,7 +25,7 @@ fun MonthsScreen(
     days: List<AgendaDay>,
     events: List<AgendaEvent>,
     currentDate: LocalDate,
-    onNowClicked: Boolean,
+    onNowClicked: Int,
     scrollToMonth: AgendaMonthYear?,
     showAll: Boolean,
     onDayClicked: (Long) -> Unit,

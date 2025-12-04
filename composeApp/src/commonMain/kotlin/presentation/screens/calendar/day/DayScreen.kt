@@ -49,7 +49,7 @@ import presentation.theme.DMSans18Medium
 fun DayScreen(
     items: List<DayListViewType>,
     appThemeMode: AppThemeMode,
-    onNowClicked: Boolean,
+    onNowClicked: Int,
     scrollToDay: Long,
     currentDate: LocalDate,
     showAll: Boolean,

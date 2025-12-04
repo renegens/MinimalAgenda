@@ -61,9 +61,9 @@ fun CalendarScreen(
     )
     val scope = rememberCoroutineScope()
 
-    var isScrolledToToday by remember { mutableStateOf(true) }
-    var isScrolledToMonth by remember { mutableStateOf(true) }
-    var isScrolledToYear by remember { mutableStateOf(true) }
+    var scrollToTodayTrigger by remember { mutableStateOf(0) }
+    var scrollToMonthTrigger by remember { mutableStateOf(0) }
+    var scrollToYearTrigger by remember { mutableStateOf(0) }
 
     var dayScrollPosition by remember { mutableStateOf(-1L) }
     var yearScrollPosition by remember { mutableStateOf(-1) }
@@ -84,9 +84,9 @@ fun CalendarScreen(
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
             when (it) {
-                Effect.ScrollDayToToday -> isScrolledToToday = !isScrolledToToday
-                Effect.ScrollMonthToToday -> isScrolledToMonth = !isScrolledToMonth
-                Effect.ScrollYearToToday -> isScrolledToYear = !isScrolledToYear
+                Effect.ScrollDayToToday -> scrollToTodayTrigger++
+                Effect.ScrollMonthToToday -> scrollToMonthTrigger++
+                Effect.ScrollYearToToday -> scrollToYearTrigger++
                 is Effect.GoToDay -> {
                     pagerState.animateScrollToPage(page = Section.Day.position)
                     dayScrollPosition = it.epochDay
@@ -235,7 +235,7 @@ fun CalendarScreen(
                             items = state.flatDaysAndEvents,
                             currentDate = state.currentDate,
                             scrollToNow = state.scrollToNow,
-                            onNowClicked = isScrolledToToday,
+                            onNowClicked = scrollToTodayTrigger,
                             scrollToDay = dayScrollPosition,
                             showAll = state.showAll,
                             onNotify = { viewModel.setEvent(Event.Notify(it)) },
@@ -248,7 +248,7 @@ fun CalendarScreen(
                             days = state.days,
                             events = state.agendaEvents,
                             currentDate = state.currentDate,
-                            onNowClicked = isScrolledToMonth,
+                            onNowClicked = scrollToMonthTrigger,
                             scrollToMonth = monthScrollPosition,
                             showAll = state.showAll,
                             onDayClicked = {
@@ -265,7 +265,7 @@ fun CalendarScreen(
                             showAll = state.showAll,
                             currentDate = state.currentDate,
                             onMonthClicked = { viewModel.setEvent(Event.OnMonthClicked(it)) },
-                            onNowClicked = isScrolledToYear,
+                            onNowClicked = scrollToYearTrigger,
                             scrollToYear = yearScrollPosition
                         )
                     }
