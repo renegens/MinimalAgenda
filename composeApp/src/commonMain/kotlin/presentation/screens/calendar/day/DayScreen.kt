@@ -140,6 +140,7 @@ fun DayScreen(
                             onDetails = {
                                 selectedEventForDetails = it
                                 showDetailsBottomSheet = true
+                                scope.launch { detailsSheetState.show() }
                             },
                             onOpenSettings = onOpenSettings,
                             selectedItem = selectedItem,
@@ -164,30 +165,30 @@ fun DayScreen(
     }
     
     // Event details bottom sheet
-    if (showDetailsBottomSheet && selectedEventForDetails != null) {
-        ModalBottomSheet(
-            containerColor = MaterialTheme.colorScheme.surface,
-            onDismissRequest = {
-                scope.launch { detailsSheetState.hide() }.invokeOnCompletion {
-                    if (!detailsSheetState.isVisible) {
-                        showDetailsBottomSheet = false
-                        selectedEventForDetails = null
-                    }
-                }
-            },
-            sheetState = detailsSheetState
-        ) {
-            EventDetailsBottomSheet(
-                event = selectedEventForDetails!!,
-                onDismiss = {
+    if (showDetailsBottomSheet) {
+        selectedEventForDetails?.let { event ->
+            ModalBottomSheet(
+                containerColor = MaterialTheme.colorScheme.surface,
+                onDismissRequest = {
                     scope.launch { detailsSheetState.hide() }.invokeOnCompletion {
                         if (!detailsSheetState.isVisible) {
                             showDetailsBottomSheet = false
-                            selectedEventForDetails = null
                         }
                     }
-                }
-            )
+                },
+                sheetState = detailsSheetState
+            ) {
+                EventDetailsBottomSheet(
+                    event = event,
+                    onDismiss = {
+                        scope.launch { detailsSheetState.hide() }.invokeOnCompletion {
+                            if (!detailsSheetState.isVisible) {
+                                showDetailsBottomSheet = false
+                            }
+                        }
+                    }
+                )
+            }
         }
     }
 }

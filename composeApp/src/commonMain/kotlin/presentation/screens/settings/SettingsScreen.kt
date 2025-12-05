@@ -1,29 +1,12 @@
 package presentation.screens.settings
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
-import androidx.compose.material3.HorizontalDivider
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.*
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
@@ -37,19 +20,13 @@ import presentation.components.AppAlertDialog
 import presentation.components.noRippleClickable
 import presentation.screens.settings.SettingsContract.Effect
 import presentation.screens.settings.SettingsContract.Event
-import presentation.screens.settings.components.ColorSelection
-import presentation.screens.settings.components.ItemBody
-import presentation.screens.settings.components.ItemHeadline
-import presentation.screens.settings.components.ItemTitle
-import presentation.screens.settings.components.ModeSelection
-import presentation.screens.settings.components.NotificationTimeInput
-import presentation.screens.settings.components.SwitchSettingItem
+import presentation.screens.settings.components.*
 import presentation.theme.iosBody
 import presentation.theme.iosExtraLargeTitle
 
 @Composable
 fun SettingsScreen(
-    notEligible: () -> Unit, 
+    notEligible: () -> Unit,
     onDismiss: () -> Unit = {},
     onOpenDeviceSettings: () -> Unit = {}
 ) {
@@ -65,77 +42,76 @@ fun SettingsScreen(
                     focusManager.clearFocus()
                     notEligible.invoke()
                 }
-                Effect.Dismiss -> {
-                    onDismiss.invoke()
-                }
-                Effect.OpenDeviceSettings -> {
-                    onOpenDeviceSettings.invoke()
-                }
+                Effect.Dismiss -> onDismiss.invoke()
+                Effect.OpenDeviceSettings -> onOpenDeviceSettings.invoke()
             }
         }
     }
-    
-    // Refresh permission state when screen becomes visible
+
     LaunchedEffect(Unit) {
         viewModel.refreshPermissionState()
     }
 
     Column(
-        modifier = Modifier.fillMaxSize()
+        modifier = Modifier
+            .fillMaxSize()
             .verticalScroll(state = rememberScrollState())
     ) {
 
-            Row(
-                modifier = Modifier.padding(horizontal = 16.dp).fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+        Row(
+            modifier = Modifier
+                .padding(horizontal = 16.dp)
+                .fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                style = iosExtraLargeTitle,
+                text = "Settings",
+                color = MaterialTheme.colorScheme.tertiary,
+            )
+            IconButton(
+                onClick = { viewModel.setEvent(Event.OnDismiss) }
             ) {
-                Text(
-                    style = iosExtraLargeTitle,
-                    text = "Settings",
-                    color = MaterialTheme.colorScheme.tertiary,
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = "Close",
+                    tint = MaterialTheme.colorScheme.tertiary
                 )
-                IconButton(
-                    onClick = { viewModel.setEvent(Event.OnDismiss) }
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Clear,
-                        contentDescription = "Close settings",
-                        tint = MaterialTheme.colorScheme.tertiary
-                    )
-                }
             }
-            Spacer(modifier = Modifier.height(24.dp))
-
-        if (state.isLoading) {
-            return
         }
+        Spacer(modifier = Modifier.height(24.dp))
 
-        // Calendar Permission Status
-        SettingsItem() {
-            ItemTitle("Calendar Access")
+        if (state.isLoading) return
+
+        // --- SECTION 1: CALENDAR CONNECTION ---
+        SettingsItem {
+            ItemTitle("Calendar Connection")
             Spacer(modifier = Modifier.height(8.dp))
             when (state.calendarPermission) {
                 CalendarPermissionHandler.State.FullAccess -> {
-                    ItemBody("Calendar access is enabled. Your events are synced.")
+                    // Changed "Synced" to "Connected" to sound more local/offline
+                    ItemBody("✓ Access enabled. Your local events are visible.")
                 }
                 CalendarPermissionHandler.State.NotDetermined -> {
-                    ItemBody("Grant calendar access to import your events.")
+                    ItemBody("Connect your calendar to start planning with real data.")
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "Request Access",
-                        Modifier.padding(top = 8.dp, end = 8.dp, bottom = 8.dp)
+                        "Allow Access", // Stronger CTA
+                        Modifier
+                            .padding(vertical = 8.dp)
                             .noRippleClickable { viewModel.setEvent(Event.OnRequestCalendarPermission) },
                         style = iosBody,
                         color = MaterialTheme.colorScheme.primary
                     )
                 }
                 CalendarPermissionHandler.State.Denied -> {
-                    ItemBody("Calendar access is denied. Please enable it in Settings to import your events.")
+                    ItemBody("Access denied. Enable permissions in Settings to import events.")
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(
-                        "Open Settings",
-                        Modifier.padding(top = 8.dp, end = 8.dp, bottom = 8.dp)
+                        "Open Device Settings",
+                        Modifier
+                            .padding(vertical = 8.dp)
                             .noRippleClickable { viewModel.setEvent(Event.OnOpenDeviceSettings) },
                         style = iosBody,
                         color = MaterialTheme.colorScheme.primary
@@ -144,94 +120,99 @@ fun SettingsScreen(
             }
         }
 
-        SettingsItem() {
-            SwitchSettingItem(title = "Private Notifications",
+        // --- SECTION 2: PREFERENCES ---
+        SettingsItem {
+            SwitchSettingItem(
+                title = "Discreet Notifications", // Better than "Private Notifications"
                 isChecked = state.privateNotifications,
-                onCheckedChange = { viewModel.setEvent(Event.OnTogglePrivateNotifications(it)) })
-            ItemBody(
-                "When enabled, notifications will use a generic title (Premium feature)",
+                onCheckedChange = { viewModel.setEvent(Event.OnTogglePrivateNotifications(it)) }
             )
+            // Focus on the benefit (Privacy) rather than the mechanism (Generic title)
+            ItemBody("Hide event names on your lock screen for total privacy. (Premium)")
         }
 
-        SettingsItem() {
-            SwitchSettingItem(title = "Hide Bottom Navigation",
+        SettingsItem {
+            SwitchSettingItem(
+                title = "Immersive Mode", // Sounds cooler than "Hide Bottom Nav"
                 isChecked = state.hideBottomNavigation,
-                onCheckedChange = { viewModel.setEvent(Event.OnToggleHideBottomNavigation(it)) })
-            ItemBody(
-                "When enabled, the bottom navigation bar will be hidden to maximize your viewing area",
+                onCheckedChange = { viewModel.setEvent(Event.OnToggleHideBottomNavigation(it)) }
             )
+            ItemBody("Hide the navigation bar to maximize your screen space.")
         }
 
-        SettingsItem() {
+        SettingsItem {
             NotificationTimeInput(
                 focusRequester = focusRequester,
                 time = state.notificationTime,
-                onTimeEntered = {
-                    viewModel.setEvent(Event.OnNotificationTimeEntered(it))
-                })
+                onTimeEntered = { viewModel.setEvent(Event.OnNotificationTimeEntered(it)) }
+            )
         }
 
-        SettingsItem() {
-            ItemTitle("Select your preferred mode")
+        // --- SECTION 3: APPEARANCE ---
+        SettingsItem {
+            ItemTitle("Appearance") // Standard OS terminology
             Spacer(modifier = Modifier.height(4.dp))
             ModeSelection(
                 selectedTheme = state.appThemeMode
             ) { viewModel.setEvent(Event.OnModeSelected(it)) }
         }
 
-        SettingsItem() {
-            ItemTitle("Choose Your Color")
+        SettingsItem {
+            ItemTitle("Accent Color")
             Spacer(modifier = Modifier.height(4.dp))
-            ItemBody("Customize colors to match your style (Premium feature)")
+            ItemBody("Personalize the app to match your style. (Premium)")
             Spacer(modifier = Modifier.height(16.dp))
             ColorSelection(state.appColor) { viewModel.setEvent(Event.OnColorSelected(it)) }
         }
 
+        // --- SECTION 4: PRIVACY PROMISE (Condensed) ---
         SettingsItem(showDivider = true) {
-            ItemTitle("What happens with your data")
+            ItemTitle("Privacy & Security")
             Spacer(modifier = Modifier.height(16.dp))
-            ItemHeadline("Accessing Existing Calendars")
-            Spacer(modifier = Modifier.height(8.dp))
-            ItemBody("The app will only access the calendar data already stored on your device. This includes events from any calendars synced to your device, such as iCloud, Google, or Outlook calendars")
+
+            // Used Headline/Body pairs to make it scannable, removed the "wall of text"
+            ItemHeadline("100% Offline")
+            ItemBody("We process your calendar data directly on your device. Nothing is ever uploaded to a server.")
+
             Spacer(modifier = Modifier.height(12.dp))
-            ItemHeadline("Data Stays on Your Device")
-            Spacer(modifier = Modifier.height(8.dp))
-            ItemBody("Your calendar data is not sent or uploaded anywhere. It remains securely stored on your device, and the app only reads the data to display your events. No external servers or third parties have access to this information")
-            Spacer(modifier = Modifier.height(12.dp))
-            ItemHeadline("Privacy Assurance")
-            Spacer(modifier = Modifier.height(8.dp))
-            ItemBody("The app can't share your calendar data. It only uses the existing events to provide functionality directly on your device")
+            ItemHeadline("No Tracking")
+            ItemBody("We do not collect, share, or sell your personal information to third parties.")
         }
 
-        SettingsItem() {
+        // --- SECTION 5: FEEDBACK ---
+        SettingsItem {
             var showEmailError by remember { mutableStateOf(false) }
             if (showEmailError) {
                 AppAlertDialog(
-                    title = "Mail Error",
-                    message = "Mail services are not available",
-                    onContinueRequest = { showEmailError = false })
+                    title = "Mail Unavailable",
+                    message = "Please configure a mail account on your device to send feedback.",
+                    onContinueRequest = { showEmailError = false }
+                )
             }
-            ItemTitle("Help us improve by sharing your feedback – we'd love to hear from you")
+            ItemTitle("Support")
+            Spacer(modifier = Modifier.height(8.dp))
+            ItemBody("Have a suggestion or found a bug? We'd love to help.")
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                "Send Feedback",
-                Modifier.padding(top = 8.dp, end = 8.dp, bottom = 8.dp)
+                "Contact Support",
+                Modifier
+                    .padding(vertical = 8.dp)
                     .noRippleClickable { sendEmail { showEmailError = true } },
                 style = iosBody,
                 color = MaterialTheme.colorScheme.primary
             )
         }
 
+        // --- SECTION 6: IOS FOCUS MODES ---
         SettingsItem(showDivider = false) {
-            ItemTitle("Don't Miss Important Notifications")
+            ItemTitle("iOS Focus Mode Setup")
             Spacer(modifier = Modifier.height(16.dp))
-            ItemBody("Open your Settings on iOS")
-            Spacer(modifier = Modifier.height(4.dp))
-            ItemBody("Go to Focus")
-            Spacer(modifier = Modifier.height(4.dp))
-            ItemBody("Select the specific mode (e.g. Work, Do Not Disturb)")
-            Spacer(modifier = Modifier.height(4.dp))
-            ItemBody("Under Allowed Notifications, add this app to ensure you receive important alerts")
+            ItemBody("Ensure you receive alerts even when Do Not Disturb is on:")
+            Spacer(modifier = Modifier.height(12.dp))
+            // Bullet points for clearer instructions
+            ItemBody("1. Open iOS Settings > Focus")
+            ItemBody("2. Select a mode (e.g., Work)")
+            ItemBody("3. Add this app to 'Allowed Notifications'")
         }
         Spacer(modifier = Modifier.height(64.dp))
     }
@@ -242,16 +223,14 @@ private fun SettingsItem(
     showDivider: Boolean = true,
     content: @Composable () -> Unit
 ) {
-
-        Column {
-            Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                content.invoke()
-            }
-            Spacer(modifier = Modifier.height(32.dp))
-            if (showDivider) {
-                HorizontalDivider()
-                Spacer(modifier = Modifier.height(32.dp))
-            }
+    Column {
+        Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+            content.invoke()
         }
-
+        Spacer(modifier = Modifier.height(32.dp))
+        if (showDivider) {
+            HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp)) // Added padding to divider for better look
+            Spacer(modifier = Modifier.height(32.dp))
+        }
+    }
 }
