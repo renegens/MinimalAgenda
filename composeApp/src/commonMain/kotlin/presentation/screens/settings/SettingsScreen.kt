@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
+import platform.CalendarPermissionHandler
 import platform.sendEmail
 import presentation.components.AppAlertDialog
 import presentation.components.noRippleClickable
@@ -47,7 +48,11 @@ import presentation.theme.iosBody
 import presentation.theme.iosExtraLargeTitle
 
 @Composable
-fun SettingsScreen(notEligible: () -> Unit, onDismiss: () -> Unit = {}) {
+fun SettingsScreen(
+    notEligible: () -> Unit, 
+    onDismiss: () -> Unit = {},
+    onOpenDeviceSettings: () -> Unit = {}
+) {
     val viewModel: SettingsViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
     val focusManager = LocalFocusManager.current
@@ -63,8 +68,16 @@ fun SettingsScreen(notEligible: () -> Unit, onDismiss: () -> Unit = {}) {
                 Effect.Dismiss -> {
                     onDismiss.invoke()
                 }
+                Effect.OpenDeviceSettings -> {
+                    onOpenDeviceSettings.invoke()
+                }
             }
         }
+    }
+    
+    // Refresh permission state when screen becomes visible
+    LaunchedEffect(Unit) {
+        viewModel.refreshPermissionState()
     }
 
     Column(
@@ -96,6 +109,39 @@ fun SettingsScreen(notEligible: () -> Unit, onDismiss: () -> Unit = {}) {
 
         if (state.isLoading) {
             return
+        }
+
+        // Calendar Permission Status
+        SettingsItem() {
+            ItemTitle("Calendar Access")
+            Spacer(modifier = Modifier.height(8.dp))
+            when (state.calendarPermission) {
+                CalendarPermissionHandler.State.FullAccess -> {
+                    ItemBody("Calendar access is enabled. Your events are synced.")
+                }
+                CalendarPermissionHandler.State.NotDetermined -> {
+                    ItemBody("Grant calendar access to import your events.")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Request Access",
+                        Modifier.padding(top = 8.dp, end = 8.dp, bottom = 8.dp)
+                            .noRippleClickable { viewModel.setEvent(Event.OnRequestCalendarPermission) },
+                        style = iosBody,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+                CalendarPermissionHandler.State.Denied -> {
+                    ItemBody("Calendar access is denied. Please enable it in Settings to import your events.")
+                    Spacer(modifier = Modifier.height(16.dp))
+                    Text(
+                        "Open Settings",
+                        Modifier.padding(top = 8.dp, end = 8.dp, bottom = 8.dp)
+                            .noRippleClickable { viewModel.setEvent(Event.OnOpenDeviceSettings) },
+                        style = iosBody,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
 
         SettingsItem() {

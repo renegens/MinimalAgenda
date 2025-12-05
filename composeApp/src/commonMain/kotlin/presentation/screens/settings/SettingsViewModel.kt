@@ -9,6 +9,7 @@ import domain.use_case.SaveSettingsUseCase
 import extensions.guardPremium
 import kotlinx.coroutines.launch
 import platform.Browser
+import platform.CalendarPermissionHandler
 import presentation.base.BaseViewModel
 import presentation.screens.settings.SettingsContract.Effect
 import presentation.screens.settings.SettingsContract.Event
@@ -17,11 +18,15 @@ import presentation.screens.settings.SettingsContract.State
 class SettingsViewModel(
     private val browser: Browser,
     private val saveSettingsUseCase: SaveSettingsUseCase,
-    private val getSettingsUseCase: GetSettingsUseCase
+    private val getSettingsUseCase: GetSettingsUseCase,
+    private val permissionHandler: CalendarPermissionHandler
 ) : BaseViewModel<Event, State, Effect>() {
 
     init {
         setEvent(Event.Load)
+        // Load initial calendar permission state
+        val permissionState = permissionHandler.getPermissionState()
+        setState { copy(calendarPermission = permissionState) }
     }
 
     override fun createInitialState() = State()
@@ -48,6 +53,7 @@ class SettingsViewModel(
             Event.Load -> {
                 viewModelScope.launch {
                     val settings = getSettingsUseCase()
+                    val permissionState = permissionHandler.getPermissionState()
                     setState {
                         copy(
                             isLoading = false,
@@ -55,12 +61,27 @@ class SettingsViewModel(
                             appThemeMode = settings.appThemeMode,
                             privateNotifications = settings.privateNotifications,
                             notificationTime = settings.notificationTimeInMinutes,
-                            hideBottomNavigation = settings.hideBottomNavigation
+                            hideBottomNavigation = settings.hideBottomNavigation,
+                            calendarPermission = permissionState
                         )
                     }
                 }
             }
+            Event.OnRequestCalendarPermission -> {
+                viewModelScope.launch {
+                    val newState = permissionHandler.requestCalendarPermission()
+                    setState { copy(calendarPermission = newState) }
+                }
+            }
+            Event.OnOpenDeviceSettings -> {
+                setEffect { Effect.OpenDeviceSettings }
+            }
         }
+    }
+    
+    fun refreshPermissionState() {
+        val permissionState = permissionHandler.getPermissionState()
+        setState { copy(calendarPermission = permissionState) }
     }
 
     private fun setPrivateNotification(isChecked: Boolean) {

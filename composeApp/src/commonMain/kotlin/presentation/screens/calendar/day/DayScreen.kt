@@ -14,15 +14,20 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -37,6 +42,7 @@ import extensions.scrollToNowIfNeeded
 import extensions.today
 import kotlinx.datetime.LocalDate
 import presentation.components.DayHeader
+import presentation.components.EventDetailsBottomSheet
 import presentation.components.EventOptionsMenu
 import presentation.components.ScrollablePaperBackground
 import presentation.components.SectionDivider
@@ -45,6 +51,7 @@ import presentation.components.noRippleClickable
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayScreen(
     items: List<DayListViewType>,
@@ -57,6 +64,8 @@ fun DayScreen(
     onHide: (AgendaEvent) -> Unit,
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
+    onDetails: (AgendaEvent) -> Unit,
+    onOpenSettings: () -> Unit,
     isDemoMode: Boolean,
 ) {
     if (items.isEmpty()) return
@@ -88,6 +97,12 @@ fun DayScreen(
     val hapticFeedback = LocalHapticFeedback.current
     val eventsByEpochDay: Map<Long, List<DayListViewType.Event>> =
         items.filterIsInstance<DayListViewType.Event>().groupBy { it.event.epochDay!! }
+    
+    // Bottom sheet state for event details
+    val detailsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showDetailsBottomSheet by remember { mutableStateOf(false) }
+    var selectedEventForDetails by remember { mutableStateOf<AgendaEvent?>(null) }
+    val scope = rememberCoroutineScope()
 
     ScrollablePaperBackground(appThemeMode, listState) {
 
@@ -122,6 +137,11 @@ fun DayScreen(
                             onNotify = onNotify,
                             onHide = onHide,
                             onEdit = onEdit,
+                            onDetails = {
+                                selectedEventForDetails = it
+                                showDetailsBottomSheet = true
+                            },
+                            onOpenSettings = onOpenSettings,
                             selectedItem = selectedItem,
                             onItemSelected = {
                                 selectedItem = it
@@ -140,6 +160,34 @@ fun DayScreen(
                     }
                 }
             }
+        }
+    }
+    
+    // Event details bottom sheet
+    if (showDetailsBottomSheet && selectedEventForDetails != null) {
+        ModalBottomSheet(
+            containerColor = MaterialTheme.colorScheme.surface,
+            onDismissRequest = {
+                scope.launch { detailsSheetState.hide() }.invokeOnCompletion {
+                    if (!detailsSheetState.isVisible) {
+                        showDetailsBottomSheet = false
+                        selectedEventForDetails = null
+                    }
+                }
+            },
+            sheetState = detailsSheetState
+        ) {
+            EventDetailsBottomSheet(
+                event = selectedEventForDetails!!,
+                onDismiss = {
+                    scope.launch { detailsSheetState.hide() }.invokeOnCompletion {
+                        if (!detailsSheetState.isVisible) {
+                            showDetailsBottomSheet = false
+                            selectedEventForDetails = null
+                        }
+                    }
+                }
+            )
         }
     }
 }
@@ -173,6 +221,8 @@ fun Event(
     onNotify: (AgendaEvent) -> Unit,
     onHide: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
+    onDetails: (AgendaEvent) -> Unit,
+    onOpenSettings: () -> Unit,
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean,
@@ -189,10 +239,15 @@ fun Event(
         modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 28.dp).wrapContentHeight()
             .padding(horizontal = 16.dp).noRippleClickable {
                 hapticFeedback.addHapticFeedbackProminent()
-                if (selectedItem == event) {
-                    onItemSelected.invoke(null)
+                // Special handling for demo event with id "6" - open settings instead of menu
+                if (event.id == "6" && isDemoMode) {
+                    onOpenSettings()
                 } else {
-                    onItemSelected.invoke(event)
+                    if (selectedItem == event) {
+                        onItemSelected.invoke(null)
+                    } else {
+                        onItemSelected.invoke(event)
+                    }
                 }
             }
     ) {
@@ -223,6 +278,7 @@ fun Event(
             onNotify = onNotify,
             onHide = onHide,
             onEdit = onEdit,
+            onDetails = onDetails,
             selectedItem = selectedItem,
             hapticFeedback = hapticFeedback,
             onItemSelected = onItemSelected,

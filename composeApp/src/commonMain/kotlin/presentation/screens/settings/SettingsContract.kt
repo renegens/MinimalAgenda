@@ -2,6 +2,7 @@ package presentation.screens.settings
 
 import domain.model.AppColor
 import domain.model.AppThemeMode
+import platform.CalendarPermissionHandler
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
@@ -14,12 +15,14 @@ class SettingsContract {
         val appColor: AppColor = AppColor.Red,
         val privateNotifications: Boolean = true,
         val notificationTime: Int = 5,
-        val hideBottomNavigation: Boolean = false
+        val hideBottomNavigation: Boolean = false,
+        val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
     ) : UiState
 
     sealed class Effect : UiEffect {
         object NotEligible: Effect()
         object Dismiss: Effect()
+        object OpenDeviceSettings: Effect()
     }
 
     sealed class Event : UiEvent {
@@ -31,5 +34,7 @@ class SettingsContract {
         class OnColorSelected(val appColor: AppColor) : Event()
         object OnSentFeedback : Event()
         class OnNotificationTimeEntered(val time: Int) : Event()
+        object OnRequestCalendarPermission : Event()
+        object OnOpenDeviceSettings : Event()
     }
 }

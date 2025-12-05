@@ -41,7 +41,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
         // Event 1: The Hook
         AgendaEvent(
             id = "1",
-            title = "👋 Try Hiding This Event!",
+            title = "👋 Tap here to hide me.",
             location = "",
             startTimeInUTC = today.atTime(9, 0).toInstant(TimeZone.UTC).epochSeconds,
             endTimeInUTC = today.atTime(10, 0).toInstant(TimeZone.UTC).epochSeconds,
@@ -115,6 +115,21 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
             isHidden = false,
             startLocalDateTime = today.atTime(17, 30),
             endLocalDateTime = today.atTime(18, 30),
+            uses24HourClock = uses24HourClock,
+            isMultiDay = false
+        ),
+        AgendaEvent(
+            id = "6",
+            title = "\uD83D\uDCC5 Import Your Real Schedule",
+            location = "Settings",
+            startTimeInUTC = today.atTime(20, 30).toInstant(TimeZone.UTC).epochSeconds,
+            endTimeInUTC = today.atTime(21, 30).toInstant(TimeZone.UTC).epochSeconds,
+            allDay = false,
+            epochDay = today.toEpochDays(),
+            isRecurring = false,
+            isHidden = false,
+            startLocalDateTime = today.atTime(20, 30),
+            endLocalDateTime = today.atTime(21, 30),
             uses24HourClock = uses24HourClock,
             isMultiDay = false
         )

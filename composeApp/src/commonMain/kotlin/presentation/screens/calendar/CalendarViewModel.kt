@@ -206,7 +206,19 @@ class CalendarViewModel(
     private fun refreshSettings() {
         viewModelScope.launch {
             val settings = settingsUseCase()
+            val previousPermissionState = uiState.value.calendarPermission
+            val currentPermissionState = permissionHandler.getPermissionState()
+            
             setState { copy(hideBottomNavigation = settings.hideBottomNavigation) }
+            
+            // If permission changed from denied/not determined to full access, reload events
+            if (previousPermissionState != CalendarPermissionHandler.State.FullAccess 
+                && currentPermissionState == CalendarPermissionHandler.State.FullAccess) {
+                loadEventsFastAndSlow(scrollToNow = true)
+            } else {
+                // Update permission state even if it didn't change to full access
+                setState { copy(calendarPermission = currentPermissionState) }
+            }
         }
     }
 }

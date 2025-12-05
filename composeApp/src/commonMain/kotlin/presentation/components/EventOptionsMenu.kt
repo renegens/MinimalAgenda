@@ -20,6 +20,7 @@ import com.slapps.cupertino.icons.CupertinoIcons
 import com.slapps.cupertino.icons.outlined.Bell
 import com.slapps.cupertino.icons.outlined.Eye
 import com.slapps.cupertino.icons.outlined.EyeSlash
+import com.slapps.cupertino.icons.outlined.InfoCircle
 import com.slapps.cupertino.icons.outlined.Pencil
 import com.slapps.cupertino.theme.CupertinoTheme
 import presentation.theme.DMSans18Medium
@@ -31,6 +32,7 @@ fun EventOptionsMenu(
     onNotify: (AgendaEvent) -> Unit,
     onHide: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
+    onDetails: (AgendaEvent) -> Unit,
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
     hapticFeedback: HapticFeedback,
@@ -91,6 +93,23 @@ fun EventOptionsMenu(
                     }
                 ) {
                     Label("Remind me")
+                }
+                HorizontalDivider()
+                MenuAction(
+                    onClick = {
+                        hapticFeedback.addHapticFeedbackProminent()
+                        onDetails.invoke(event)
+                        onItemSelected.invoke(null)
+                    },
+                    icon = {
+                        CupertinoIcon(
+                            imageVector = CupertinoIcons.Default.InfoCircle,
+                            contentDescription = "details",
+                            tint = MaterialTheme.colorScheme.tertiary
+                        )
+                    }
+                ) {
+                    Label("Details")
                 }
                 HorizontalDivider()
                 MenuAction(

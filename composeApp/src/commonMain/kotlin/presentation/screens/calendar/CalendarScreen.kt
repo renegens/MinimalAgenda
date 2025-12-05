@@ -80,6 +80,14 @@ fun CalendarScreen(
     // Settings bottom sheet state
     val settingsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     var showSettingsBottomSheet by remember { mutableStateOf(false) }
+    
+    // Check permission when settings sheet is dismissed (user might have granted permission)
+    LaunchedEffect(settingsSheetState.isVisible) {
+        if (!settingsSheetState.isVisible && showSettingsBottomSheet) {
+            // Sheet was just hidden, check if permission changed
+            viewModel.setEvent(Event.RefreshSettings)
+        }
+    }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -114,8 +122,11 @@ fun CalendarScreen(
     }
 
     ComposableLifecycle {
-        if (it == Lifecycle.Event.ON_START) {
-            viewModel.setEvent(Event.InitialDataLoad)
+        when (it) {
+            Lifecycle.Event.ON_START -> {
+                viewModel.setEvent(Event.InitialDataLoad)
+            }
+            else -> {}
         }
     }
 
@@ -125,57 +136,7 @@ fun CalendarScreen(
         }
     }
 
-    // Show calendar permission dialog when state changes
-    // Only show dialog if we have actual data loaded (not just initial state)
-    LaunchedEffect(state.calendarPermission, state.flatDaysAndEvents.isNotEmpty()) {
-        showCalendarPermissionDialog = when (state.calendarPermission) {
-            CalendarPermissionHandler.State.Denied, CalendarPermissionHandler.State.NotDetermined -> {
-                // Only show dialog if we have data loaded, indicating the ViewModel has checked permissions
-                state.flatDaysAndEvents.isNotEmpty()
-            }
-
-            CalendarPermissionHandler.State.FullAccess -> {
-                false
-            }
-        }
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
-        // Calendar permission dialog - positioned at top level to appear above all content
-        if (showCalendarPermissionDialog) {
-            when (state.calendarPermission) {
-                CalendarPermissionHandler.State.Denied -> {
-                    AppAlertDialog(
-                        title = "Calendar Permissions Denied",
-                        message = "You're currently viewing sample events. Connect your calendar to see your actual schedule and focus on what matters to you.",
-                        confirmButtonLabel = "Go to settings",
-                        negativeButtonLabel = "Ok",
-                        onNegativeRequest = {
-                            showCalendarPermissionDialog = false
-                        },
-                        onContinueRequest = {
-                            showCalendarPermissionDialog = false
-                            onOpenDeviceSettings()
-                        }
-                    )
-                }
-                CalendarPermissionHandler.State.NotDetermined -> {
-                    AppAlertDialog(
-                        title = "Explore Focus mode in Action",
-                        message = "See how focus mode works with sample events. Connect your calendar to start managing your real schedule.",
-                        confirmButtonLabel = "Continue",
-                        onContinueRequest = {
-                            showCalendarPermissionDialog = false
-                            viewModel.setEvent(Event.OnRequestCalendarPermissionClicked)
-                        }
-                    )
-                }
-                CalendarPermissionHandler.State.FullAccess -> {
-                    // No dialog needed
-                }
-            }
-        }
-        
         Scaffold(containerColor = Color.Transparent,
             modifier = Modifier.statusBarsPadding(),
             topBar = {
@@ -241,6 +202,8 @@ fun CalendarScreen(
                             onNotify = { viewModel.setEvent(Event.Notify(it)) },
                             onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
                             onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
+                            onDetails = { /* Details handled internally in DayScreen */ },
+                            onOpenSettings = { viewModel.setEvent(Event.ShowSettings) },
                             isDemoMode = state.isDemoMode,
                         )
 
@@ -300,6 +263,14 @@ fun CalendarScreen(
                                     viewModel.setEvent(Event.RefreshSettings)
                                 }
                             }
+                        },
+                        onOpenDeviceSettings = {
+                            scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
+                                if (!settingsSheetState.isVisible) {
+                                    showSettingsBottomSheet = false
+                                }
+                            }
+                            onOpenDeviceSettings()
                         }
                     )
                 }
