@@ -23,9 +23,9 @@ fun StepWelcome(onContinue: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(16.dp),
         ) {
             Spacer(modifier = Modifier.weight(0.5F))
-            TextTitle(text = "Welcome,\nYour All in One $APP_DISPLAY_NAME")
+            TextTitle(text = "Welcome,\nYour Private $APP_DISPLAY_NAME")
             Spacer(modifier = Modifier.height(16.dp))
-            TextSubtitle("Stay focused with a daily lens on your life.")
+            TextSubtitle("Plan your day, hide sensitive events, and protect your privacy.")
             Spacer(modifier = Modifier.height(32.dp))
 
             Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
@@ -34,7 +34,7 @@ fun StepWelcome(onContinue: () -> Unit) {
             Spacer(modifier = Modifier.weight(1F))
 
             MainCTAButton(
-                label = "Start now",
+                label = "Get Started",
                 onClick = onContinue
             )
             Spacer(modifier = Modifier.height(16.dp))

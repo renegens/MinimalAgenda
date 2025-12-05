@@ -19,15 +19,15 @@ fun StepHideDemo(onContinue: () -> Unit) {
     Column(
         modifier = Modifier.fillMaxSize().statusBarsPadding().padding(16.dp),
     ) {
-        TextTitle(text = "Keep Only What Matters")
+        TextTitle(text = "Control Your Privacy")
         Spacer(modifier = Modifier.height(16.dp))
-        TextSubtitle(text = "Tap to hide any event and focus on what is important")
+        TextSubtitle(text = "Tap on any event to hide it from prying eyes.")
         Spacer(modifier = Modifier.height(32.dp))
         DemonstrationDay()
         Spacer(modifier = Modifier.weight(1F))
         Spacer(modifier = Modifier.height(32.dp))
         MainCTAButton(
-            label = "Learn How It Works",
+            label = "I'm Ready to Plan",
             onClick = onContinue
         )
         Spacer(modifier = Modifier.height(16.dp))

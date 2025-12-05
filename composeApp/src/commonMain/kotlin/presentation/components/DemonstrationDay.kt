@@ -1,5 +1,9 @@
 package presentation.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.dp
@@ -36,13 +41,24 @@ fun DemonstrationDay() {
     var calendarEntries by remember {
         mutableStateOf(generateOnboardingDemoEvents())
     }
+    
+    var itemsToHide by remember {
+        mutableStateOf<Set<String>>(emptySet())
+    }
 
     val today by remember { mutableStateOf(today) }
     LaunchedEffect(Unit) {
         delay(1000) // Delay before removing each event
-        while (calendarEntries.size > 3) {
+        val indicesToRemove = listOf(4, 2, 0) // Remove in reverse order to avoid index shifting
+        indicesToRemove.forEach { index ->
+            if (calendarEntries.size > index) {
             delay(1000) // Delay before removing each event
-            calendarEntries = calendarEntries.drop(1) // Remove the first event
+                val itemToHide = calendarEntries[index].second
+                itemsToHide = itemsToHide + itemToHide
+                delay(300) // Wait for fade-out animation
+                calendarEntries = calendarEntries.filterIndexed { i, _ -> i != index }
+                itemsToHide = itemsToHide - itemToHide
+            }
         }
     }
     Column(
@@ -69,10 +85,17 @@ fun DemonstrationDay() {
 
                     LazyColumn {
                         items(calendarEntries, key = { it.second }) {
+                            val isVisible = !itemsToHide.contains(it.second)
+                            AnimatedVisibility(
+                                visible = isVisible,
+                                exit = fadeOut(animationSpec = tween(300)) + shrinkVertically(
+                                    animationSpec = tween(300),
+                                    shrinkTowards = Alignment.Top
+                                )
+                            ) {
                             Row(
                                 modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 28.dp)
                                     .wrapContentHeight()
-                                    .animateItem()
                                     .padding(horizontal = 16.dp)
                             ) {
 
@@ -114,6 +137,7 @@ fun DemonstrationDay() {
                                     style = DMSans18Medium,
                                     color = MaterialTheme.colorScheme.tertiary,
                                 )
+                                }
                             }
                         }
                     }

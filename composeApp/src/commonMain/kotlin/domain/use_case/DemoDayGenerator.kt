@@ -10,25 +10,24 @@ import platform.uses24HourClock
 import kotlin.time.ExperimentalTime
 
 fun generateOnboardingDemoEvents(): List<Pair<FormattedTime, String>> {
+    // 5 Events: Mix of "Boring" and "Secret" to encourage hiding.
     return if (uses24HourClock()) {
+        // 24-Hour Format (e.g., 14:00)
         listOf(
-            Pair(FormattedTime("06", "30", "AM"), "Morning Routine"),
-            Pair(FormattedTime("08", "45", "AM"), "Team Standup"),
-            Pair(FormattedTime("10", "00", "AM"), "Project Review Meeting"),
-            Pair(FormattedTime("02", "00", "PM"), "Client Call"),
-            Pair(FormattedTime("03", "15", "PM"), "Strategy Planning Session"),
-            Pair(FormattedTime("05", "30", "PM"), "Wrap-up Meeting"),
-            Pair(FormattedTime("08", "45", "PM"), "Personal Reading Time")
+            Pair(FormattedTime("09", "00"), "👋 Try Hiding This Event!"),
+            Pair(FormattedTime("10", "30"), "Weekly Team Meeting"),
+            Pair(FormattedTime("12", "00"), "🤫 Interview with Competitor"),
+            Pair(FormattedTime("14", "00"), "Deep Work"),
+            Pair(FormattedTime("17", "30"), "💍 Buy Engagement Ring")
         )
     } else {
+        // 12-Hour Format (e.g., 02:00 PM)
         listOf(
-            Pair(FormattedTime("06", "30"), "Morning Routine"),
-            Pair(FormattedTime("08", "45"), "Team Standup"),
-            Pair(FormattedTime("10", "00"), "Project Review Meeting"),
-            Pair(FormattedTime("14", "00"), "Client Call"),
-            Pair(FormattedTime("15", "15"), "Strategy Planning Session"),
-            Pair(FormattedTime("17", "30"), "Wrap-up Meeting"),
-            Pair(FormattedTime("20", "45"), "Personal Reading Time")
+            Pair(FormattedTime("09", "00", "AM"), "👋 Try Hiding This Event!"),
+            Pair(FormattedTime("10", "30", "AM"), "Weekly Team Meeting"),
+            Pair(FormattedTime("12", "00", "PM"), "🤫 Interview with Competitor"),
+            Pair(FormattedTime("02", "00", "PM"), "Deep Work"),
+            Pair(FormattedTime("05", "30", "PM"), "💍 Buy Engagement Ring")
         )
     }
 }
@@ -39,122 +38,83 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
     val today = today
 
     return listOf(
+        // Event 1: The Hook
         AgendaEvent(
             id = "1",
-            title = "Morning Routine",
+            title = "👋 Try Hiding This Event!",
             location = "",
-            startTimeInUTC = today.atTime(6, 30)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            endTimeInUTC = today.atTime(7, 30)
-                .toInstant(TimeZone.UTC).epochSeconds,
+            startTimeInUTC = today.atTime(9, 0).toInstant(TimeZone.UTC).epochSeconds,
+            endTimeInUTC = today.atTime(10, 0).toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
             epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
-            startLocalDateTime = today.atTime(6, 30),
-            endLocalDateTime = today.atTime(7, 30), // Assumed 1-hour duration
+            startLocalDateTime = today.atTime(9, 0),
+            endLocalDateTime = today.atTime(10, 0),
             uses24HourClock = uses24HourClock,
             isMultiDay = false
         ),
+        // Event 2: Safe/Boring
         AgendaEvent(
             id = "2",
-            title = "Team Standup",
-            location = "",
-            startTimeInUTC = today.atTime(6, 45)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            endTimeInUTC = today.atTime(7, 15)
-                .toInstant(TimeZone.UTC).epochSeconds,
+            title = "Weekly Team Meeting",
+            location = "Office",
+            startTimeInUTC = today.atTime(10, 30).toInstant(TimeZone.UTC).epochSeconds,
+            endTimeInUTC = today.atTime(11, 30).toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
             epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
-            startLocalDateTime = today.atTime(8, 45),
-            endLocalDateTime = today.atTime(9, 15), // Assumed 30-minute duration
+            startLocalDateTime = today.atTime(10, 30),
+            endLocalDateTime = today.atTime(11, 30),
             uses24HourClock = uses24HourClock,
             isMultiDay = false
         ),
+        // Event 3: Secret (Privacy Trigger)
         AgendaEvent(
             id = "3",
-            title = "Project Review Meeting",
-            location = "",
-            startTimeInUTC = today.atTime(10, 0)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            endTimeInUTC = today.atTime(11, 0)
-                .toInstant(TimeZone.UTC).epochSeconds,
+            title = "🤫 Interview with Competitor",
+            location = "Online",
+            startTimeInUTC = today.atTime(12, 0).toInstant(TimeZone.UTC).epochSeconds,
+            endTimeInUTC = today.atTime(13, 0).toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
             epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
-            startLocalDateTime = today.atTime(10, 0),
-            endLocalDateTime = today.atTime(11, 0), // Assumed 1-hour duration
+            startLocalDateTime = today.atTime(12, 0),
+            endLocalDateTime = today.atTime(13, 0),
             uses24HourClock = uses24HourClock,
             isMultiDay = false
         ),
+        // Event 4: Neutral filler
         AgendaEvent(
             id = "4",
-            title = "Client Call",
+            title = "Deep Work",
             location = "",
-            startTimeInUTC = today.atTime(14, 0)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            endTimeInUTC = today.atTime(15, 0)
-                .toInstant(TimeZone.UTC).epochSeconds,
+            startTimeInUTC = today.atTime(14, 0).toInstant(TimeZone.UTC).epochSeconds,
+            endTimeInUTC = today.atTime(16, 0).toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
             epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(14, 0),
-            endLocalDateTime = today.atTime(15, 0), // Assumed 1-hour duration
+            endLocalDateTime = today.atTime(16, 0),
             uses24HourClock = uses24HourClock,
             isMultiDay = false
         ),
+        // Event 5: Secret (Personal)
         AgendaEvent(
             id = "5",
-            title = "Strategy Planning Session",
-            location = "",
-            startTimeInUTC = today.atTime(15, 15)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            endTimeInUTC = today.atTime(16, 15)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            allDay = false,
-            epochDay = today.toEpochDays(),
-            isRecurring = false,
-            isHidden = false,
-            startLocalDateTime = today.atTime(15, 15),
-            endLocalDateTime = today.atTime(16, 15), // Assumed 1-hour duration
-            uses24HourClock = uses24HourClock,
-            isMultiDay = false
-        ),
-        AgendaEvent(
-            id = "6",
-            title = "Wrap-up Meeting",
-            location = "",
-            startTimeInUTC = today.atTime(17, 30)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            endTimeInUTC = today.atTime(18, 30)
-                .toInstant(TimeZone.UTC).epochSeconds,
+            title = "💍 Buy Engagement Ring",
+            location = "Jeweler",
+            startTimeInUTC = today.atTime(17, 30).toInstant(TimeZone.UTC).epochSeconds,
+            endTimeInUTC = today.atTime(18, 30).toInstant(TimeZone.UTC).epochSeconds,
             allDay = false,
             epochDay = today.toEpochDays(),
             isRecurring = false,
             isHidden = false,
             startLocalDateTime = today.atTime(17, 30),
-            endLocalDateTime = today.atTime(18, 30), // Assumed 1-hour duration
-            uses24HourClock = uses24HourClock,
-            isMultiDay = false
-        ),
-        AgendaEvent(
-            id = "7",
-            title = "Personal Reading Time",
-            location = "",
-            startTimeInUTC = today.atTime(20, 45)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            endTimeInUTC = today.atTime(21, 45)
-                .toInstant(TimeZone.UTC).epochSeconds,
-            allDay = false,
-            epochDay = today.toEpochDays(),
-            isRecurring = false,
-            isHidden = false,
-            startLocalDateTime = today.atTime(20, 45),
-            endLocalDateTime = today.atTime(21, 45), // Assumed 1-hour duration
+            endLocalDateTime = today.atTime(18, 30),
             uses24HourClock = uses24HourClock,
             isMultiDay = false
         )

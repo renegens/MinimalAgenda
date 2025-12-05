@@ -52,9 +52,9 @@ private fun ColumnScope.PermissionDenied(
     onContinue: () -> Unit,
     openSettings: () -> Unit
 ) {
-    TextTitle(text = "Permission Denied")
+    TextTitle(text = "Calendar Access Required")
     Spacer(modifier = Modifier.height(16.dp))
-    TextSubtitle(text = "We can’t sync your calendar without your permission")
+    TextSubtitle(text = "To hide your real events, we need access to your calendar.")
     Spacer(modifier = Modifier.weight(1F))
 
     Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
@@ -66,19 +66,18 @@ private fun ColumnScope.PermissionDenied(
         )
         Spacer(modifier = Modifier.height(4.dp))
         BodyText(
-            text = "Enable calendar access in iOS settings to display your events.",
+            text = "Please enable calendar access in Settings.",
             textAlign = TextAlign.Center
         )
         Spacer(modifier = Modifier.height(16.dp))
-        BodyText(text = "Your data is private and secure.", textAlign = TextAlign.Center)
     }
     Spacer(modifier = Modifier.weight(1F))
 
-    MainCTAButton("Try with sample events", onContinue)
+    MainCTAButton("Use with Demo Data", onContinue)
     Spacer(modifier = Modifier.height(48.dp))
 
     ButtonWholeWidth(
-        label = "Go to Settings",
+        label = "Open Settings",
         onClick = openSettings,
         buttonColor = MaterialTheme.colorScheme.tertiary,
         textColor = MaterialTheme.colorScheme.surface
@@ -92,10 +91,10 @@ private fun ColumnScope.AskingForPermission(
     onContinue: () -> Unit,
     requestCalendarPermission: () -> Unit
 ) {
-    TextTitle(text = "Calendar Permission")
+    TextTitle(text = "Connect Your Calendar")
     Spacer(modifier = Modifier.height(16.dp))
-    TextSubtitle(text = "Sync with your calendar to simplify planning—no duplicates, no stress.")
-    Spacer(modifier = Modifier.weight(1F))
+    TextSubtitle(text = "Import your existing events to start organizing and hiding them immediately.")
+    Spacer(Modifier.weight(1.0f))
     Icon(
         imageVector = CupertinoIcons.Filled.LockCircle,
         contentDescription = null,
@@ -115,11 +114,11 @@ private fun ColumnScope.AskingForPermission(
     }
     Spacer(modifier = Modifier.weight(1F))
 
-    MainCTAButton("continue", requestCalendarPermission)
+    MainCTAButton("Import My Events", requestCalendarPermission)
     Spacer(modifier = Modifier.height(48.dp))
 
     ButtonWholeWidth(
-        label = "Try with sample events",
+        label = "Continue without syncing",
         onClick = onContinue,
         buttonColor = MaterialTheme.colorScheme.tertiary,
         textColor = MaterialTheme.colorScheme.surface

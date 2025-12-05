@@ -77,16 +77,6 @@ fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
                         )
                     }
                     Spacer(modifier = Modifier.weight(1F))
-                    Text(
-                        text = "Skip",
-                        modifier = Modifier.padding(8.dp).noRippleClickable {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(Onboarding.StepPaywall.position)
-                            }
-                        },
-                        style = DMSans24Medium60,
-                        color = MaterialTheme.colorScheme.tertiary,
-                    )
                 }
             }
             HorizontalPager(state = pagerState) { page ->
