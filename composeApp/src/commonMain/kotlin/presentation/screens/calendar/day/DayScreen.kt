@@ -73,7 +73,7 @@ fun DayScreen(
 
     LaunchedEffect(scrollToDay) {
         if (scrollToDay > 0) {
-            val index = items.findIndexOf(scrollToDay.toLong())
+            val index = items.findIndexOf(scrollToDay)
             listState.scrollToItem(index)
         }
     }
@@ -198,10 +198,11 @@ fun Event(
     ) {
         Time(agendaEvent = event, textColor = textColor)
         Column(modifier = Modifier.fillMaxWidth()) {
-            val style = if (event.allDay.not() && event.hasPassedForToday(today.toEpochDays())) {
-                DMSans18Medium.copy(textDecoration = TextDecoration.LineThrough)
-            } else {
-                DMSans18Medium
+
+            val style = when {
+                isDemoMode -> DMSans18Medium
+                event.allDay.not() && event.hasPassedForToday(today.toEpochDays()) -> DMSans18Medium.copy(textDecoration = TextDecoration.LineThrough)
+                else -> DMSans18Medium
             }
 
             val title = if (event.isLastDayInMultiDayEvent) {
