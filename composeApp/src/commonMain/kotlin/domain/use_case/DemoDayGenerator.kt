@@ -120,7 +120,7 @@ fun generateDemoAgendaEvents(): List<AgendaEvent> {
         ),
         AgendaEvent(
             id = "6",
-            title = "\uD83D\uDCC5 Import Your Real Schedule",
+            title = "\uD83D\uDCC5 Connect to existing calendar",
             location = "Settings",
             startTimeInUTC = today.atTime(20, 30).toInstant(TimeZone.UTC).epochSeconds,
             endTimeInUTC = today.atTime(21, 30).toInstant(TimeZone.UTC).epochSeconds,

@@ -170,13 +170,14 @@ fun SettingsScreen(
             ItemTitle("Privacy & Security")
             Spacer(modifier = Modifier.height(16.dp))
 
-            // Used Headline/Body pairs to make it scannable, removed the "wall of text"
-            ItemHeadline("100% Offline")
-            ItemBody("We process your calendar data directly on your device. Nothing is ever uploaded to a server.")
+            ItemHeadline("How it works")
+            // CLEARER: Explains that we just "look" at the data
+            ItemBody("This app acts as a secure viewer for your phone's native calendar. It does not have its own database of events.")
 
             Spacer(modifier = Modifier.height(12.dp))
-            ItemHeadline("No Tracking")
-            ItemBody("We do not collect, share, or sell your personal information to third parties.")
+            ItemHeadline("Zero Data Collection")
+            // STRONGER:
+            ItemBody("Because we don't have servers, we physically cannot see, store, or sell your personal data. Everything happens locally on your phone.")
         }
 
         // --- SECTION 5: FEEDBACK ---

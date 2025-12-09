@@ -93,7 +93,7 @@ private fun ColumnScope.AskingForPermission(
 ) {
     TextTitle(text = "Connect Your Calendar")
     Spacer(modifier = Modifier.height(16.dp))
-    TextSubtitle(text = "Import your existing events to start organizing and hiding them immediately.")
+    TextSubtitle(text = "This app works directly with your phone's built-in calendar database.")
     Spacer(Modifier.weight(1.0f))
     Icon(
         imageVector = CupertinoIcons.Filled.LockCircle,
@@ -114,11 +114,11 @@ private fun ColumnScope.AskingForPermission(
     }
     Spacer(modifier = Modifier.weight(1F))
 
-    MainCTAButton("Import My Events", requestCalendarPermission)
+    MainCTAButton("Grant Access", requestCalendarPermission)
     Spacer(modifier = Modifier.height(48.dp))
 
     ButtonWholeWidth(
-        label = "Continue without syncing",
+        label = "Continue without access",
         onClick = onContinue,
         buttonColor = MaterialTheme.colorScheme.tertiary,
         textColor = MaterialTheme.colorScheme.surface
