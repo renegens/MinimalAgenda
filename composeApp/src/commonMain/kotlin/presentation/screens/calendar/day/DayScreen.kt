@@ -21,7 +21,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -72,7 +71,10 @@ fun DayScreen(
 
     val currentEpochDay = currentDate.toEpochDays()
 
-    val todayIndex by mutableStateOf(items.findIndexOf(currentEpochDay))
+    // Recalculate todayIndex when items change (important for initial load when items load asynchronously)
+    val todayIndex = remember(items, currentEpochDay) { 
+        items.findIndexOf(currentEpochDay) 
+    }
 
     val listState = rememberLazyListState()
 
@@ -87,9 +89,12 @@ fun DayScreen(
         }
     }
 
-    SideEffect {
-        if (scrollToNow) {
-            listState.requestScrollToItem(index = todayIndex)
+    // Watch both scrollToNow and todayIndex to handle:
+    // 1. scrollToNow changes to true when todayIndex is already valid
+    // 2. todayIndex becomes valid after scrollToNow is already true (async data load)
+    LaunchedEffect(scrollToNow, todayIndex) {
+        if (scrollToNow && todayIndex >= 0) {
+            listState.scrollToItem(index = todayIndex)
         }
     }
 
