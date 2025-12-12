@@ -23,12 +23,13 @@ data class EventTime(
     }
 
     fun getEndDateTime(): LocalDateTime {
-        val quotient = durationInMinutes / 60
-        val reminder = durationInMinutes % 60
+        val totalMinutes = startMinutes + durationInMinutes
+        val hoursToAdd = totalMinutes / 60
+        val finalMinutes = totalMinutes % 60
         return getLocalDateTime(
             timestamp = startTimestampInMillis,
-            hours = startHours + quotient,
-            minutes = reminder
+            hours = startHours + hoursToAdd,
+            minutes = finalMinutes
         )
     }
 
