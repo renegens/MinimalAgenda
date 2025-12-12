@@ -36,5 +36,7 @@ class SettingsContract {
         class OnNotificationTimeEntered(val time: Int) : Event()
         object OnRequestCalendarPermission : Event()
         object OnOpenDeviceSettings : Event()
+        object OnOpenPrivacyPolicy : Event()
+        object OnOpenTermsOfService : Event()
     }
 }

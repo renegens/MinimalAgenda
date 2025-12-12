@@ -204,7 +204,30 @@ fun SettingsScreen(
             )
         }
 
-        // --- SECTION 6: IOS FOCUS MODES ---
+        // --- SECTION 6: PRIVACY & TERMS ---
+        SettingsItem {
+            ItemTitle("Legal")
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                "Privacy Policy",
+                Modifier
+                    .padding(vertical = 8.dp)
+                    .noRippleClickable { viewModel.setEvent(Event.OnOpenPrivacyPolicy) },
+                style = iosBody,
+                color = MaterialTheme.colorScheme.primary
+            )
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                "Terms of Service",
+                Modifier
+                    .padding(vertical = 8.dp)
+                    .noRippleClickable { viewModel.setEvent(Event.OnOpenTermsOfService) },
+                style = iosBody,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        // --- SECTION 7: IOS FOCUS MODES ---
         SettingsItem(showDivider = false) {
             ItemTitle("iOS Focus Mode Setup")
             Spacer(modifier = Modifier.height(16.dp))

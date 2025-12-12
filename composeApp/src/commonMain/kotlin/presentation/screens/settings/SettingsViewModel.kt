@@ -76,6 +76,12 @@ class SettingsViewModel(
             Event.OnOpenDeviceSettings -> {
                 setEffect { Effect.OpenDeviceSettings }
             }
+            Event.OnOpenPrivacyPolicy -> {
+                browser.openUrl("https://giant-solutions.eu/calendar/privacy/index.html")
+            }
+            Event.OnOpenTermsOfService -> {
+                browser.openUrl("https://giant-solutions.eu/calendar/terms/index.html")
+            }
         }
     }
     
