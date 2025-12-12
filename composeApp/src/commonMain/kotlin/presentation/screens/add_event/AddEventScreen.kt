@@ -312,15 +312,38 @@ private fun ColumnScope.DateAndTime(
     val cupertinoTimePickerState =
         rememberCupertinoTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
 
-    // Get selected values from the appropriate state based on platform
+    // Watch for changes in picker states and update only when values actually change
+    // This prevents infinite recomposition while still capturing the latest values
+    // Only create the relevant LaunchedEffect per platform for efficiency
+    if (isAndroid) {
+        LaunchedEffect(
+            materialDatePickerState.selectedDateMillis,
+            materialTimePickerState.hour,
+            materialTimePickerState.minute
+        ) {
+            materialDatePickerState.selectedDateMillis?.let { dateMillis ->
+                onTimeUpdate(Triple(dateMillis, materialTimePickerState.hour, materialTimePickerState.minute))
+            }
+        }
+    } else {
+        LaunchedEffect(
+            cupertinoDatePickerState.selectedDateMillis,
+            cupertinoTimePickerState.hour,
+            cupertinoTimePickerState.minute
+        ) {
+            cupertinoDatePickerState.selectedDateMillis?.let { dateMillis ->
+                onTimeUpdate(Triple(dateMillis, cupertinoTimePickerState.hour, cupertinoTimePickerState.minute))
+            }
+        }
+    }
+
+    // Get selected values for display
     val selectedDate = if (isAndroid) {
         materialDatePickerState.selectedDateMillis?.let {
-            onTimeUpdate(Triple(it, materialTimePickerState.hour, materialTimePickerState.minute))
             formatTimestamp(it)
         } ?: ""
     } else {
         cupertinoDatePickerState.selectedDateMillis?.let {
-            onTimeUpdate(Triple(it, cupertinoTimePickerState.hour, cupertinoTimePickerState.minute))
             formatTimestamp(it)
         } ?: ""
     }

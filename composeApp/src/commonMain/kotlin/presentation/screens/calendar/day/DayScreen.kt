@@ -145,7 +145,6 @@ fun DayScreen(
                             onDetails = {
                                 selectedEventForDetails = it
                                 showDetailsBottomSheet = true
-                                scope.launch { detailsSheetState.show() }
                             },
                             onOpenSettings = onOpenSettings,
                             selectedItem = selectedItem,
