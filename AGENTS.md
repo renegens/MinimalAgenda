@@ -10,7 +10,7 @@ device's own calendars. It is a Kotlin Multiplatform project with a shared Compo
 **Active branch is `develop`.** `main` was last merged in Nov 2024 and is far behind; base work on `develop`.
 
 - **iOS:** was shipped (now removed from the App Store; kept in the repo as unsupported) and complete (EventKit, native event editor and pickers, local notifications,
-  onboarding, demo mode, multi-day events, RevenueCat paywall UI, Mixpanel analytics in Swift).
+  onboarding, demo mode, multi-day events).
 - **Android:** prototype only. `AndroidCalendarRepository.getEvents()` returns 8000 fake events, and
   `getEvent`, `getBuildVersion`, notification permission, notification scheduling and event editing are
   `TODO()` (they crash at runtime).
@@ -25,11 +25,11 @@ Proposed or Blocked unless the user asks. Work through the doc's Phases in order
 Versions live in `gradle/libs.versions.toml`.
 
 - Kotlin 2.2.20, Compose Multiplatform 1.9.3, AGP 8.13.1, Gradle 8.13
-- Koin 4.1 for DI, AndroidX DataStore for settings, kotlinx-datetime 0.6.1, kotlinx-serialization
-- Navigation and lifecycle from JetBrains, currently `2.9.0-rc02`
-- RevenueCat `purchases-kmp-core` + `purchases-kmp-ui` (`2.0.0+15.0.0`) for the `Unlocked` entitlement and paywall
+- Koin 4.1 for DI, AndroidX DataStore for settings, kotlinx-datetime 0.7.1, kotlinx-serialization
+- Navigation 2.9.2 and lifecycle 2.9.6 from JetBrains
 - Cupertino UI components (`io.github.schott12521:cupertino*` 2.3.1)
-- iOS: Swift Package Manager (RevenueCat, Mixpanel), static `ComposeApp` framework. No CocoaPods.
+- No billing, analytics or crash-reporting SDKs (decisions D10, D11)
+- iOS: static `ComposeApp` framework, no Swift packages. No CocoaPods.
 - Android: minSdk 24, compile/targetSdk 36, namespace and applicationId `eu.giant.agenda`
 
 ## Layout
@@ -48,7 +48,7 @@ composeApp/src/
   androidMain/       Android actuals, AndroidCalendarRepository, Android Koin module
   nativeMain/        iOS actuals, iOSCalendarRepository (EventKit), iOS Koin module
   iosMain/           MainViewController entry point
-iosApp/              Xcode project (SwiftUI host, Mixpanel init in iOSApp.swift)
+iosApp/              Xcode project (SwiftUI host)
 ```
 
 ## Architecture conventions
@@ -66,17 +66,16 @@ iosApp/              Xcode project (SwiftUI host, Mixpanel init in iOSApp.swift)
 - **Register new classes in Koin** (`di/Modules.kt` for shared, platform modules for actuals).
 - **Time:** the app stores event times as epoch **seconds** and days as `epochDay` (`LocalDate.toEpochDays()`).
   Android's `CalendarContract` uses **milliseconds**, so convert at the repository boundary.
-- **Premium gating is being removed** (decision D11): RevenueCat, the paywall, `guardPremium()` / `isPremium()`
-  (`extensions/RevenueCatExtensions.kt`), `ShowPaywallOncePerDayUseCase`, `PaywallLocalDataSource` and the onboarding
-  paywall step all go, on iOS too. Every feature is free. Don't add new RevenueCat or paywall code.
+  Use `kotlin.time.Instant` / `kotlin.time.Clock`, not the deprecated `kotlinx.datetime` ones.
+- **Every feature is free** (decision D11). RevenueCat, the paywall and premium gating have been removed on all
+  platforms; don't add billing, paywall or premium code back.
 - **Demo mode** shows generated demo events (`DemoDayGenerator`, `DemoEventsRepository`) until the user
   hides it; keep it working when touching event loading.
 - `extensions.takingScreenshots` freezes "today" for store screenshots; it must stay `false` in commits.
 
 ## Android plans (accepted in the decisions doc, 2026-11-05; not yet implemented)
 
-- Play build is paid upfront (2.49€), so there is no billing code anywhere. No analytics or crash SDKs in any build;
-  Mixpanel is removed from iOS.
+- Play build is paid upfront (2.49€), so there is no billing code anywhere. No analytics or crash SDKs in any build.
 - Module split into `shared/` + `androidApp/` + `iosApp/`. `androidApp` has flavors `play` and `foss` that differ
   only by `BuildConfig.SHOW_DONATE` (true in `foss`; no donation links in `play`).
 - Both flavors use applicationId `eu.giant.agenda`, signed with the same key. minSdk 26.
@@ -92,9 +91,12 @@ iosApp/              Xcode project (SwiftUI host, Mixpanel init in iOSApp.swift)
 ## Build and run
 
 ```bash
-./gradlew :composeApp:assembleDebug       # Android (prototype, shows fake data; build not verified)
+./gradlew :composeApp:assembleDebug       # Android (prototype, shows fake data)
+./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64   # shared code for iOS
 open iosApp/iosApp.xcodeproj              # iOS: build and run from Xcode
 ```
+
+Gradle needs JDK 21; it fails on JDK 25. The Android SDK path goes in `local.properties` (gitignored).
 
 There are no tests yet. When adding logic, add `commonTest` tests for use cases where possible.
 
@@ -104,4 +106,5 @@ There are no tests yet. When adding logic, add `commonTest` tests for use cases 
 - Don't break iOS while working on Android: shared code changes must keep the iOS build working.
 - Don't add secrets to the repo. The old RevenueCat and Mixpanel client keys stay in git history and will be
   invalidated by deleting those projects before the repo goes public.
+- Trunk-based development: commit directly on `develop`; no feature branches or pull requests.
 - Commit or push only when asked.
