@@ -18,9 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import domain.model.AgendaMonthYear
 import domain.model.AgendaYear
-import extensions.toShortName
 import kotlinx.datetime.LocalDate
-import platform.getCurrentRegion
+import platform.formatDayAndMonth
+import platform.formatMonthName
 import presentation.theme.DMSans18Medium
 import presentation.theme.DMSansBlack250
 
@@ -28,7 +28,7 @@ import presentation.theme.DMSansBlack250
 fun MonthHeader(monthYear: AgendaMonthYear, modifier: Modifier, currentDate: LocalDate) {
     val label = buildAnnotatedString {
         withStyle(style = SpanStyle(color = ColorPrimary(monthYear.isCurrent(currentDate)))) {
-            append(monthYear.agendaMonth.nameRes.toShortName())
+            append(formatMonthName(monthYear.agendaMonth.number, abbreviated = true))
         }
         withStyle(style = SpanStyle(color = ColorSecondary(monthYear.isCurrent(currentDate)))) {
             append(monthYear.agendaYear.lastTwoDigits)
@@ -44,13 +44,7 @@ fun DayHeader(day: String, dayInMonth: Int, month: Int, isToday: Boolean) {
             append(day)
         }
         withStyle(style = SpanStyle(color = ColorSecondary(isToday))) {
-            val isUSRegion = getCurrentRegion().contentEquals("us", ignoreCase = true)
-
-            if (isUSRegion) {
-                append("$month.$dayInMonth")
-            } else {
-                append("$dayInMonth.$month")
-            }
+            append(formatDayAndMonth(dayInMonth, month))
         }
     }
     HeaderLarge(label = label)

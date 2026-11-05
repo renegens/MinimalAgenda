@@ -1,23 +1,40 @@
 package platform
 
-import platform.Foundation.*
-import platform.Foundation.NSLocale
-import platform.Foundation.NSDateFormatter
+import kotlinx.datetime.LocalDate
 import platform.Foundation.NSDate
+import platform.Foundation.NSDateFormatter
+import platform.Foundation.NSDateFormatterShortStyle
+import platform.Foundation.NSLocale
+import platform.Foundation.NSTimeZone
+import platform.Foundation.currentLocale
+import platform.Foundation.dateWithTimeIntervalSince1970
+import platform.Foundation.timeZoneForSecondsFromGMT
 
-actual fun formatTimestamp(timestamp: Long): String {
-    val nsTimeInterval = (timestamp / 1000).toDouble()
-    val nsDate = NSDate.dateWithTimeIntervalSince1970(nsTimeInterval)
+private fun wallClockFormatter(): NSDateFormatter = NSDateFormatter().apply {
+    locale = NSLocale.currentLocale
+    timeZone = NSTimeZone.timeZoneForSecondsFromGMT(0)
+}
 
-    val customFormat = "dd/MM/yyyy"
-    val dateFormat = NSDateFormatter.dateFormatFromTemplate(
-        tmplate = customFormat,
-        options = 0u,
-        locale = NSLocale.currentLocale
-    )
+actual fun formatLocalDate(date: LocalDate): String {
+    val formatter = wallClockFormatter()
+    formatter.setLocalizedDateFormatFromTemplate("yMd")
+    return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(date.toEpochDays() * 86_400.0))
+}
 
-    val formatter = NSDateFormatter()
-    formatter.dateFormat = dateFormat!!
+actual fun formatDayAndMonth(day: Int, month: Int): String {
+    val pattern = NSDateFormatter.dateFormatFromTemplate("Md", 0u, NSLocale.currentLocale).orEmpty()
+    return compactDayAndMonth(day, month, pattern)
+}
 
-    return formatter.stringFromDate(nsDate)
+actual fun formatLocalTime(hour: Int, minute: Int): String {
+    val formatter = wallClockFormatter()
+    formatter.timeStyle = NSDateFormatterShortStyle
+    return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970((hour * 60.0 + minute) * 60))
+}
+
+actual fun formatMonthName(month: Int, abbreviated: Boolean): String {
+    val formatter = wallClockFormatter()
+    formatter.dateFormat = if (abbreviated) "LLL" else "LLLL"
+    val date = LocalDate(2000, month, 1)
+    return formatter.stringFromDate(NSDate.dateWithTimeIntervalSince1970(date.toEpochDays() * 86_400.0))
 }

@@ -21,6 +21,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import extensions.today
+import kotlinx.datetime.number
+import platform.formatMonthName
 import presentation.theme.AppCornerShape
 import presentation.theme.CustomColor
 import presentation.theme.DMSans24Black100
@@ -62,7 +64,7 @@ fun CalendarIcon() {
                 )
                 Spacer(modifier = Modifier.height(4.dp))
                 Text(
-                    text = today.month.name.substring(0,3),
+                    text = formatMonthName(today.month.number, abbreviated = true),
                     style = DMSans24Black100.copy(fontSize = 24.sp),
                     color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Center

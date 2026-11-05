@@ -81,6 +81,8 @@ import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import presentation.components.AppAlertDialog
 import platform.formatTimestamp
+import platform.formatLocalTime
+import platform.uses24HourClock
 import presentation.components.NewEventHeader
 import presentation.components.clickableWithOpaqueText
 import presentation.theme.DMSans18Medium
@@ -401,18 +403,19 @@ private fun ColumnScope.DateAndTime(
     focusManager: FocusManager
 ) {
     val isAndroid = getPlatform().isAndroid
+    val is24Hour = uses24HourClock()
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
     // Material3 pickers for Android
     val materialDatePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
     val materialTimePickerState =
-        rememberTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
+        rememberTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = is24Hour)
 
     // Cupertino pickers for iOS
     val cupertinoDatePickerState = rememberCupertinoDatePickerState(initialSelectedDateMillis = date)
     val cupertinoTimePickerState =
-        rememberCupertinoTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
+        rememberCupertinoTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = is24Hour)
 
     // Watch for changes in picker states and update only when values actually change
     // This prevents infinite recomposition while still capturing the latest values
@@ -451,9 +454,9 @@ private fun ColumnScope.DateAndTime(
     }
 
     val selectedTime = if (isAndroid) {
-        "${materialTimePickerState.hour}:${materialTimePickerState.minute.toString().padStart(2, '0')}"
+        formatLocalTime(materialTimePickerState.hour, materialTimePickerState.minute)
     } else {
-        "${cupertinoTimePickerState.hour}:${cupertinoTimePickerState.minute.toString().padStart(2, '0')}"
+        formatLocalTime(cupertinoTimePickerState.hour, cupertinoTimePickerState.minute)
     }
 
     DetailsItemRow {

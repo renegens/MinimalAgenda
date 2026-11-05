@@ -21,7 +21,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import domain.model.AgendaEvent
-import kotlinx.datetime.LocalDateTime
+import platform.formatLocalDate
+import platform.formatLocalTime
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 import presentation.theme.iosExtraLargeTitle
@@ -69,7 +70,7 @@ fun EventDetailsBottomSheet(
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
         
         // Date
-        val dateText = formatDate(event.startLocalDateTime)
+        val dateText = formatLocalDate(event.startLocalDateTime.date)
         DetailRow(
             label = "Date",
             value = dateText
@@ -84,8 +85,8 @@ fun EventDetailsBottomSheet(
                 value = "All Day"
             )
         } else {
-            val startTime = formatTime(event.startLocalDateTime, event.uses24HourClock)
-            val endTime = formatTime(event.endLocalDateTime, event.uses24HourClock)
+            val startTime = formatLocalTime(event.startLocalDateTime.hour, event.startLocalDateTime.minute)
+            val endTime = formatLocalTime(event.endLocalDateTime.hour, event.endLocalDateTime.minute)
             DetailRow(
                 label = "Time",
                 value = "$startTime - $endTime"
@@ -149,29 +150,6 @@ private fun DetailRow(
             style = DMSans18Bold60,
             color = MaterialTheme.colorScheme.tertiary
         )
-    }
-}
-
-private fun formatDate(dateTime: LocalDateTime): String {
-    val day = dateTime.day
-    val month = dateTime.month.name.lowercase().replaceFirstChar { it.uppercase() }
-    val year = dateTime.year
-    return "$month $day, $year"
-}
-
-private fun formatTime(dateTime: LocalDateTime, uses24HourClock: Boolean): String {
-    val hour = dateTime.hour
-    val minute = dateTime.minute
-    
-    return if (uses24HourClock) {
-        val hours = hour.toString().padStart(2, '0')
-        val minutes = minute.toString().padStart(2, '0')
-        "$hours:$minutes"
-    } else {
-        val hour12 = if (hour % 12 == 0) 12 else hour % 12
-        val amPm = if (hour < 12) "AM" else "PM"
-        val minutes = minute.toString().padStart(2, '0')
-        "$hour12:$minutes $amPm"
     }
 }
 

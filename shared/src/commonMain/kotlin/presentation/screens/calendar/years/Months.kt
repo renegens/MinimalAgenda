@@ -20,6 +20,7 @@ import domain.model.AgendaYear
 import extensions.getEventsForMonth
 import extensions.hasHiddenEvents
 import kotlinx.datetime.LocalDate
+import platform.formatMonthName
 import presentation.theme.DMSans24Black100
 import presentation.theme.DMSans24Medium120
 
@@ -38,7 +39,7 @@ fun Months(
             months.first().forEachIndexed { index, month ->
                 if (month.isCurrent(currentDate, year)) {
                     MonthTextFocused(
-                        text = month.nameRes,
+                        text = formatMonthName(month.number),
                         modifier = Modifier.clickable {
                             onMonthClicked.invoke(
                                 AgendaMonthYear(
@@ -55,7 +56,7 @@ fun Months(
                         events.hasHiddenEvents()
                     }
                     MonthText(
-                        text = month.nameRes,
+                        text = formatMonthName(month.number, abbreviated = true),
                         hasEvents = hasMonthEvents,
                         modifier = Modifier.clickable {
                             onMonthClicked.invoke(
@@ -73,7 +74,7 @@ fun Months(
             months[1].forEachIndexed { index, month ->
                 if (month.isCurrent(currentDate, year)) {
                     MonthTextFocused(
-                        text = month.nameRes,
+                        text = formatMonthName(month.number),
                         modifier = Modifier.clickable {
                             onMonthClicked.invoke(
                                 AgendaMonthYear(
@@ -90,7 +91,7 @@ fun Months(
                         events.hasHiddenEvents()
                     }
                     MonthText(
-                        month.nameRes,
+                        formatMonthName(month.number, abbreviated = true),
                         hasEvents = hasMonthEvents,
                         modifier = Modifier.clickable {
                             onMonthClicked.invoke(
@@ -108,10 +109,9 @@ fun Months(
 
 @Composable
 private fun MonthText(text: String, modifier: Modifier, hasEvents: Boolean) {
-    val shortMonth = text.substring(0, 3)
     Box(Modifier.height(40.dp).fillMaxWidth().then(modifier)) {
         Text(
-            text = shortMonth,
+            text = text,
             style = DMSans24Medium120,
             color = if (hasEvents) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary,
             modifier = Modifier.wrapContentHeight(unbounded = true)
