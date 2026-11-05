@@ -164,13 +164,11 @@ fun SettingsScreen(
             Spacer(modifier = Modifier.height(16.dp))
 
             ItemHeadline("How it works")
-            // CLEARER: Explains that we just "look" at the data
-            ItemBody("This app acts as a secure viewer for your phone's native calendar. It does not have its own database of events.")
+            ItemBody("Minimal Agenda reads, creates, edits, and deletes events through your phone's system calendar. The app keeps no event database of its own.")
 
             Spacer(modifier = Modifier.height(12.dp))
             ItemHeadline("Zero Data Collection")
-            // STRONGER:
-            ItemBody("Because we don't have servers, we physically cannot see, store, or sell your personal data. Everything happens locally on your phone.")
+            ItemBody("Minimal Agenda collects no data. There are no analytics, ads, or developer servers. Your preferences and reminders stay on your phone.")
         }
 
         // --- SECTION 5: FEEDBACK ---

@@ -126,7 +126,7 @@ fun CalendarToolbarMenu(
                         )
                     }
                 ) {
-                    val text = if (showAll) "Show Active" else "Show All"
+                    val text = if (showAll) "Hide hidden events" else "Show hidden events"
                     Label(text)
                 }
                 HorizontalDivider()

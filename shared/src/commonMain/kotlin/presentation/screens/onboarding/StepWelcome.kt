@@ -22,7 +22,7 @@ fun StepWelcome(onContinue: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(16.dp),
         ) {
             Spacer(modifier = Modifier.weight(0.5F))
-            TextTitle(text = "Welcome,\nYour Private Daily Planner")
+            TextTitle(text = "Welcome,\nMinimal Agenda")
             Spacer(modifier = Modifier.height(16.dp))
             TextSubtitle("Plan your day, hide sensitive events, and protect your privacy.")
             Spacer(modifier = Modifier.height(32.dp))
