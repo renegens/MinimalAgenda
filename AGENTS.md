@@ -7,7 +7,7 @@ Guidance for AI coding agents working in this repository.
 MinimalAgenda (display name "Daily Planner") is a minimalist agenda app that shows events from the
 device's own calendars. It is a Kotlin Multiplatform project with a shared Compose Multiplatform UI.
 
-**Active branch is `develop`.** `main` was last merged in Nov 2024 and is far behind; base work on `develop`.
+**Work on `main`** (trunk-based; `develop` was merged into `main` and deleted in Nov 2026).
 
 - **iOS:** was shipped (now removed from the App Store; kept in the repo as unsupported) and complete (EventKit, native event editor and pickers, local notifications,
   onboarding, demo mode, multi-day events).
@@ -106,5 +106,5 @@ There are no tests yet. When adding logic, add `commonTest` tests for use cases 
 - Don't break iOS while working on Android: shared code changes must keep the iOS build working.
 - Don't add secrets to the repo. The old RevenueCat and Mixpanel client keys stay in git history and will be
   invalidated by deleting those projects before the repo goes public.
-- Trunk-based development: commit directly on `develop`; no feature branches or pull requests.
+- Trunk-based development: commit directly on `main`; no feature branches or pull requests.
 - Commit or push only when asked.
