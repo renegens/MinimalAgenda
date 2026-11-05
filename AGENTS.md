@@ -11,11 +11,11 @@ device's own calendars. It is a Kotlin Multiplatform project with a shared Compo
 
 - **iOS:** was shipped (now removed from the App Store; kept in the repo as unsupported) and complete (EventKit, native event editor and pickers, local notifications,
   onboarding, demo mode, multi-day events).
-- **Android:** prototype only. `AndroidCalendarRepository.getEvents()` returns 8000 fake events, and
-  `getEvent`, `getBuildVersion`, notification permission, notification scheduling and event editing are
-  `TODO()` (they crash at runtime).
+- **Android:** feature-complete, not yet released. Reads real calendars (`CalendarContract.Instances`), offers a
+  device-only calendar when none exist, adds/edits/deletes events in the shared editor, and schedules per-event
+  reminders. Release prep (rename, license, signing, CI) is the next phase.
 
-Android support is being planned. Decisions and open questions are tracked in the
+Decisions and open questions are tracked in the
 "MinimalAgenda — Android Support Decisions" doc: https://claude.ai/artifact/HjjwoK4A95C76Hm3YHXtTe
 Check it before making structural changes, and don't implement a decision that is still marked
 Proposed or Blocked unless the user asks. Work through the doc's Phases in order.
@@ -85,11 +85,19 @@ iosApp/              Xcode project (SwiftUI host), runs :shared:embedAndSignAppl
   only by `BuildConfig.SHOW_DONATE` (true in `foss`; no donation links in `play`).
 - Both flavors use applicationId `eu.giant.agenda`, signed with the same key. minSdk 26.
 - Read events from `CalendarContract.Instances`, not `Events`, so recurring events are expanded.
-  All-day events are UTC midnight; compute their day in UTC.
-- Add, edit and delete events directly (`WRITE_CALENDAR`) from an in-app editor, like iOS (D23, replaces the
-  intents-only D7). When the device has no calendars, offer to create a device-only calendar (`ACCOUNT_TYPE_LOCAL`).
-- Reminders are opt-in per event: `AlarmManager` (`USE_EXACT_ALARM`) + `NotificationManager`, persisted in DataStore,
-  rescheduled after boot, and the event is re-checked when the alarm fires.
+  All-day events are UTC midnight; compute their day in UTC (helpers in `data/calendar/CalendarMath.kt`).
+  An Android event id is the instance id `"<EVENT_ID>/<BEGIN ms>"`.
+- Add, edit and delete events directly (`WRITE_CALENDAR`) from the shared editor (`add_event`), like iOS (D23,
+  replaces the intents-only D7). Recurring events: only title/location change, for the whole series, after a
+  confirmation; never write DTSTART/DTEND on a series. When the device has no calendars, offer to create a
+  device-only calendar (`ACCOUNT_TYPE_LOCAL`).
+- Reminders are opt-in per event: `AlarmManager` (`USE_EXACT_ALARM`) + `NotificationManager`, persisted in DataStore
+  (`data/reminder/`), restored on boot/update/time change/app start, and re-checked when the alarm fires
+  (`ReminderPlanner`: show, reschedule if moved, drop if deleted or ended).
+- Android permissions go through `PermissionRequester` (ActivityResult bridge registered in `MainActivity`).
+- Test on the emulator `minimal-agenda-api36` with Google's `android` CLI
+  (`android emulator start --headless minimal-agenda-api36`); launch with
+  `adb shell am start -n eu.giant.agenda/.MainActivity`.
 - Nothing in the `foss` dependency graph may pull in GMS, Firebase, Play Billing, RevenueCat or analytics SDKs.
 - iOS stays in the repo as unsupported, but shared-code changes should still keep it building.
 - App will be renamed "Minimal Agenda", licensed GPL-3.0 (name and icon reserved).
