@@ -1,6 +1,8 @@
 package di
 
 import data.DataStore
+import data.reminder.ScheduledReminderStore
+import platform.ReminderScheduler
 import org.koin.core.module.Module
 import org.koin.dsl.bind
 import org.koin.dsl.module
@@ -22,8 +24,10 @@ import repository.AndroidCalendarRepository
 actual val platformModule: Module = module {
     single { DataStore(get()) }
     factory { ActivityEditEventView(get()) }.bind<EventEditViewHandler>()
-    single { AndroidNotificationHandler() }.bind<NotificationHandler>()
-    single { AndroidNotificationPermissionHandler() }.bind<NotificationPermissionHandler>()
+    single { ScheduledReminderStore(get()) }
+    single { ReminderScheduler(get()) }
+    single { AndroidNotificationHandler(get(), get(), get(), get()) }.bind<NotificationHandler>()
+    single { AndroidNotificationPermissionHandler(get(), get()) }.bind<NotificationPermissionHandler>()
     single { AndroidCalendarRepository(get()) }.bind<CalendarRepository>()
     single { PermissionRequester() }
     single { AndroidCalendarPermissionHandler(get(), get()) }.bind<CalendarPermissionHandler>()

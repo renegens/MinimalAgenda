@@ -13,6 +13,8 @@ import android.provider.CalendarContract.Instances
 import data.calendar.CalendarEntity
 import data.calendar.CalendarMath
 import data.calendar.EventEntity
+import data.reminder.EventLookup
+import data.reminder.EventTimes
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
@@ -116,6 +118,25 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
             selection = "${Instances.EVENT_ID} = ?",
             selectionArgs = arrayOf(instance.eventId.toString()),
         ).firstOrNull { it.id == id }
+    }
+
+    /** The event row itself (any begin), used to follow a moved reminder; null when missing/deleted/unreadable. */
+    suspend fun getEventLookup(eventId: Long): EventLookup? = withContext(Dispatchers.IO) {
+        try {
+            context.contentResolver.query(
+                ContentUris.withAppendedId(Events.CONTENT_URI, eventId),
+                arrayOf(Events.DTSTART, Events.DTEND, Events.ALL_DAY, Events.RRULE, Events.DELETED),
+                null, null, null
+            )?.use {
+                if (!it.moveToFirst() || it.getInt(4) != 0) return@use null
+                val start = it.getLong(0)
+                val end = if (it.isNull(1)) start else it.getLong(1)
+                val times = CalendarMath.resolveTimes(start, end, it.getInt(2) != 0, TimeZone.currentSystemDefault())
+                EventLookup(EventTimes(times.startSeconds, times.endSeconds), CalendarMath.isRecurring(it.getString(3)))
+            }
+        } catch (_: SecurityException) {
+            null
+        }
     }
 
     private suspend fun queryInstances(
