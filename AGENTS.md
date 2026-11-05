@@ -81,7 +81,8 @@ iosApp/              Xcode project (SwiftUI host)
 - Both flavors use applicationId `eu.giant.agenda`, signed with the same key. minSdk 26.
 - Read events from `CalendarContract.Instances`, not `Events`, so recurring events are expanded.
   All-day events are UTC midnight; compute their day in UTC.
-- Add/edit events via `ACTION_INSERT` / `ACTION_EDIT` intents only (no `WRITE_CALENDAR`).
+- Add, edit and delete events directly (`WRITE_CALENDAR`) from an in-app editor, like iOS (D23, replaces the
+  intents-only D7). When the device has no calendars, offer to create a device-only calendar (`ACCOUNT_TYPE_LOCAL`).
 - Reminders are opt-in per event: `AlarmManager` (`USE_EXACT_ALARM`) + `NotificationManager`, persisted in DataStore,
   rescheduled after boot, and the event is re-checked when the alarm fires.
 - Nothing in the `foss` dependency graph may pull in GMS, Firebase, Play Billing, RevenueCat or analytics SDKs.
