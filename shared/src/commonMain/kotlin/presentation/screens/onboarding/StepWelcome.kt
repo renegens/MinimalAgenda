@@ -11,7 +11,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import data.APP_DISPLAY_NAME
 import presentation.components.CalendarIcon
 import presentation.components.MainCTAButton
 import presentation.components.TextSubtitle
@@ -23,7 +22,7 @@ fun StepWelcome(onContinue: () -> Unit) {
             modifier = Modifier.fillMaxSize().padding(16.dp),
         ) {
             Spacer(modifier = Modifier.weight(0.5F))
-            TextTitle(text = "Welcome,\nYour Private $APP_DISPLAY_NAME")
+            TextTitle(text = "Welcome,\nYour Private Daily Planner")
             Spacer(modifier = Modifier.height(16.dp))
             TextSubtitle("Plan your day, hide sensitive events, and protect your privacy.")
             Spacer(modifier = Modifier.height(32.dp))

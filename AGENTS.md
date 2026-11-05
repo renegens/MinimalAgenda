@@ -4,7 +4,7 @@ Guidance for AI coding agents working in this repository.
 
 ## Project
 
-MinimalAgenda (display name "Daily Planner") is a minimalist agenda app that shows events from the
+MinimalAgenda (display name "Minimal Agenda") is a minimalist agenda app that shows events from the
 device's own calendars. It is a Kotlin Multiplatform project with a shared Compose Multiplatform UI.
 
 **Work on `main`** (trunk-based; `develop` was merged into `main` and deleted in Nov 2026).
@@ -13,7 +13,7 @@ device's own calendars. It is a Kotlin Multiplatform project with a shared Compo
   onboarding, demo mode, multi-day events).
 - **Android:** feature-complete, not yet released. Reads real calendars (`CalendarContract.Instances`), offers a
   device-only calendar when none exist, adds/edits/deletes events in the shared editor, and schedules per-event
-  reminders. Release prep (rename, license, signing, CI) is the next phase.
+  reminders. Release prep (rename, license, signing, CI) is done; see "Release" below.
 
 Decisions and open questions are tracked in the
 "MinimalAgenda — Android Support Decisions" doc: https://claude.ai/artifact/HjjwoK4A95C76Hm3YHXtTe
@@ -100,7 +100,7 @@ iosApp/              Xcode project (SwiftUI host), runs :shared:embedAndSignAppl
   `adb shell am start -n eu.giant.agenda/.MainActivity`.
 - Nothing in the `foss` dependency graph may pull in GMS, Firebase, Play Billing, RevenueCat or analytics SDKs.
 - iOS stays in the repo as unsupported, but shared-code changes should still keep it building.
-- App will be renamed "Minimal Agenda", licensed GPL-3.0 (name and icon reserved).
+- App is named "Minimal Agenda", licensed GPL-3.0-only (name and icon reserved).
 
 ## Build and run
 
@@ -115,6 +115,15 @@ open iosApp/iosApp.xcodeproj                                           # iOS: bu
 Gradle needs JDK 21; it fails on JDK 25. The Android SDK path goes in `local.properties` (gitignored).
 
 Tests live in `shared/src/commonTest` (hand-written fakes, no mocking library). When adding logic, add tests for it there.
+
+## Release
+
+- Release signing reads `MINIMAL_AGENDA_KEYSTORE`, `MINIMAL_AGENDA_KEYSTORE_PASSWORD`, `MINIMAL_AGENDA_KEY_ALIAS`,
+  `MINIMAL_AGENDA_KEY_PASSWORD` (env vars or Gradle properties); without them release builds are unsigned.
+  Never commit a keystore (`*.jks`, `*.keystore` are gitignored).
+- `-PversionName=... -PversionCode=...` override the defaults in `androidApp/build.gradle.kts`.
+- Pushing a `v*` tag runs `.github/workflows/release.yml` (tests, signed FOSS APK attached to a GitHub Release,
+  Play AAB as a workflow artifact). `ci.yml` runs tests and debug builds on `main`. Details in README.
 
 ## Working rules
 

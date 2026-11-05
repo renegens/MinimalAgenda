@@ -5,6 +5,7 @@ import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
+import platform.AppConfig
 import platform.Browser
 import platform.CalendarPermissionHandler
 import platform.EventEditViewHandler
@@ -21,6 +22,12 @@ import repository.CalendarRepository
 import repository.iOSCalendarRepository
 
 actual val platformModule = module {
+    single<AppConfig> {
+        object : AppConfig {
+            override val showDonate = false
+            override val showFocusModeSetup = true
+        }
+    }
     single { iOSCalendarRepository(get()) }.bind<CalendarRepository>()
     single { DataStore() }
     single { iOSNotificationPermissionHandler() }.bind<NotificationPermissionHandler>()

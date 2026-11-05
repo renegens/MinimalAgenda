@@ -5,6 +5,16 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+// Release signing is read from environment variables or Gradle properties. When absent, release builds stay unsigned.
+fun signingValue(name: String): String? =
+    (System.getenv(name) ?: providers.gradleProperty(name).orNull)?.takeIf { it.isNotBlank() }
+
+val keystorePath = signingValue("MINIMAL_AGENDA_KEYSTORE")
+val keystorePassword = signingValue("MINIMAL_AGENDA_KEYSTORE_PASSWORD")
+val keyAliasValue = signingValue("MINIMAL_AGENDA_KEY_ALIAS")
+val keyPasswordValue = signingValue("MINIMAL_AGENDA_KEY_PASSWORD")
+val hasReleaseSigning = listOf(keystorePath, keystorePassword, keyAliasValue, keyPasswordValue).all { it != null }
+
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
@@ -19,8 +29,19 @@ android {
         applicationId = "eu.giant.agenda"
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = providers.gradleProperty("versionCode").orNull?.toInt() ?: 1
+        versionName = providers.gradleProperty("versionName").orNull ?: "1.0"
+    }
+
+    signingConfigs {
+        if (hasReleaseSigning) {
+            create("release") {
+                storeFile = file(keystorePath!!)
+                storePassword = keystorePassword
+                keyAlias = keyAliasValue
+                keyPassword = keyPasswordValue
+            }
+        }
     }
 
     flavorDimensions += "distribution"
@@ -44,6 +65,7 @@ android {
         getByName("release") {
             isMinifyEnabled = false
             isDebuggable = false
+            if (hasReleaseSigning) signingConfig = signingConfigs.getByName("release")
         }
         getByName("debug") {
             isDebuggable = true

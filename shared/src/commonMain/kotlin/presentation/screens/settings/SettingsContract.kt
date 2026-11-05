@@ -16,6 +16,8 @@ class SettingsContract {
         val privateNotifications: Boolean = true,
         val notificationTime: Int = 5,
         val hideBottomNavigation: Boolean = false,
+        val showDonate: Boolean = false,
+        val showFocusModeSetup: Boolean = false,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
     ) : UiState
 
@@ -37,5 +39,6 @@ class SettingsContract {
         object OnOpenDeviceSettings : Event()
         object OnOpenPrivacyPolicy : Event()
         object OnOpenTermsOfService : Event()
+        object OnOpenDonate : Event()
     }
 }

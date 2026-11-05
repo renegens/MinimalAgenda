@@ -197,8 +197,26 @@ fun SettingsScreen(
             )
         }
 
+        // --- SUPPORT DEVELOPMENT (FOSS build only) ---
+        if (state.showDonate) {
+            SettingsItem {
+                ItemTitle("Support development")
+                Spacer(modifier = Modifier.height(8.dp))
+                ItemBody("Minimal Agenda is free and open source. If you find it useful, you can support its development.")
+                Spacer(modifier = Modifier.height(16.dp))
+                Text(
+                    "Support development",
+                    Modifier
+                        .padding(vertical = 8.dp)
+                        .noRippleClickable { viewModel.setEvent(Event.OnOpenDonate) },
+                    style = iosBody,
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
+
         // --- SECTION 6: PRIVACY & TERMS ---
-        SettingsItem {
+        SettingsItem(showDivider = state.showFocusModeSetup) {
             ItemTitle("Legal")
             Spacer(modifier = Modifier.height(16.dp))
             Text(
@@ -221,15 +239,17 @@ fun SettingsScreen(
         }
 
         // --- SECTION 7: IOS FOCUS MODES ---
-        SettingsItem(showDivider = false) {
-            ItemTitle("iOS Focus Mode Setup")
-            Spacer(modifier = Modifier.height(16.dp))
-            ItemBody("Ensure you receive alerts even when Do Not Disturb is on:")
-            Spacer(modifier = Modifier.height(12.dp))
-            // Bullet points for clearer instructions
-            ItemBody("1. Open iOS Settings > Focus")
-            ItemBody("2. Select a mode (e.g., Work)")
-            ItemBody("3. Add this app to 'Allowed Notifications'")
+        if (state.showFocusModeSetup) {
+            SettingsItem(showDivider = false) {
+                ItemTitle("iOS Focus Mode Setup")
+                Spacer(modifier = Modifier.height(16.dp))
+                ItemBody("Ensure you receive alerts even when Do Not Disturb is on:")
+                Spacer(modifier = Modifier.height(12.dp))
+                // Bullet points for clearer instructions
+                ItemBody("1. Open iOS Settings > Focus")
+                ItemBody("2. Select a mode (e.g., Work)")
+                ItemBody("3. Add this app to 'Allowed Notifications'")
+            }
         }
         Spacer(modifier = Modifier.height(64.dp))
     }

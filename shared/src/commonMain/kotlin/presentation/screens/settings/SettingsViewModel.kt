@@ -7,6 +7,8 @@ import domain.model.Settings
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
 import kotlinx.coroutines.launch
+import data.DONATE_URL
+import platform.AppConfig
 import platform.Browser
 import platform.CalendarPermissionHandler
 import presentation.base.BaseViewModel
@@ -18,14 +20,18 @@ class SettingsViewModel(
     private val browser: Browser,
     private val saveSettingsUseCase: SaveSettingsUseCase,
     private val getSettingsUseCase: GetSettingsUseCase,
-    private val permissionHandler: CalendarPermissionHandler
+    private val permissionHandler: CalendarPermissionHandler,
+    appConfig: AppConfig
 ) : BaseViewModel<Event, State, Effect>() {
+
+    private val donateEnabled = appConfig.showDonate
+    private val focusModeSetupEnabled = appConfig.showFocusModeSetup
 
     init {
         setEvent(Event.Load)
         // Load initial calendar permission state
         val permissionState = permissionHandler.getPermissionState()
-        setState { copy(calendarPermission = permissionState) }
+        setState { copy(calendarPermission = permissionState, showDonate = donateEnabled, showFocusModeSetup = focusModeSetupEnabled) }
     }
 
     override fun createInitialState() = State()
@@ -71,6 +77,9 @@ class SettingsViewModel(
             }
             Event.OnOpenPrivacyPolicy -> {
                 browser.openUrl("https://giant-solutions.eu/calendar/privacy/index.html")
+            }
+            Event.OnOpenDonate -> {
+                if (donateEnabled) browser.openUrl(DONATE_URL)
             }
             Event.OnOpenTermsOfService -> {
                 browser.openUrl("https://giant-solutions.eu/calendar/terms/index.html")

@@ -1,0 +1,23 @@
+Minimal Agenda is a minimalist agenda that shows the events from the calendars already on your device, in one clean, distraction-free list.
+
+<b>Features</b>
+<ul>
+<li>Agenda view of your upcoming events, plus month and year overviews</li>
+<li>Works with every calendar on your device (Google, Nextcloud/DAVx5, local and others)</li>
+<li>Add, edit and delete events; recurring events and multi-day events are supported</li>
+<li>Optional reminders for individual events, with discreet notifications that hide event names on the lock screen</li>
+<li>Light, dark and system themes, accent colors, immersive mode</li>
+<li>If your device has no calendar, you can create a device-only one</li>
+</ul>
+
+<b>Privacy</b>
+<ul>
+<li>No data collection, no analytics, no crash reporting, no ads</li>
+<li>No network access: your events never leave your device</li>
+<li>Calendar data is read and written only through the Android system calendar</li>
+</ul>
+
+<b>Free and open source</b>
+Minimal Agenda is licensed under the GPL-3.0 and every feature is free. If you like it, you can support development through GitHub Sponsors: https://github.com/sponsors/renegens
+
+Source code: https://github.com/renegens/MinimalAgenda
