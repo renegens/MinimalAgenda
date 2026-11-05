@@ -24,7 +24,7 @@ class GetAllEventsUseCase(
         val allEvents = if (showDemoModeUseCase()){
             generateDemoAgendaEvents()
         }else{
-            calendarRepository.getEvents(durationInMonths).map { it.toEvent() }
+            calendarRepository.getEvents(durationInMonths).mapNotNull { it.toEvent() }
         }
 
         val hiddenEvents = hiddenEventsRepository.getEvents()

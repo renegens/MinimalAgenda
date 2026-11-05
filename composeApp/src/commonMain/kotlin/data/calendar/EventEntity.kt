@@ -18,18 +18,23 @@ data class EventEntity(
     val uses24HourClock: Boolean
 )
 
-fun EventEntity.toEvent(): AgendaEvent {
-
-    //todo add default event with values
+/**
+ * Maps the entity to an [AgendaEvent], or returns null when a required field (id or start time) is
+ * missing so that one bad event can be skipped without failing the whole load.
+ * Optional fields fall back to defaults: title -> "", allDay/isRecurring -> false.
+ */
+fun EventEntity.toEvent(): AgendaEvent? {
+    val id = id ?: return null
+    val startTime = startTime ?: return null
 
     return AgendaEvent(
-        id = id!!,
-        title = title!!,
+        id = id,
+        title = title.orEmpty(),
         location = location,
-        startTimeInUTC = startTime!!,
+        startTimeInUTC = startTime,
         endTimeInUTC = endTime,
-        allDay = allDay!!,
-        isRecurring = isRecurring!!,
+        allDay = allDay ?: false,
+        isRecurring = isRecurring ?: false,
         isMultiDay = isMultiDay,
         epochDay = epochDay,
         isHidden = false,

@@ -88,6 +88,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                 val ekEvent = eventStore.eventWithIdentifier(id)
                 if (ekEvent == null) {
                     continuation.resume(null)
+                    return@suspendCancellableCoroutine
                 }
                 val timeZone = TimeZone.currentSystemDefault()
                 val uses24HourClock = uses24HourClock()
@@ -137,6 +138,7 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
                     if (calendar == null) {
                         continuation.resume(false)
+                        return@suspendCancellableCoroutine
                     }
 
                     val newEvent = EKEvent.eventWithEventStore(eventStore)

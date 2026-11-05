@@ -6,10 +6,10 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import testutil.eventEntity
 import testutil.at
-import kotlin.test.Ignore
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertFalse
+import kotlin.test.assertNull
 import kotlin.test.assertTrue
 import kotlin.time.ExperimentalTime
 
@@ -21,8 +21,6 @@ class StringExtensionsTest {
         assertEquals("May", "May".toShortName())
     }
 
-    // Known bug: String.toShortName() crashes on strings shorter than 3 characters, fixed in a follow-up
-    @Ignore
     @Test
     fun toShortNameOfShortStringReturnsWholeString() {
         assertEquals("ab", "ab".toShortName())
@@ -188,7 +186,7 @@ class EventEntityMappingTest {
 
     @Test
     fun toEventMapsFields() {
-        val e = eventEntity(id = "x", title = "T", start = at(d, 9), end = at(d, 10), allDay = true).toEvent()
+        val e = eventEntity(id = "x", title = "T", start = at(d, 9), end = at(d, 10), allDay = true).toEvent()!!
         assertEquals("x", e.id)
         assertEquals("T", e.title)
         assertTrue(e.allDay)
@@ -197,17 +195,21 @@ class EventEntityMappingTest {
         assertEquals(at(d, 9).toInstant(TimeZone.UTC).epochSeconds, e.startTimeInUTC)
     }
 
-    // Known bug: EventEntity.toEvent() uses !! on every field, so one null field fails the whole load, fixed in a follow-up
-    @Ignore
     @Test
-    fun toEventDoesNotThrowOnNullTitle() {
-        eventEntity(title = null, start = at(d, 9)).toEvent()
+    fun toEventDefaultsNullOptionalFields() {
+        val e = eventEntity(title = null, start = at(d, 9), allDay = null, isRecurring = null).toEvent()!!
+        assertEquals("", e.title)
+        assertFalse(e.allDay)
+        assertFalse(e.isRecurring)
     }
 
-    // Known bug: EventEntity.toEvent() uses !! on every field, so one null field fails the whole load, fixed in a follow-up
-    @Ignore
     @Test
-    fun toEventDoesNotThrowOnNullStartTime() {
-        eventEntity(start = at(d, 9), startTime = null).toEvent()
+    fun toEventReturnsNullWhenStartTimeMissing() {
+        assertNull(eventEntity(start = at(d, 9), startTime = null).toEvent())
+    }
+
+    @Test
+    fun toEventReturnsNullWhenIdMissing() {
+        assertNull(eventEntity(id = null, start = at(d, 9)).toEvent())
     }
 }

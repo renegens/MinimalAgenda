@@ -231,4 +231,16 @@ class GetAllEventsUseCaseTest {
         val divider = list.indexOfFirst { it is DayListViewType.Divider && it.epochDay == today.toEpochDays() }
         assertEquals(6, list.subList(header, divider).count { it is DayListViewType.Event })
     }
+
+    @Test
+    fun eventsMissingRequiredFieldsAreSkippedNotFatal() = runTest {
+        calendarRepo.events = listOf(
+            eventEntity(id = "ok", title = null, start = at(day, 9)),
+            eventEntity(id = null, start = at(day, 10)),
+            eventEntity(id = "nostart", start = at(day, 11), startTime = null),
+        )
+        val result = run()
+        assertEquals(listOf("ok"), result.agendaEvents.map { it.id })
+        assertEquals("", result.agendaEvents.single().title)
+    }
 }

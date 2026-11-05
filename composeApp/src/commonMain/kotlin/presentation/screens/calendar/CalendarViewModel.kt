@@ -162,11 +162,9 @@ class CalendarViewModel(
         viewModelScope.launch {
             when (val state = toggleEventVisibilityUseCase(agendaEvent = agendaEvent)) {
                 is ToggleEventVisibilityUseCase.State.Success -> {
-                    val events = uiState.value.flatDaysAndEvents.toMutableList()
-                    val index =
-                        events.indexOfFirst { it is DayListViewType.Event && it.event == agendaEvent }
-                    events.removeAt(index)
-                    events.add(index, DayListViewType.Event(state.agendaEvent))
+                    val events = replaceEvent(
+                        uiState.value.flatDaysAndEvents, agendaEvent, state.agendaEvent
+                    )
                     setState { copy(flatDaysAndEvents = events, scrollToNow = false) }
                 }
             }
@@ -204,4 +202,15 @@ class CalendarViewModel(
             }
         }
     }
+}
+
+/** Returns [items] with the entry for [old] replaced by [new]; unchanged if [old] isn't in the list. */
+internal fun replaceEvent(
+    items: List<DayListViewType>,
+    old: AgendaEvent,
+    new: AgendaEvent
+): List<DayListViewType> {
+    val index = items.indexOfFirst { it is DayListViewType.Event && it.event == old }
+    if (index < 0) return items
+    return items.toMutableList().also { it[index] = DayListViewType.Event(new) }
 }

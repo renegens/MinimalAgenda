@@ -1,3 +1,3 @@
 package extensions
 
-fun String.toShortName() = this.substring(0, 3)
+fun String.toShortName() = this.take(3)

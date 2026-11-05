@@ -16,15 +16,15 @@ class HiddenEventsRepositoryImpl(private val hiddenEventsLocalDataSource: Hidden
     }
 
     override suspend fun hideEvent(agendaEvent: AgendaEvent) {
-        val list = getEvents()
-        list.toMutableList().add(agendaEvent.toHiddenEventEntity())
+        val list = getEvents().toMutableList()
+        list.add(agendaEvent.toHiddenEventEntity())
         val listToSave = Json.encodeToString(list)
         hiddenEventsLocalDataSource.saveEvents(listToSave)
     }
 
     override suspend fun unhiddenEvent(agendaEvent: AgendaEvent) {
-        val list = getEvents()
-        list.toMutableList().remove(agendaEvent.toHiddenEventEntity())
+        val list = getEvents().toMutableList()
+        list.remove(agendaEvent.toHiddenEventEntity())
         val listToSave = Json.encodeToString(list)
         hiddenEventsLocalDataSource.saveEvents(listToSave)
     }
