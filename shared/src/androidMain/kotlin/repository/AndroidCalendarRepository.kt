@@ -8,6 +8,7 @@ import android.graphics.Color
 import android.net.Uri
 import android.provider.CalendarContract
 import android.provider.CalendarContract.Calendars
+import android.provider.CalendarContract.Events
 import android.provider.CalendarContract.Instances
 import data.calendar.CalendarEntity
 import data.calendar.CalendarMath
@@ -28,6 +29,8 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
             Calendars.CALENDAR_DISPLAY_NAME,
             Calendars.ACCOUNT_NAME,
             Calendars.ACCOUNT_TYPE,
+            Calendars.CALENDAR_ACCESS_LEVEL,
+            Calendars.IS_PRIMARY,
         )
         try {
             context.contentResolver.query(
@@ -40,6 +43,8 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                             name = cursor.getString(1).orEmpty(),
                             accountName = cursor.getString(2).orEmpty(),
                             accountType = cursor.getString(3).orEmpty(),
+                            canWrite = cursor.getInt(4) >= Calendars.CAL_ACCESS_CONTRIBUTOR,
+                            isPrimary = cursor.getInt(5) == 1,
                         )
                     )
                 }
@@ -170,9 +175,89 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         location: String,
         startTime: LocalDateTime,
         endTime: LocalDateTime,
-        allDay: Boolean
-    ): Boolean {
-        return false
+        allDay: Boolean,
+        calendarId: String?,
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val targetId = calendarId?.toLongOrNull()
+                ?: defaultWritableCalendarId()
+                ?: return@withContext false
+            val times = CalendarMath.toWriteTimes(startTime, endTime, allDay, TimeZone.currentSystemDefault())
+            val values = ContentValues().apply {
+                put(Events.CALENDAR_ID, targetId)
+                put(Events.TITLE, title)
+                put(Events.EVENT_LOCATION, location)
+                put(Events.DTSTART, times.dtStartMillis)
+                put(Events.DTEND, times.dtEndMillis)
+                put(Events.EVENT_TIMEZONE, times.timeZoneId)
+                put(Events.ALL_DAY, if (allDay) 1 else 0)
+            }
+            context.contentResolver.insert(Events.CONTENT_URI, values) != null
+        } catch (_: SecurityException) {
+            false
+        } catch (_: RuntimeException) {
+            false
+        }
+    }
+
+    override suspend fun updateEvent(
+        id: String,
+        title: String,
+        location: String,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        allDay: Boolean,
+    ): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val eventId = CalendarMath.parseInstanceId(id)?.eventId ?: return@withContext false
+            val uri = ContentUris.withAppendedId(Events.CONTENT_URI, eventId)
+            val recurring = context.contentResolver.query(
+                uri, arrayOf(Events.RRULE, Events.RDATE), null, null, null
+            )?.use {
+                if (!it.moveToFirst()) return@withContext false
+                CalendarMath.isRecurring(it.getString(0)) || CalendarMath.isRecurring(it.getString(1))
+            } ?: return@withContext false
+
+            val values = ContentValues().apply {
+                put(Events.TITLE, title)
+                put(Events.EVENT_LOCATION, location)
+                if (!recurring) {
+                    // Recurring events keep their DTSTART/DURATION/RRULE untouched: an instance's start is not
+                    // the series' start, and a DTEND on a recurring event would corrupt it.
+                    val times = CalendarMath.toWriteTimes(
+                        startTime, endTime, allDay, TimeZone.currentSystemDefault()
+                    )
+                    put(Events.DTSTART, times.dtStartMillis)
+                    put(Events.DTEND, times.dtEndMillis)
+                    putNull(Events.DURATION)
+                    put(Events.EVENT_TIMEZONE, times.timeZoneId)
+                    put(Events.ALL_DAY, if (allDay) 1 else 0)
+                }
+            }
+            context.contentResolver.update(uri, values, null, null) > 0
+        } catch (_: SecurityException) {
+            false
+        } catch (_: RuntimeException) {
+            false
+        }
+    }
+
+    override suspend fun deleteEvent(id: String): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val eventId = CalendarMath.parseInstanceId(id)?.eventId ?: return@withContext false
+            context.contentResolver.delete(
+                ContentUris.withAppendedId(Events.CONTENT_URI, eventId), null, null
+            ) > 0
+        } catch (_: SecurityException) {
+            false
+        } catch (_: RuntimeException) {
+            false
+        }
+    }
+
+    private suspend fun defaultWritableCalendarId(): Long? {
+        val writable = getCalendars().filter { it.canWrite }
+        return (writable.firstOrNull { it.isPrimary } ?: writable.firstOrNull())?.id?.toLongOrNull()
     }
 
     private companion object {

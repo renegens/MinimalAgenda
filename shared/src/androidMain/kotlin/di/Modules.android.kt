@@ -21,12 +21,12 @@ import repository.AndroidCalendarRepository
 
 actual val platformModule: Module = module {
     single { DataStore(get()) }
-    factory {ActivityEditEventView()}.bind<EventEditViewHandler>()
+    factory { ActivityEditEventView(get()) }.bind<EventEditViewHandler>()
     single { AndroidNotificationHandler() }.bind<NotificationHandler>()
     single { AndroidNotificationPermissionHandler() }.bind<NotificationPermissionHandler>()
     single { AndroidCalendarRepository(get()) }.bind<CalendarRepository>()
     single { PermissionRequester() }
     single { AndroidCalendarPermissionHandler(get(), get()) }.bind<CalendarPermissionHandler>()
     factory { Browser(get()) }
-    factory { AndroidModalPresenter() }.bind<ModalPresenter>()
+    factory { AndroidModalPresenter(get()) }.bind<ModalPresenter>()
 }

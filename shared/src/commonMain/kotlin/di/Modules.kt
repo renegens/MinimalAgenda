@@ -18,11 +18,14 @@ import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
 import org.koin.core.module.dsl.singleOf
+import org.koin.core.module.dsl.viewModel
 import org.koin.core.module.dsl.viewModelOf
 import org.koin.dsl.bind
 import org.koin.dsl.module
 
 import presentation.screens.add_event.AddEventViewModel
+import presentation.screens.add_event.EventEditorRequest
+import presentation.screens.add_event.EventEditorRequests
 import presentation.screens.calendar.CalendarViewModel
 import presentation.screens.onboarding.OnboardingViewModel
 import presentation.screens.main.AppViewModel
@@ -38,7 +41,10 @@ val sharedModule = module {
     viewModelOf(::AppViewModel)
     viewModelOf(::OnboardingViewModel)
     viewModelOf(::CalendarViewModel)
-    viewModelOf(::AddEventViewModel)
+    singleOf(::EventEditorRequests)
+    viewModel { params ->
+        AddEventViewModel(get(), params.getOrNull<EventEditorRequest>() ?: EventEditorRequest.Add)
+    }
     viewModelOf(::SettingsViewModel)
 
     singleOf(::CalendarGenerator)

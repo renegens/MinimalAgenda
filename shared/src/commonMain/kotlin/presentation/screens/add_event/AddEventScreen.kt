@@ -4,6 +4,7 @@ import AppSwitch
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -73,9 +74,12 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import data.calendar.CalendarEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
+import org.koin.core.parameter.parametersOf
+import presentation.components.AppAlertDialog
 import platform.formatTimestamp
 import presentation.components.NewEventHeader
 import presentation.components.clickableWithOpaqueText
@@ -85,8 +89,12 @@ import presentation.theme.TextFieldStyleDateAndTime
 import getPlatform
 
 @Composable
-fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
-    val viewModel: AddEventViewModel = koinViewModel()
+fun AddEventScreen(
+    onCancel: () -> Unit,
+    onSave: () -> Unit,
+    request: EventEditorRequest = EventEditorRequest.Add,
+) {
+    val viewModel: AddEventViewModel = koinViewModel(key = request.hashCode().toString()) { parametersOf(request) }
     val state by viewModel.uiState.collectAsState()
     val focusRequester = remember { FocusRequester() }
     val focusManager = LocalFocusManager.current
@@ -117,7 +125,7 @@ fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
             .verticalScroll(scrollState)
     ) {
         Header(
-            label = "New",
+            label = if (state.isEditing) "Edit" else "New",
             onCancel = { viewModel.setEvent(AddEventContract.Event.OnCancel) },
             isEnabled = state.isSaveEnabled(),
             onSave = { viewModel.setEvent(AddEventContract.Event.OnSave) }
@@ -139,7 +147,7 @@ fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        Details(
+        if (state.timesEditable) Details(
             startDate = state.startDate,
             startHours = state.startHours,
             startMinutes = state.startMinutes,
@@ -160,12 +168,106 @@ fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
             }
         )
 
-        Spacer(modifier = Modifier.height(24.dp))
-        BodyText(
-            "New events are added to the default calendar",
+        else BodyText(
+            "This event repeats. Changes to the title and location apply to all events in the series. " +
+                "To change the time, edit the series in your calendar app.",
             modifier = Modifier.padding(horizontal = 16.dp)
         )
+
+        Spacer(modifier = Modifier.height(24.dp))
+        if (!state.isEditing && state.calendars.size > 1) {
+            CalendarPicker(
+                calendars = state.calendars,
+                selectedId = state.calendarId,
+                onSelected = { viewModel.setEvent(AddEventContract.Event.OnCalendarSelected(it)) }
+            )
+        } else if (!state.isEditing) {
+            BodyText(
+                "New events are added to the default calendar",
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
+
+        if (state.saveFailed) {
+            Spacer(modifier = Modifier.height(16.dp))
+            BodyText(
+                "Couldn't save the change. Check that the calendar is still available and try again.",
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+        }
+
+        if (state.isEditing) {
+            Spacer(modifier = Modifier.height(16.dp))
+            TextButton(
+                onClick = { viewModel.setEvent(AddEventContract.Event.OnDelete) },
+                enabled = !state.isSaving,
+                modifier = Modifier.padding(horizontal = 8.dp)
+            ) {
+                BodyText(
+                    label = if (state.isRecurring) "Delete all events in series" else "Delete event",
+                    color = MaterialTheme.colorScheme.primary
+                )
+            }
+        }
         Spacer(modifier = Modifier.height(64.dp))
+    }
+
+    when (state.confirmation) {
+        AddEventContract.Confirmation.DeleteEvent -> AppAlertDialog(
+            title = if (state.isRecurring) "Delete series?" else "Delete event?",
+            message = if (state.isRecurring) {
+                "This event repeats. This deletes all events in the series."
+            } else {
+                "This removes the event from your calendar."
+            },
+            confirmButtonLabel = "Delete",
+            negativeButtonLabel = "Cancel",
+            onContinueRequest = { viewModel.setEvent(AddEventContract.Event.OnConfirm) },
+            onNegativeRequest = { viewModel.setEvent(AddEventContract.Event.OnDismissConfirmation) }
+        )
+
+        AddEventContract.Confirmation.ChangeSeries -> AppAlertDialog(
+            title = "Change series?",
+            message = "This changes all events in the series.",
+            confirmButtonLabel = "Change all",
+            negativeButtonLabel = "Cancel",
+            onContinueRequest = { viewModel.setEvent(AddEventContract.Event.OnConfirm) },
+            onNegativeRequest = { viewModel.setEvent(AddEventContract.Event.OnDismissConfirmation) }
+        )
+
+        null -> {}
+    }
+}
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+private fun CalendarPicker(
+    calendars: List<CalendarEntity>,
+    selectedId: String?,
+    onSelected: (String) -> Unit,
+) {
+    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+        BodyText("Calendar")
+        FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            calendars.forEach { calendar ->
+                val selected = calendar.id == selectedId
+                AssistChip(
+                    onClick = { calendar.id?.let(onSelected) },
+                    label = {
+                        BodyText(
+                            calendar.name,
+                            color = if (selected) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.tertiary
+                        )
+                    },
+                    colors = AssistChipDefaults.assistChipColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
+                )
+            }
+        }
     }
 }
 

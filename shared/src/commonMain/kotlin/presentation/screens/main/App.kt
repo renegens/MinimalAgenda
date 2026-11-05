@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -12,8 +13,11 @@ import kotlinx.coroutines.flow.collectLatest
 import navigation.Screen
 import org.jetbrains.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
+import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import platform.openSettings
+import presentation.screens.add_event.AddEventScreen
+import presentation.screens.add_event.EventEditorRequests
 import presentation.screens.calendar.CalendarScreen
 import presentation.screens.onboarding.Onboarding
 import presentation.theme.AppTheme
@@ -24,10 +28,20 @@ fun App() {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
         val navController = rememberNavController()
+        val editorRequests: EventEditorRequests = koinInject()
         val start = if (state.shouldShowOnboarding) {
             Screen.Onboarding
         } else {
             Screen.Agenda
+        }
+
+        // Android: platform presenters ask for the shared editor through EventEditorRequests.
+        LaunchedEffect(Unit) {
+            editorRequests.opened.collect {
+                if (navController.currentDestination?.route != Screen.CreateEvent.route) {
+                    navController.navigate(Screen.CreateEvent.route)
+                }
+            }
         }
 
         LaunchedEffect(Unit) {
@@ -56,6 +70,26 @@ fun App() {
                         },
                         onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
                         onOpenDeviceSettings = { viewModel.setEvent(AppContract.Event.OnOpenDeviceSettings) })
+                }
+
+                composable(Screen.CreateEvent.route) {
+                    val pending = remember { editorRequests.current }
+                    if (pending == null) {
+                        LaunchedEffect(Unit) { navController.popBackStack() }
+                    } else {
+                        AddEventScreen(
+                            request = pending.request,
+                            onCancel = {
+                                editorRequests.close()
+                                navController.popBackStack()
+                            },
+                            onSave = {
+                                editorRequests.close()
+                                navController.popBackStack()
+                                pending.onSave()
+                            }
+                        )
+                    }
                 }
 
                 composable(Screen.Onboarding.route) {

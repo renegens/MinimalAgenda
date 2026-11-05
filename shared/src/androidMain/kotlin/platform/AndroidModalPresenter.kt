@@ -1,41 +1,13 @@
 package platform
 
 import domain.model.AppTheme
+import presentation.screens.add_event.EventEditorRequest
+import presentation.screens.add_event.EventEditorRequests
 
-class AndroidModalPresenter : ModalPresenter {
+/** Opens the shared editor (a navigation route in `App`) in add mode. The theme is applied by `App`. */
+class AndroidModalPresenter(private val editorRequests: EventEditorRequests) : ModalPresenter {
 
-    override fun presentAddEvent(appTheme: AppTheme, onCompletion: () -> Unit) {
-        //navController.navigate(Screen.CreateEvent.route)
-
-
-//        composable(
-//            route = Screen.CreateEvent.route,
-//            enterTransition = enterPush,
-//            exitTransition = exitPush
-//        ) {
-//            AddEventScreen(onCancel = { navController.navigateUp() },
-//                onSave = { navController.navigateUp() })
-//        }
-
-
-//        NavHost(navController = navController,
-//            startDestination = Screen.Agenda.route,
-//            enterTransition = { EnterTransition.None },
-//            exitTransition = { ExitTransition.None }) {
-//            composable(route = Screen.Agenda.route, exitTransition = stayPush) {
-//                CalendarScreen(
-//                    appThemeMode = theme,
-//                    reloadEvents = state.shouldReloadEvents,
-//                    onAddEvent = {
-//                        viewModel.setEvent(AppContract.Event.NewEvent)
-//                    },
-//                    onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
-//                    })
-//            }
-//        }
+    override fun presentAddEvent(appTheme: AppTheme, onSave: () -> Unit) {
+        editorRequests.open(EventEditorRequest.Add, onSave)
     }
-
-
-
-
 }

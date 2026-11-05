@@ -138,4 +138,78 @@ class CalendarMathTest {
         assertFalse(CalendarMath.isRecurring(null))
         assertFalse(CalendarMath.isRecurring("  "))
     }
+
+    // ---- write conversion ----
+
+    @Test
+    fun timedWriteUsesRealInstantAndZone() {
+        val w = CalendarMath.toWriteTimes(
+            LocalDateTime(2026, 3, 10, 9, 0), LocalDateTime(2026, 3, 10, 10, 30), allDay = false, zone = berlin
+        )
+        assertEquals(utcMillis(2026, 3, 10, 8, 0), w.dtStartMillis)
+        assertEquals(utcMillis(2026, 3, 10, 9, 30), w.dtEndMillis)
+        assertEquals("Europe/Berlin", w.timeZoneId)
+    }
+
+    @Test
+    fun timedWriteNeverEndsBeforeStart() {
+        val w = CalendarMath.toWriteTimes(
+            LocalDateTime(2026, 3, 10, 9, 0), LocalDateTime(2026, 3, 10, 8, 0), allDay = false, zone = berlin
+        )
+        assertEquals(w.dtStartMillis, w.dtEndMillis)
+    }
+
+    @Test
+    fun allDayWriteIsUtcMidnightWithExclusiveEndInAnyZone() {
+        for (zone in listOf(la, berlin, auckland)) {
+            val w = CalendarMath.toWriteTimes(
+                LocalDateTime(2026, 3, 10, 0, 0), LocalDateTime(2026, 3, 10, 23, 59), allDay = true, zone = zone
+            )
+            assertEquals(utcMillis(2026, 3, 10), w.dtStartMillis)
+            assertEquals(utcMillis(2026, 3, 11), w.dtEndMillis)
+            assertEquals("UTC", w.timeZoneId)
+        }
+    }
+
+    @Test
+    fun allDayMultiDayWriteEndsAfterLastDay() {
+        val w = CalendarMath.toWriteTimes(
+            LocalDateTime(2026, 3, 10, 0, 0), LocalDateTime(2026, 3, 12, 23, 59), allDay = true, zone = la
+        )
+        assertEquals(utcMillis(2026, 3, 10), w.dtStartMillis)
+        assertEquals(utcMillis(2026, 3, 13), w.dtEndMillis)
+    }
+
+    @Test
+    fun endAfterCrossesMidnight() {
+        val end = CalendarMath.endAfter(LocalDateTime(2026, 3, 10, 23, 30), 90, berlin)
+        assertEquals(LocalDateTime(2026, 3, 11, 1, 0), end)
+    }
+
+    @Test
+    fun roundTripTimed() {
+        for (zone in listOf(la, berlin, auckland)) {
+            val start = LocalDateTime(2026, 7, 4, 18, 15)
+            val end = CalendarMath.endAfter(start, 75, zone)
+            val w = CalendarMath.toWriteTimes(start, end, allDay = false, zone = zone)
+            val r = CalendarMath.resolveTimes(w.dtStartMillis, w.dtEndMillis, allDay = false, zone = zone)
+            assertEquals(start, r.startLocalDateTime)
+            assertEquals(end, r.endLocalDateTime)
+            assertEquals(day(2026, 7, 4), r.epochDay)
+        }
+    }
+
+    @Test
+    fun roundTripAllDay() {
+        for (zone in listOf(la, berlin, auckland)) {
+            val start = LocalDateTime(2026, 12, 30, 0, 0)
+            val end = LocalDateTime(2027, 1, 1, 23, 59)
+            val w = CalendarMath.toWriteTimes(start, end, allDay = true, zone = zone)
+            val r = CalendarMath.resolveTimes(w.dtStartMillis, w.dtEndMillis, allDay = true, zone = zone)
+            assertEquals(LocalDate(2026, 12, 30), r.startLocalDateTime.date)
+            assertEquals(LocalDate(2027, 1, 1), r.endLocalDateTime.date)
+            assertEquals(day(2026, 12, 30), r.epochDay)
+            assertTrue(r.isMultiDay)
+        }
+    }
 }

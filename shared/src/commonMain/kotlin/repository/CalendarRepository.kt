@@ -16,5 +16,24 @@ interface CalendarRepository {
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         allDay: Boolean = false,
+        /** Target calendar (an id from [getCalendars]); null = the default one. */
+        calendarId: String? = null,
     ): Boolean
+
+    /**
+     * Updates the event [id] (an `EventEntity.id`). For all-day events [startTime]'s date is the first day
+     * and [endTime]'s date the last day (inclusive). Recurring events: only title and location are changed
+     * (the whole series); times are left alone so the series can't be corrupted. Returns true on success.
+     */
+    suspend fun updateEvent(
+        id: String,
+        title: String,
+        location: String,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        allDay: Boolean,
+    ): Boolean
+
+    /** Deletes the event [id]; for a recurring event this deletes the WHOLE series. Returns true on success. */
+    suspend fun deleteEvent(id: String): Boolean
 }

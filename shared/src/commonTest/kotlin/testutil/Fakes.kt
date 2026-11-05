@@ -28,6 +28,10 @@ class FakeCalendarRepository(
     var calendars: List<CalendarEntity> = emptyList()
     var createLocalCalendarCalls = 0
     var createLocalCalendarResult = true
+    val added = mutableListOf<SavedEvent>()
+    val updated = mutableListOf<SavedEvent>()
+    val deleted = mutableListOf<String>()
+    var saveResult = true
 
     override suspend fun getCalendars(): List<CalendarEntity> = calendars
 
@@ -49,9 +53,40 @@ class FakeCalendarRepository(
         location: String,
         startTime: LocalDateTime,
         endTime: LocalDateTime,
+        allDay: Boolean,
+        calendarId: String?
+    ): Boolean {
+        added.add(SavedEvent(null, title, location, startTime, endTime, allDay, calendarId))
+        return saveResult
+    }
+
+    override suspend fun updateEvent(
+        id: String,
+        title: String,
+        location: String,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
         allDay: Boolean
-    ): Boolean = true
+    ): Boolean {
+        updated.add(SavedEvent(id, title, location, startTime, endTime, allDay, null))
+        return saveResult
+    }
+
+    override suspend fun deleteEvent(id: String): Boolean {
+        deleted.add(id)
+        return saveResult
+    }
 }
+
+data class SavedEvent(
+    val id: String?,
+    val title: String,
+    val location: String,
+    val start: LocalDateTime,
+    val end: LocalDateTime,
+    val allDay: Boolean,
+    val calendarId: String?,
+)
 
 class FakeHiddenEventsRepository(
     var hidden: List<HiddenEventEntity> = emptyList()

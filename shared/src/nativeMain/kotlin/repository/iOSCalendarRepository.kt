@@ -132,7 +132,8 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         location: String,
         startTime: LocalDateTime,
         endTime: LocalDateTime,
-        allDay: Boolean
+        allDay: Boolean,
+        calendarId: String?
     ): Boolean {
         return withContext(Dispatchers.IO) {
             suspendCancellableCoroutine { continuation ->
@@ -164,6 +165,18 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
             }
         }
     }
+
+    // iOS edits and deletes through Apple's native editor (EKEventEditViewController).
+    override suspend fun updateEvent(
+        id: String,
+        title: String,
+        location: String,
+        startTime: LocalDateTime,
+        endTime: LocalDateTime,
+        allDay: Boolean
+    ): Boolean = false
+
+    override suspend fun deleteEvent(id: String): Boolean = false
 
     override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
         return withContext(Dispatchers.IO) {

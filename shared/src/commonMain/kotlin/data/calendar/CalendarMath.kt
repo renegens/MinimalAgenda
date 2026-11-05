@@ -1,12 +1,15 @@
 package data.calendar
 
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.atTime
+import kotlinx.datetime.plus
 import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Duration.Companion.minutes
 import kotlin.time.Instant
 
 /**
@@ -94,6 +97,37 @@ object CalendarMath {
         val begin = parts[1].toLongOrNull() ?: return null
         return InstanceId(eventId, begin)
     }
+
+    /** Values to store in `CalendarContract.Events` (milliseconds) for a non-recurring event. */
+    data class WriteTimes(val dtStartMillis: Long, val dtEndMillis: Long, val timeZoneId: String)
+
+    /**
+     * Inverse of [resolveTimes]. [start] and [end] are local date-times in [zone].
+     *
+     * Timed events are stored as real instants with `EVENT_TIMEZONE` = [zone] (end is never before start).
+     *
+     * All-day events must be stored as UTC midnight with `EVENT_TIMEZONE` "UTC" and an exclusive end, so
+     * [start]'s date is the first day, [end]'s date is the LAST day (inclusive, as [resolveTimes] reports it)
+     * and the stored end is UTC midnight of the day after.
+     */
+    fun toWriteTimes(start: LocalDateTime, end: LocalDateTime, allDay: Boolean, zone: TimeZone): WriteTimes {
+        if (allDay) {
+            val firstDay = start.date
+            val lastDay = if (end.date > firstDay) end.date else firstDay
+            return WriteTimes(
+                dtStartMillis = firstDay.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(),
+                dtEndMillis = lastDay.plus(1, DateTimeUnit.DAY).atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(),
+                timeZoneId = TimeZone.UTC.id,
+            )
+        }
+        val startInstant = start.toInstant(zone)
+        val endInstant = end.toInstant(zone).let { if (it < startInstant) startInstant else it }
+        return WriteTimes(startInstant.toEpochMilliseconds(), endInstant.toEpochMilliseconds(), zone.id)
+    }
+
+    /** [start] plus [durationInMinutes] on the real timeline of [zone] (may cross midnight). */
+    fun endAfter(start: LocalDateTime, durationInMinutes: Long, zone: TimeZone): LocalDateTime =
+        (start.toInstant(zone) + durationInMinutes.minutes).toLocalDateTime(zone)
 
     fun isRecurring(rrule: String?): Boolean = !rrule.isNullOrBlank()
 }
