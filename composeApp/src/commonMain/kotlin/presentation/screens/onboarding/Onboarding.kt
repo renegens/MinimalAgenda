@@ -32,11 +32,6 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.PaperBackground
 import presentation.components.noRippleClickable
 import presentation.theme.DMSans24Medium60
-import com.revenuecat.purchases.kmp.models.CustomerInfo
-import com.revenuecat.purchases.kmp.models.StoreTransaction
-import com.revenuecat.purchases.kmp.ui.revenuecatui.Paywall
-import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallListener
-import com.revenuecat.purchases.kmp.ui.revenuecatui.PaywallOptions
 import org.jetbrains.compose.ui.tooling.preview.Preview
 
 @Composable
@@ -54,30 +49,25 @@ fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
         viewModel.effect.collectLatest {
             when (it) {
                 OnboardingContract.Effect.CloseOnboarding -> dismiss.invoke()
-                OnboardingContract.Effect.ShowPaywall -> coroutineScope.launch {
-                    pagerState.animateScrollToPage(Onboarding.StepPaywall.position)
-                }
             }
         }
     }
     PaperBackground(appThemeMode = AppThemeMode.FollowSystem) {
 
         Column(modifier = Modifier.fillMaxSize().statusBarsPadding()) {
-            if (pagerState.currentPage != Onboarding.StepPaywall.position) {
-                Row(
-                    modifier = Modifier.wrapContentHeight().fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                ) {
-                    repeat(pagerState.pageCount) { iteration ->
-                        val color =
-                            if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary
-                        Box(
-                            modifier = Modifier.padding(2.dp).clip(CircleShape).background(color)
-                                .size(12.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.weight(1F))
+            Row(
+                modifier = Modifier.wrapContentHeight().fillMaxWidth().padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                repeat(pagerState.pageCount) { iteration ->
+                    val color =
+                        if (pagerState.currentPage == iteration) MaterialTheme.colorScheme.tertiary else MaterialTheme.colorScheme.secondary
+                    Box(
+                        modifier = Modifier.padding(2.dp).clip(CircleShape).background(color)
+                            .size(12.dp)
+                    )
                 }
+                Spacer(modifier = Modifier.weight(1F))
             }
             HorizontalPager(state = pagerState) { page ->
                 when (page) {
@@ -96,36 +86,10 @@ fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
                     Onboarding.StepThree.position -> StepCalendarPermission(
                         calendarPermissionState = state.calendarPermissionState,
                         onContinue = {
-                            coroutineScope.launch {
-                                pagerState.animateScrollToPage(Onboarding.StepPaywall.position)
-                            }
+                            viewModel.setEvent(OnboardingContract.Event.OnDismissOnboarding)
                         },
                         openSettings = openSettings,
                         requestCalendarPermission = { viewModel.setEvent(OnboardingContract.Event.OnRequestCalendarPermission) })
-
-                    Onboarding.StepPaywall.position -> {
-                        val listener = object : PaywallListener {
-                            override fun onPurchaseCompleted(
-                                customerInfo: CustomerInfo, storeTransaction: StoreTransaction
-                            ) {
-                                viewModel.setEvent(OnboardingContract.Event.OnDismissOnboarding)
-                            }
-
-                            override fun onPurchaseCancelled() {
-                                viewModel.setEvent(OnboardingContract.Event.OnDismissOnboarding)
-                            }
-                        }
-
-                        val options = PaywallOptions(
-                            dismissRequest = {
-                                viewModel.setEvent(OnboardingContract.Event.OnDismissOnboarding)
-                            }) {
-                            this.listener = listener
-                            shouldDisplayDismissButton = true
-                        }
-
-                       Paywall(options = options)
-                    }
                 }
             }
         }
@@ -133,7 +97,7 @@ fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {
 }
 
 enum class Onboarding(val position: Int) {
-    StepOne(0), StepTwo(1), StepThree(2), StepPaywall(3);
+    StepOne(0), StepTwo(1), StepThree(2);
 }
 
 @Preview

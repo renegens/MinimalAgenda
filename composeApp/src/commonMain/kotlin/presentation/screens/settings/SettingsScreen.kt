@@ -10,7 +10,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
-import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -26,22 +25,16 @@ import presentation.theme.iosExtraLargeTitle
 
 @Composable
 fun SettingsScreen(
-    notEligible: () -> Unit,
     onDismiss: () -> Unit = {},
     onOpenDeviceSettings: () -> Unit = {}
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
-    val focusManager = LocalFocusManager.current
     val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
             when (it) {
-                Effect.NotEligible -> {
-                    focusManager.clearFocus()
-                    notEligible.invoke()
-                }
                 Effect.Dismiss -> onDismiss.invoke()
                 Effect.OpenDeviceSettings -> onOpenDeviceSettings.invoke()
             }
@@ -128,7 +121,7 @@ fun SettingsScreen(
                 onCheckedChange = { viewModel.setEvent(Event.OnTogglePrivateNotifications(it)) }
             )
             // Focus on the benefit (Privacy) rather than the mechanism (Generic title)
-            ItemBody("Hide event names on your lock screen for total privacy. (Premium)")
+            ItemBody("Hide event names on your lock screen for total privacy.")
         }
 
         SettingsItem {
@@ -160,7 +153,7 @@ fun SettingsScreen(
         SettingsItem {
             ItemTitle("Accent Color")
             Spacer(modifier = Modifier.height(4.dp))
-            ItemBody("Personalize the app to match your style. (Premium)")
+            ItemBody("Personalize the app to match your style.")
             Spacer(modifier = Modifier.height(16.dp))
             ColorSelection(state.appColor) { viewModel.setEvent(Event.OnColorSelected(it)) }
         }

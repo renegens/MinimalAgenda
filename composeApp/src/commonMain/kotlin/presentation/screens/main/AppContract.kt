@@ -15,8 +15,6 @@ class AppContract {
     ) : UiState
 
     sealed class Effect : UiEffect {
-        object PresentPaywall : Effect()
-        object DismissPaywall : Effect()
         object CloseOnboardingAndGoToCalendar: Effect()
         object OpenDeviceAppSettings: Effect()
     }
@@ -25,10 +23,6 @@ class AppContract {
         class EditExternal(val agendaEvent: AgendaEvent) : Event()
         object NewEvent : Event()
         object OnOpenDeviceSettings: Event()
-        object NotEligible : Event()
-        object OnDismissPaywall : Event()
-        object OnPurchased : Event()
-        object CheckPaywall : Event()
         object DismissOnboarding : Event()
     }
 }

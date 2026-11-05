@@ -30,8 +30,6 @@ class AndroidModalPresenter : ModalPresenter {
 //                        viewModel.setEvent(AppContract.Event.NewEvent)
 //                    },
 //                    onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
-//                    notEligible = {
-//                        viewModel.setEvent(AppContract.Event.NotEligible)
 //                    })
 //            }
 //        }

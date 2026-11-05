@@ -20,7 +20,6 @@ class SettingsContract {
     ) : UiState
 
     sealed class Effect : UiEffect {
-        object NotEligible: Effect()
         object Dismiss: Effect()
         object OpenDeviceSettings: Effect()
     }

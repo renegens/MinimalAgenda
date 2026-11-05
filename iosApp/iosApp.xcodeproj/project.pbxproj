@@ -9,10 +9,7 @@
 /* Begin PBXBuildFile section */
 		058557BB273AAA24004C7B11 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557BA273AAA24004C7B11 /* Assets.xcassets */; };
 		058557D9273AAEEB004C7B11 /* Preview Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 058557D8273AAEEB004C7B11 /* Preview Assets.xcassets */; };
-		1C57F38A2E2F62A500CEB9DD /* PurchasesHybridCommon in Frameworks */ = {isa = PBXBuildFile; productRef = 1C57F3892E2F62A500CEB9DD /* PurchasesHybridCommon */; };
-		1C57F38C2E2F62A500CEB9DD /* PurchasesHybridCommonUI in Frameworks */ = {isa = PBXBuildFile; productRef = 1C57F38B2E2F62A500CEB9DD /* PurchasesHybridCommonUI */; };
 		1CC22FF82CA4235500E2D6AE /* Launch Screen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 1CC22FF72CA4235500E2D6AE /* Launch Screen.storyboard */; };
-		1CD1ED392E2FAB3F00CCA7FB /* Mixpanel in Frameworks */ = {isa = PBXBuildFile; productRef = 1CD1ED382E2FAB3F00CCA7FB /* Mixpanel */; };
 		2152FB042600AC8F00CF470E /* iOSApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2152FB032600AC8F00CF470E /* iOSApp.swift */; };
 		7555FF83242A565900829871 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7555FF82242A565900829871 /* ContentView.swift */; };
 /* End PBXBuildFile section */
@@ -34,9 +31,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1CD1ED392E2FAB3F00CCA7FB /* Mixpanel in Frameworks */,
-				1C57F38C2E2F62A500CEB9DD /* PurchasesHybridCommonUI in Frameworks */,
-				1C57F38A2E2F62A500CEB9DD /* PurchasesHybridCommon in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -136,10 +130,6 @@
 				Base,
 			);
 			mainGroup = 7555FF72242A565900829871;
-			packageReferences = (
-				1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */,
-				1CD1ED372E2FAB3F00CCA7FB /* XCRemoteSwiftPackageReference "mixpanel-swift" */,
-			);
 			productRefGroup = 7555FF7C242A565900829871 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
@@ -406,43 +396,6 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
-
-/* Begin XCRemoteSwiftPackageReference section */
-		1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/RevenueCat/purchases-hybrid-common";
-			requirement = {
-				kind = exactVersion;
-				version = 15.0.0;
-			};
-		};
-		1CD1ED372E2FAB3F00CCA7FB /* XCRemoteSwiftPackageReference "mixpanel-swift" */ = {
-			isa = XCRemoteSwiftPackageReference;
-			repositoryURL = "https://github.com/mixpanel/mixpanel-swift";
-			requirement = {
-				branch = master;
-				kind = branch;
-			};
-		};
-/* End XCRemoteSwiftPackageReference section */
-
-/* Begin XCSwiftPackageProductDependency section */
-		1C57F3892E2F62A500CEB9DD /* PurchasesHybridCommon */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
-			productName = PurchasesHybridCommon;
-		};
-		1C57F38B2E2F62A500CEB9DD /* PurchasesHybridCommonUI */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1C57F3882E2F62A500CEB9DD /* XCRemoteSwiftPackageReference "purchases-hybrid-common" */;
-			productName = PurchasesHybridCommonUI;
-		};
-		1CD1ED382E2FAB3F00CCA7FB /* Mixpanel */ = {
-			isa = XCSwiftPackageProductDependency;
-			package = 1CD1ED372E2FAB3F00CCA7FB /* XCRemoteSwiftPackageReference "mixpanel-swift" */;
-			productName = Mixpanel;
-		};
-/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = 7555FF73242A565900829871 /* Project object */;
 }

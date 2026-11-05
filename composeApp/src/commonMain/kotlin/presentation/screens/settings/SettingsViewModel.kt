@@ -6,7 +6,6 @@ import domain.model.AppThemeMode
 import domain.model.Settings
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
-import extensions.guardPremium
 import kotlinx.coroutines.launch
 import platform.Browser
 import platform.CalendarPermissionHandler
@@ -35,19 +34,13 @@ class SettingsViewModel(
         when (event) {
             Event.OnDismiss -> setEffect { Effect.Dismiss }
             is Event.OnModeSelected -> setAppThemeMode(event.appThemeMode)
-            is Event.OnColorSelected -> guardPremium(
-                onSubscribed = { setAppColor(event.appColor) }, onPaywall = ::showPaywall
-            )
+            is Event.OnColorSelected -> setAppColor(event.appColor)
 
-            is Event.OnTogglePrivateNotifications -> guardPremium(
-                onSubscribed = { setPrivateNotification(event.checked) }, onPaywall = ::showPaywall
-            )
+            is Event.OnTogglePrivateNotifications -> setPrivateNotification(event.checked)
 
             is Event.OnToggleHideBottomNavigation -> setHideBottomNavigation(event.checked)
 
-            is Event.OnNotificationTimeEntered -> guardPremium(
-                onSubscribed = { setNotificationTime(event.time) }, onPaywall = ::showPaywall
-            )
+            is Event.OnNotificationTimeEntered -> setNotificationTime(event.time)
 
             Event.OnSentFeedback -> TODO()
             Event.Load -> {
@@ -128,10 +121,6 @@ class SettingsViewModel(
             saveSettingsUseCase.invoke(currentSettings.copy(hideBottomNavigation = isChecked))
             setState { copy(hideBottomNavigation = isChecked) }
         }
-    }
-
-    private fun showPaywall() {
-        setEffect { Effect.NotEligible }
     }
 
     private fun State.toSettings(): Settings {

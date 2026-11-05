@@ -67,8 +67,6 @@ kotlin {
             api(libs.koin.core)
             implementation(libs.koin.compose)
             implementation(libs.koin.compose.viewmodel)
-            implementation(libs.purchases.core)
-            implementation(libs.purchases.ui)
             implementation(libs.cupertino)
             implementation(libs.cupertino.native)
             implementation(libs.cupertino.icons.extended)

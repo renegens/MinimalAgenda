@@ -49,7 +49,6 @@ fun CalendarScreen(
     appThemeMode: AppThemeMode,
     onAddEvent: () -> Unit,
     onEditEvent: (AgendaEvent) -> Unit,
-    notEligible: () -> Unit,
     onOpenDeviceSettings: () -> Unit,
     forceEventLoad: Int,
 ) {
@@ -114,7 +113,6 @@ fun CalendarScreen(
                     shouldShowNotificationPermission = true
                 }
 
-                is Effect.ShowPaywall -> notEligible.invoke()
                 is Effect.ShowEdit -> onEditEvent.invoke(it.agendaEvent)
                 Effect.ShowSettings -> showSettingsBottomSheet = true
             }
@@ -248,14 +246,6 @@ fun CalendarScreen(
                     sheetState = settingsSheetState
                 ) {
                     SettingsScreen(
-                        notEligible = {
-                            scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
-                                if (!settingsSheetState.isVisible) {
-                                    showSettingsBottomSheet = false
-                                }
-                            }
-                            notEligible.invoke()
-                        },
                         onDismiss = {
                             scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
                                 if (!settingsSheetState.isVisible) {

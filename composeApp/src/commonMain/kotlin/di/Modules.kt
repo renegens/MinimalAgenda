@@ -2,7 +2,6 @@ package di
 
 import data.local.HiddenEventsLocalDataSource
 import data.local.LaunchCounterDataSource
-import data.local.PaywallLocalDataSource
 import data.local.SettingsLocalDataSource
 import data.local.SwipeToolTipDataSource
 import domain.use_case.AppThemeListenerUseCase
@@ -10,10 +9,8 @@ import domain.use_case.CalendarGenerator
 import domain.use_case.FlatCalendarViewFactory
 import domain.use_case.GetAllEventsUseCase
 import domain.use_case.GetSettingsUseCase
-import domain.use_case.SavePaywallTimestampUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
-import domain.use_case.ShowPaywallOncePerDayUseCase
 import domain.use_case.ShouldShowDemoModeUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.Module
@@ -48,8 +45,6 @@ val sharedModule = module {
     factoryOf(::GetSettingsUseCase)
     factoryOf(::SaveSettingsUseCase)
     factoryOf(::ScheduleNotificationUseCase)
-    factoryOf(::ShowPaywallOncePerDayUseCase)
-    factoryOf(::SavePaywallTimestampUseCase)
     singleOf(::AppThemeListenerUseCase)
     factoryOf(::ShouldShowDemoModeUseCase)
 
@@ -61,7 +56,6 @@ val sharedModule = module {
     singleOf(::SettingsLocalDataSource)
     singleOf(::SwipeToolTipDataSource)
     singleOf(::SettingsRepositoryImpl).bind<SettingsRepository>()
-    singleOf(::PaywallLocalDataSource)
     singleOf(::LaunchCounterDataSource)
 
     factory { ToggleEventVisibilityUseCase(get()) }

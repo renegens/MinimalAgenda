@@ -33,7 +33,6 @@ class CalendarContract {
         class GoToDay(val epochDay: Long) : Effect()
         class GoToMonth(val agendaMonthYear: AgendaMonthYear) : Effect()
         class GoToYear(val agendaYear: AgendaYear) : Effect()
-        object ShowPaywall : Effect()
         class ShowEdit(val agendaEvent: AgendaEvent) : Effect()
         object NotificationPermissionMissing : Effect()
         object ShowSettings : Effect()

@@ -15,7 +15,6 @@ class OnboardingContract {
 
     sealed class Effect : UiEffect {
         object CloseOnboarding : Effect()
-        object ShowPaywall: Effect()
     }
 
     sealed class Event : UiEvent {

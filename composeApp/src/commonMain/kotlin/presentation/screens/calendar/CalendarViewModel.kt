@@ -11,7 +11,6 @@ import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
 import domain.use_case.GetSettingsUseCase
-import extensions.guardPremium
 import extensions.today
 import platform.CalendarPermissionHandler
 
@@ -69,20 +68,12 @@ class CalendarViewModel(
                 }
             }
 
-            is Event.ToggleEventVisibility -> guardPremiumLetThroughDemo(onSubscribed = {
-                toggleEventVisibility(
-                    event.agendaEvent
-                )
-            }, onPaywall = { setEffect { Effect.ShowPaywall } })
+            is Event.ToggleEventVisibility -> toggleEventVisibility(event.agendaEvent)
 
-            is Event.Notify -> {
-                guardPremiumLetThroughDemo(onSubscribed = { notifyEvent(event.agendaEvent) },
-                    onPaywall = { setEffect { Effect.ShowPaywall } })
-            }
+            is Event.Notify -> notifyEvent(event.agendaEvent)
 
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
-            is Event.OnEditEvent -> guardPremium(onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
-                onPaywall = { setEffect { Effect.ShowPaywall } })
+            is Event.OnEditEvent -> setEffect { Effect.ShowEdit(event.agendaEvent) }
             Event.ShowSettings -> setEffect { Effect.ShowSettings }
             Event.RefreshSettings -> refreshSettings()
         }
@@ -192,14 +183,6 @@ class CalendarViewModel(
 
                 ScheduleNotificationUseCase.State.Success -> {}
             }
-        }
-    }
-
-    private fun guardPremiumLetThroughDemo(onSubscribed: () -> Unit, onPaywall: () -> Unit) {
-        if (permissionHandler.getPermissionState() == CalendarPermissionHandler.State.FullAccess) {
-            guardPremium(onSubscribed = onSubscribed, onPaywall = onPaywall)
-        } else {
-            onSubscribed.invoke()
         }
     }
 
