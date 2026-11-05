@@ -13,6 +13,7 @@ import android.provider.CalendarContract.Instances
 import data.calendar.CalendarEntity
 import data.calendar.CalendarMath
 import data.calendar.EventEntity
+import data.calendar.EventTimeRange
 import data.reminder.EventLookup
 import data.reminder.EventTimes
 import kotlinx.coroutines.Dispatchers
@@ -198,12 +199,13 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         endTime: LocalDateTime,
         allDay: Boolean,
         calendarId: String?,
+        timedRange: EventTimeRange?,
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val targetId = calendarId?.toLongOrNull()
                 ?: defaultWritableCalendarId()
                 ?: return@withContext false
-            val times = CalendarMath.toWriteTimes(startTime, endTime, allDay, TimeZone.currentSystemDefault())
+            val times = CalendarMath.toWriteTimes(startTime, endTime, allDay, TimeZone.currentSystemDefault(), timedRange)
             val values = ContentValues().apply {
                 put(Events.CALENDAR_ID, targetId)
                 put(Events.TITLE, title)
@@ -228,6 +230,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         allDay: Boolean,
+        timedRange: EventTimeRange?,
     ): Boolean = withContext(Dispatchers.IO) {
         try {
             val eventId = CalendarMath.parseInstanceId(id)?.eventId ?: return@withContext false
@@ -246,7 +249,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                     // Recurring events keep their DTSTART/DURATION/RRULE untouched: an instance's start is not
                     // the series' start, and a DTEND on a recurring event would corrupt it.
                     val times = CalendarMath.toWriteTimes(
-                        startTime, endTime, allDay, TimeZone.currentSystemDefault()
+                        startTime, endTime, allDay, TimeZone.currentSystemDefault(), timedRange
                     )
                     put(Events.DTSTART, times.dtStartMillis)
                     put(Events.DTEND, times.dtEndMillis)

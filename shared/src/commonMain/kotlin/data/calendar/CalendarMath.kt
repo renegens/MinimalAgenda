@@ -58,11 +58,18 @@ object CalendarMath {
         )
     }
 
-    private fun resolveAllDay(beginMillis: Long, endMillis: Long, zone: TimeZone): ResolvedTimes {
-        val firstDay = Instant.fromEpochMilliseconds(beginMillis).toLocalDateTime(TimeZone.UTC).date
+    /** EventKit uses local midnight boundaries for all-day events. */
+    fun resolveLocalCalendarTimes(beginMillis: Long, endMillis: Long, allDay: Boolean, zone: TimeZone): ResolvedTimes =
+        if (allDay) resolveAllDay(beginMillis, endMillis, zone, dateZone = zone)
+        else resolveTimed(beginMillis, endMillis, zone)
+
+    private fun resolveAllDay(
+        beginMillis: Long, endMillis: Long, zone: TimeZone, dateZone: TimeZone = TimeZone.UTC,
+    ): ResolvedTimes {
+        val firstDay = Instant.fromEpochMilliseconds(beginMillis).toLocalDateTime(dateZone).date
         // End is exclusive midnight of the following day, so the last covered day is (end - 1ms).
         val lastDay = if (endMillis > beginMillis) {
-            Instant.fromEpochMilliseconds(endMillis - 1).toLocalDateTime(TimeZone.UTC).date
+            Instant.fromEpochMilliseconds(endMillis - 1).toLocalDateTime(dateZone).date
         } else {
             firstDay
         }
@@ -110,24 +117,31 @@ object CalendarMath {
      * [start]'s date is the first day, [end]'s date is the LAST day (inclusive, as [resolveTimes] reports it)
      * and the stored end is UTC midnight of the day after.
      */
-    fun toWriteTimes(start: LocalDateTime, end: LocalDateTime, allDay: Boolean, zone: TimeZone): WriteTimes {
+    fun toWriteTimes(
+        start: LocalDateTime, end: LocalDateTime, allDay: Boolean, zone: TimeZone,
+        timedRange: EventTimeRange? = null,
+    ): WriteTimes {
         if (allDay) {
             val firstDay = start.date
             val lastDay = if (end.date > firstDay) end.date else firstDay
             return WriteTimes(
                 dtStartMillis = firstDay.atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(),
-                dtEndMillis = lastDay.plus(1, DateTimeUnit.DAY).atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds(),
+                dtEndMillis = allDayEndExclusive(lastDay.atTime(0, 0)).toInstant(TimeZone.UTC).toEpochMilliseconds(),
                 timeZoneId = TimeZone.UTC.id,
             )
         }
-        val startInstant = start.toInstant(zone)
-        val endInstant = end.toInstant(zone).let { if (it < startInstant) startInstant else it }
+        val startInstant = timedRange?.start ?: start.toInstant(zone)
+        val endInstant = (timedRange?.end ?: end.toInstant(zone)).let { if (it < startInstant) startInstant else it }
         return WriteTimes(startInstant.toEpochMilliseconds(), endInstant.toEpochMilliseconds(), zone.id)
     }
 
     /** [start] plus [durationInMinutes] on the real timeline of [zone] (may cross midnight). */
     fun endAfter(start: LocalDateTime, durationInMinutes: Long, zone: TimeZone): LocalDateTime =
         (start.toInstant(zone) + durationInMinutes.minutes).toLocalDateTime(zone)
+
+    /** Converts the app's inclusive all-day end to the calendar API's exclusive boundary. */
+    fun allDayEndExclusive(end: LocalDateTime): LocalDateTime =
+        end.date.plus(1, DateTimeUnit.DAY).atTime(0, 0)
 
     fun isRecurring(rrule: String?): Boolean = !rrule.isNullOrBlank()
 }

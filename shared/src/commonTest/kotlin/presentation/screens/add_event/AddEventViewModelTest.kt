@@ -48,7 +48,7 @@ class AddEventViewModelTest {
             end = LocalDateTime(2026, 3, 10, if (allDay) 23 else endHour, if (allDay) 59 else 30),
             allDay = allDay,
         ).copy(location = "Room", isRecurring = recurring)
-        return AddEventViewModel(repo, EventEditorRequest.Edit(base))
+        return AddEventViewModel(repo, EventEditorRequest.Edit(base), TimeZone.UTC)
     }
 
     @Test
@@ -60,10 +60,11 @@ class AddEventViewModelTest {
     }
 
     @Test
-    fun invalidDurationBlocksSaveUnlessAllDay() {
+    fun equalEndBlocksTimedSaveButOneAllDayDateIsValid() {
         val vm = AddEventViewModel(FakeCalendarRepository())
         vm.setEvent(Event.OnTitleEntered("Lunch"))
-        vm.setEvent(Event.OnDurationEntered("0"))
+        val state = vm.uiState.value
+        vm.setEvent(Event.OnEndEntered(state.startDate, state.startHours, state.startMinutes))
         assertFalse(vm.uiState.value.isSaveEnabled())
         vm.setEvent(Event.ToggleAllDay(true))
         assertTrue(vm.uiState.value.isSaveEnabled())
@@ -80,13 +81,13 @@ class AddEventViewModelTest {
         vm.setEvent(Event.OnCalendarSelected("1"))
         vm.setEvent(Event.OnTitleEntered("Lunch"))
         vm.setEvent(Event.OnStartEntered(date.toPickerMillis(), 12, 0))
-        vm.setEvent(Event.OnDurationEntered("45"))
+        vm.setEvent(Event.OnDurationSelected(30))
         vm.setEvent(Event.OnSave)
 
         val added = repo.added.single()
         assertEquals("1", added.calendarId)
         assertEquals(LocalDateTime(2026, 3, 10, 12, 0), added.start)
-        assertEquals(LocalDateTime(2026, 3, 10, 12, 45), added.end)
+        assertEquals(LocalDateTime(2026, 3, 10, 12, 30), added.end)
         assertFalse(added.allDay)
     }
 
@@ -121,13 +122,14 @@ class AddEventViewModelTest {
         val s = vm.uiState.value
         assertEquals("Old", s.title)
         assertEquals("Room", s.location)
-        assertEquals("90", s.durationInMinutes)
+        assertEquals(5_400L, s.durationInSeconds)
+        assertEquals(LocalDateTime(2026, 3, 10, 10, 30), s.toStartAndEnd(TimeZone.UTC).second)
         assertEquals(9, s.startHours)
         assertEquals(date.toPickerMillis(), s.startDate)
         assertTrue(vm.uiState.value.isEditing)
 
         vm.setEvent(Event.OnTitleEntered("New"))
-        vm.setEvent(Event.OnDurationEntered("30"))
+        vm.setEvent(Event.OnDurationSelected(30))
         vm.setEvent(Event.OnSave)
 
         assertTrue(repo.added.isEmpty())
@@ -145,7 +147,7 @@ class AddEventViewModelTest {
             id = "7/1000", start = LocalDateTime(2026, 3, 10, 0, 0),
             end = LocalDateTime(2026, 3, 12, 23, 59), allDay = true,
         )
-        val vm = AddEventViewModel(repo, EventEditorRequest.Edit(event))
+        val vm = AddEventViewModel(repo, EventEditorRequest.Edit(event), TimeZone.UTC)
         vm.setEvent(Event.OnTitleEntered("Trip"))
         vm.setEvent(Event.OnSave)
         val u = repo.updated.single()
@@ -193,7 +195,7 @@ class AddEventViewModelTest {
     @Test
     fun timedEndCrossesMidnightWhenEditing() {
         val state = AddEventContract.State(
-            startDate = date.toPickerMillis(), startHours = 23, startMinutes = 0, durationInMinutes = "120"
+            startDate = date.toPickerMillis(), startHours = 23, startMinutes = 0, durationInSeconds = 7_200
         )
         val (start, end) = state.toStartAndEnd(TimeZone.UTC)
         assertEquals(LocalDateTime(2026, 3, 10, 23, 0), start)

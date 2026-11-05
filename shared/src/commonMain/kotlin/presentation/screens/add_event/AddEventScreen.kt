@@ -23,7 +23,6 @@ import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -31,6 +30,8 @@ import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerState
+import androidx.compose.material3.TimePickerState
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -57,6 +58,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.key
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,11 +69,11 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.input.KeyboardCapitalization
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
@@ -77,6 +81,7 @@ import androidx.compose.ui.unit.sp
 import data.calendar.CalendarEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.drop
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import presentation.components.AppAlertDialog
@@ -87,7 +92,6 @@ import presentation.components.NewEventHeader
 import presentation.components.clickableWithOpaqueText
 import presentation.theme.DMSans18Medium
 import presentation.theme.TextFieldStyleAddEvent
-import presentation.theme.TextFieldStyleDateAndTime
 import getPlatform
 
 @Composable
@@ -149,26 +153,29 @@ fun AddEventScreen(
 
         Spacer(modifier = Modifier.height(24.dp))
 
-        if (state.timesEditable) Details(
-            startDate = state.startDate,
-            startHours = state.startHours,
-            startMinutes = state.startMinutes,
-            allDay = state.allDay,
-            durationInMinutes = state.durationInMinutes,
-            onDurationEntered = { viewModel.setEvent(AddEventContract.Event.OnDurationEntered(it)) },
-            checkChange = { viewModel.setEvent(AddEventContract.Event.ToggleAllDay(it)) },
-            durationError = state.durationError,
-            focusManager = focusManager,
-            onTimeUpdate = {
-                viewModel.setEvent(
-                    AddEventContract.Event.OnStartEntered(
-                        it.first,
-                        it.second,
-                        it.third
-                    )
-                )
-            }
-        )
+        if (state.timesEditable) {
+            val end = state.toStartAndEnd().second
+            Details(
+                startDate = state.startDate,
+                startHours = state.startHours,
+                startMinutes = state.startMinutes,
+                endDate = end.date.toPickerMillis(),
+                endHours = end.hour,
+                endMinutes = end.minute,
+                allDay = state.allDay,
+                selectedDurationMinutes = state.selectedDurationMinutes,
+                onDurationSelected = { viewModel.setEvent(AddEventContract.Event.OnDurationSelected(it)) },
+                checkChange = { viewModel.setEvent(AddEventContract.Event.ToggleAllDay(it)) },
+                timeError = state.timeError,
+                focusManager = focusManager,
+                onStartUpdate = {
+                    viewModel.setEvent(AddEventContract.Event.OnStartEntered(it.first, it.second, it.third))
+                },
+                onEndUpdate = {
+                    viewModel.setEvent(AddEventContract.Event.OnEndEntered(it.first, it.second, it.third))
+                },
+            )
+        }
 
         else BodyText(
             "This event repeats. Changes to the title and location apply to all events in the series. " +
@@ -278,12 +285,16 @@ private fun Details(
     startDate: Long,
     startHours: Int,
     startMinutes: Int,
-    durationInMinutes: String,
+    endDate: Long,
+    endHours: Int,
+    endMinutes: Int,
+    selectedDurationMinutes: Int?,
     allDay: Boolean,
     checkChange: (Boolean) -> Unit,
-    onDurationEntered: (String) -> Unit,
-    onTimeUpdate: (Triple<Long, Int, Int>) -> Unit,
-    durationError: String?,
+    onDurationSelected: (Int) -> Unit,
+    onStartUpdate: (Triple<Long, Int, Int>) -> Unit,
+    onEndUpdate: (Triple<Long, Int, Int>) -> Unit,
+    timeError: String?,
     focusManager: FocusManager
 ) {
     Column(
@@ -306,37 +317,36 @@ private fun Details(
             date = startDate,
             hours = startHours,
             minutes = startMinutes,
-            onTimeUpdate = onTimeUpdate,
+            onTimeUpdate = onStartUpdate,
             focusManager = focusManager
         )
 
+        DetailsDivider()
+        DateAndTime(
+            label = "Ends",
+            isChecked = allDay,
+            date = endDate,
+            hours = endHours,
+            minutes = endMinutes,
+            onTimeUpdate = onEndUpdate,
+            focusManager = focusManager,
+        )
+
         if (!allDay) {
-            DetailsDivider()
-
-            DetailsItemRow {
-                BodyText("Event duration in minutes")
-                Spacer(Modifier.weight(1f))
-                DurationInput(
-                    durationInMinutes = durationInMinutes,
-                    onValueChange = onDurationEntered
-                )
-            }
-
             DurationChips(
-                durations = listOf(10, 15, 30, 60, 90, 120),
-                onDurationSelected = onDurationEntered,
-                focusManager = focusManager
+                selectedMinutes = selectedDurationMinutes,
+                onDurationSelected = onDurationSelected,
+                focusManager = focusManager,
             )
-
-            if (durationError != null) {
-                Text(
-                    text = durationError,
-                    style = DMSans18Medium,
-                    fontSize = 16.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.padding(top = 4.dp, start = 16.dp, bottom = 8.dp)
-                )
-            }
+        }
+        if (timeError != null) {
+            Text(
+                text = timeError,
+                style = DMSans18Medium,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(top = 4.dp, start = 16.dp, bottom = 8.dp)
+            )
         }
     }
 }
@@ -344,50 +354,32 @@ private fun Details(
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
 private fun DurationChips(
-    durations: List<Int>,
-    onDurationSelected: (String) -> Unit,
+    selectedMinutes: Int?,
+    onDurationSelected: (Int) -> Unit,
     focusManager: FocusManager
 ) {
     FlowRow(
         modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        durations.forEach { duration ->
+        durationQuickPicks.forEach { duration ->
+            val selected = selectedMinutes == duration
             AssistChip(
+                modifier = Modifier.semantics { this.selected = selected },
                 onClick = {
                     focusManager.clearFocus()
-                    onDurationSelected(duration.toString())
+                    onDurationSelected(duration)
                 },
-                label = { BodyText("${duration}m") },
+                label = {
+                    BodyText(
+                        "${duration}m",
+                        color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.tertiary,
+                    )
+                },
                 colors = AssistChipDefaults.assistChipColors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
-                border = null
+                border = if (selected) BorderStroke(1.dp, MaterialTheme.colorScheme.primary) else null
             )
         }
-    }
-}
-
-@Composable
-private fun DurationInput(
-    durationInMinutes: String, onValueChange: (String) -> Unit,
-) {
-
-    Box(
-        modifier = Modifier.width(64.dp).height(40.dp).background(
-            color = MaterialTheme.colorScheme.surfaceVariant, shape = RoundedCornerShape(8.dp)
-        ), contentAlignment = Alignment.CenterEnd
-    ) {
-        BasicTextField(
-            cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-            textStyle = TextFieldStyleDateAndTime,
-            value = durationInMinutes,
-            onValueChange = {
-                onValueChange.invoke(it)
-                //text = it
-            },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
-            modifier = Modifier.fillMaxWidth(),
-        )
     }
 }
 
@@ -407,57 +399,8 @@ private fun ColumnScope.DateAndTime(
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    // Material3 pickers for Android
-    val materialDatePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
-    val materialTimePickerState =
-        rememberTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = is24Hour)
-
-    // Cupertino pickers for iOS
-    val cupertinoDatePickerState = rememberCupertinoDatePickerState(initialSelectedDateMillis = date)
-    val cupertinoTimePickerState =
-        rememberCupertinoTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = is24Hour)
-
-    // Watch for changes in picker states and update only when values actually change
-    // This prevents infinite recomposition while still capturing the latest values
-    // Only create the relevant LaunchedEffect per platform for efficiency
-    if (isAndroid) {
-        LaunchedEffect(
-            materialDatePickerState.selectedDateMillis,
-            materialTimePickerState.hour,
-            materialTimePickerState.minute
-        ) {
-            materialDatePickerState.selectedDateMillis?.let { dateMillis ->
-                onTimeUpdate(Triple(dateMillis, materialTimePickerState.hour, materialTimePickerState.minute))
-            }
-        }
-    } else {
-        LaunchedEffect(
-            cupertinoDatePickerState.selectedDateMillis,
-            cupertinoTimePickerState.hour,
-            cupertinoTimePickerState.minute
-        ) {
-            cupertinoDatePickerState.selectedDateMillis?.let { dateMillis ->
-                onTimeUpdate(Triple(dateMillis, cupertinoTimePickerState.hour, cupertinoTimePickerState.minute))
-            }
-        }
-    }
-
-    // Get selected values for display
-    val selectedDate = if (isAndroid) {
-        materialDatePickerState.selectedDateMillis?.let {
-            formatTimestamp(it)
-        } ?: ""
-    } else {
-        cupertinoDatePickerState.selectedDateMillis?.let {
-            formatTimestamp(it)
-        } ?: ""
-    }
-
-    val selectedTime = if (isAndroid) {
-        formatLocalTime(materialTimePickerState.hour, materialTimePickerState.minute)
-    } else {
-        formatLocalTime(cupertinoTimePickerState.hour, cupertinoTimePickerState.minute)
-    }
+    val selectedDate = formatTimestamp(date)
+    val selectedTime = formatLocalTime(hours, minutes)
 
     DetailsItemRow {
         BodyText(label)
@@ -484,36 +427,75 @@ private fun ColumnScope.DateAndTime(
         exit = shrinkVertically()
     ) {
         if (isAndroid) {
+            val pickerState = rememberDatePickerState(initialSelectedDateMillis = date)
+            LaunchedEffect(date) {
+                if (pickerState.selectedDateMillis != date) {
+                    pickerState.selectedDateMillis = date
+                    pickerState.displayedMonthMillis = date
+                }
+            }
+            // Only writes from the control invoke callbacks; model synchronization uses the delegate.
+            val controlledState = object : DatePickerState by pickerState {
+                override var selectedDateMillis: Long?
+                    get() = pickerState.selectedDateMillis
+                    set(value) {
+                        pickerState.selectedDateMillis = value
+                        value?.let { onTimeUpdate(Triple(it, hours, minutes)) }
+                    }
+            }
             DatePicker(
                 title = null,
                 headline = null,
-                state = materialDatePickerState,
+                state = controlledState,
                 colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
                 showModeToggle = false,
             )
         } else {
-            CupertinoDatePicker(
-                state = cupertinoDatePickerState,
-                modifier = Modifier.fillMaxWidth(),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
+            key(date) {
+                val pickerState = rememberCupertinoDatePickerState(initialSelectedDateMillis = date)
+                LaunchedEffect(pickerState) {
+                    snapshotFlow { pickerState.selectedDateMillis }.drop(1).collect {
+                        onTimeUpdate(Triple(it, hours, minutes))
+                    }
+                }
+                CupertinoDatePicker(
+                    state = pickerState,
+                    modifier = Modifier.fillMaxWidth(),
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                )
+            }
         }
     }
 
     AnimatedVisibility(
-        visible = showTimePicker,
+        visible = showTimePicker && !isChecked,
         enter = expandVertically(),
         exit = shrinkVertically()
     ) {
         if (isAndroid) {
+            val pickerState = rememberTimePickerState(hours, minutes, is24Hour)
+            LaunchedEffect(hours, minutes) {
+                pickerState.hour = hours
+                pickerState.minute = minutes
+            }
+            val controlledState = object : TimePickerState by pickerState {
+                override var hour: Int
+                    get() = pickerState.hour
+                    set(value) {
+                        pickerState.hour = value
+                        onTimeUpdate(Triple(date, value, pickerState.minute))
+                    }
+                override var minute: Int
+                    get() = pickerState.minute
+                    set(value) {
+                        pickerState.minute = value
+                        onTimeUpdate(Triple(date, pickerState.hour, value))
+                    }
+            }
             val density = LocalDensity.current.density
-            val s = Density(density, 0.8f)
-
-            CompositionLocalProvider(
-                LocalDensity provides s,
-            ) {
+            CompositionLocalProvider(LocalDensity provides Density(density, 0.8f)) {
                 TimePicker(
-                    state = materialTimePickerState,
+                    state = controlledState,
                     colors = TimePickerDefaults.colors(
                         timeSelectorSelectedContentColor = MaterialTheme.colorScheme.primary,
                         timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
@@ -523,12 +505,47 @@ private fun ColumnScope.DateAndTime(
                 )
             }
         } else {
-            CupertinoTimePicker(
-                state = cupertinoTimePickerState,
-                modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
-                containerColor = MaterialTheme.colorScheme.secondaryContainer
-            )
+            CupertinoTimeControl(hours, minutes, is24Hour) { hour, minute ->
+                onTimeUpdate(Triple(date, hour, minute))
+            }
         }
+
+    }
+}
+
+@OptIn(ExperimentalCupertinoApi::class)
+@Composable
+private fun CupertinoTimeControl(
+    hours: Int,
+    minutes: Int,
+    is24Hour: Boolean,
+    onTimeUpdate: (Int, Int) -> Unit,
+) {
+    val modelTime = hours to minutes
+    var seed by remember { mutableStateOf(modelTime) }
+    var lastEmitted by remember { mutableStateOf(modelTime) }
+    val currentModel by rememberUpdatedState(modelTime)
+    val onUpdate by rememberUpdatedState(onTimeUpdate)
+    LaunchedEffect(modelTime) {
+        if (modelTime != lastEmitted) seed = modelTime
+        lastEmitted = modelTime
+    }
+    val activeSeed = seed
+    key(activeSeed, is24Hour) {
+        val pickerState = rememberCupertinoTimePickerState(activeSeed.first, activeSeed.second, is24Hour)
+        LaunchedEffect(pickerState) {
+            snapshotFlow { pickerState.hour to pickerState.minute }.drop(1).collect { value ->
+                if (activeSeed == seed && currentModel == lastEmitted) {
+                    lastEmitted = value
+                    onUpdate(value.first, value.second)
+                }
+            }
+        }
+        CupertinoTimePicker(
+            state = pickerState,
+            modifier = Modifier.fillMaxWidth(),
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+        )
     }
 }
 

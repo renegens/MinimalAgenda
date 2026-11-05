@@ -2,6 +2,7 @@ package testutil
 
 import data.calendar.CalendarEntity
 import data.calendar.EventEntity
+import data.calendar.EventTimeRange
 import data.local.HiddenEventEntity
 import domain.model.AgendaEvent
 import domain.model.AppTheme
@@ -54,9 +55,10 @@ class FakeCalendarRepository(
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         allDay: Boolean,
-        calendarId: String?
+        calendarId: String?,
+        timedRange: EventTimeRange?,
     ): Boolean {
-        added.add(SavedEvent(null, title, location, startTime, endTime, allDay, calendarId))
+        added.add(SavedEvent(null, title, location, startTime, endTime, allDay, calendarId, timedRange))
         return saveResult
     }
 
@@ -66,9 +68,10 @@ class FakeCalendarRepository(
         location: String,
         startTime: LocalDateTime,
         endTime: LocalDateTime,
-        allDay: Boolean
+        allDay: Boolean,
+        timedRange: EventTimeRange?,
     ): Boolean {
-        updated.add(SavedEvent(id, title, location, startTime, endTime, allDay, null))
+        updated.add(SavedEvent(id, title, location, startTime, endTime, allDay, null, timedRange))
         return saveResult
     }
 
@@ -86,6 +89,7 @@ data class SavedEvent(
     val end: LocalDateTime,
     val allDay: Boolean,
     val calendarId: String?,
+    val timedRange: EventTimeRange? = null,
 )
 
 class FakeHiddenEventsRepository(

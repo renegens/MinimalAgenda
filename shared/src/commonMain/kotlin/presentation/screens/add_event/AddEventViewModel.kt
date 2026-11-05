@@ -1,13 +1,16 @@
 package presentation.screens.add_event
 
 import androidx.lifecycle.viewModelScope
-import data.calendar.CalendarMath
+import data.calendar.EventTimeRange
+import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.launch
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.plus
+import kotlinx.datetime.daysUntil
+import kotlinx.datetime.toInstant
 import kotlinx.datetime.toLocalDateTime
 import presentation.base.BaseViewModel
 import presentation.screens.add_event.AddEventContract.Confirmation
@@ -20,6 +23,7 @@ import kotlin.time.Instant
 class AddEventViewModel(
     private val repository: CalendarRepository,
     private val request: EventEditorRequest = EventEditorRequest.Add(),
+    private val timeZone: TimeZone = TimeZone.currentSystemDefault(),
 ) : BaseViewModel<Event, State, Effect>() {
 
     // `request` isn't assigned yet when the base class asks for the initial state, so it is applied in init.
@@ -40,7 +44,11 @@ class AddEventViewModel(
 
     override fun handleEvent(event: Event) {
         when (event) {
-            is Event.ToggleAllDay -> setState { copy(allDay = event.isAllDay) }
+            is Event.ToggleAllDay -> setState {
+                val end = toStartAndEnd(timeZone).second
+                val days = pickerDate(startDate).daysUntil(end.date) + 1
+                copy(allDay = event.isAllDay, allDayDays = if (event.isAllDay) days else allDayDays)
+            }
 
             is Event.OnCancel -> setEffect { Effect.Cancel }
 
@@ -70,25 +78,36 @@ class AddEventViewModel(
 
             is Event.OnDismissConfirmation -> setState { copy(confirmation = null) }
 
-            is Event.OnStartEntered -> {
-                val error = validateDurationTime(
-                    uiState.value.durationInMinutes, event.hours, event.minutes, uiState.value.isEditing
+            is Event.OnStartEntered -> setState {
+                copy(
+                    startInstantOverride = if (event.timestamp == startDate && event.hours == startHours && event.minutes == startMinutes)
+                        startInstantOverride else null,
+                    startDate = event.timestamp,
+                    startHours = event.hours,
+                    startMinutes = event.minutes,
+                    startSeconds = if (event.hours == startHours && event.minutes == startMinutes) startSeconds else 0,
                 )
-                setState {
-                    copy(
-                        durationError = error,
-                        startMinutes = event.minutes,
-                        startDate = event.timestamp,
-                        startHours = event.hours
-                    )
-                }
             }
 
-            is Event.OnDurationEntered -> {
-                val error = validateDurationTime(
-                    event.duration, uiState.value.startHours, uiState.value.startMinutes, uiState.value.isEditing
+            is Event.OnEndEntered -> setState {
+                val start = LocalDateTime(pickerDate(startDate), LocalTime(startHours, startMinutes, startSeconds))
+                val range = timedRange(timeZone)
+                val previousEnd = range.end.toLocalDateTime(timeZone)
+                val date = pickerDate(event.timestamp)
+                val displayedEnd = toStartAndEnd(timeZone).second
+                if (date == displayedEnd.date && (allDay ||
+                        event.hours == displayedEnd.hour && event.minutes == displayedEnd.minute)) return@setState this
+                val seconds = if (event.hours == previousEnd.hour && event.minutes == previousEnd.minute) previousEnd.second else 0
+                val endTime = if (allDay) previousEnd.time else LocalTime(event.hours, event.minutes, seconds)
+                val end = LocalDateTime(date, endTime)
+                copy(
+                    durationInSeconds = (end.toInstant(timeZone) - range.start).inWholeSeconds,
+                    allDayDays = start.date.daysUntil(date) + 1,
                 )
-                setState { copy(durationInMinutes = event.duration, durationError = error) }
+            }
+
+            is Event.OnDurationSelected -> if (event.minutes in durationQuickPicks) {
+                setState { copy(durationInSeconds = event.minutes * 60L) }
             }
 
             is Event.OnTitleEntered -> setState { copy(title = event.title) }
@@ -101,7 +120,7 @@ class AddEventViewModel(
         val state = uiState.value
         setState { copy(isSaving = true, saveFailed = false) }
         viewModelScope.launch {
-            val (start, end) = state.toStartAndEnd()
+            val (start, end) = state.toStartAndEnd(timeZone)
             val id = state.editingEventId
             val didSave = if (id == null) {
                 repository.addEvent(
@@ -111,6 +130,7 @@ class AddEventViewModel(
                     endTime = end,
                     allDay = state.allDay,
                     calendarId = state.calendarId,
+                    timedRange = if (state.allDay) null else state.timedRange(timeZone),
                 )
             } else {
                 repository.updateEvent(
@@ -120,6 +140,7 @@ class AddEventViewModel(
                     startTime = start,
                     endTime = end,
                     allDay = state.allDay,
+                    timedRange = if (state.allDay) null else state.timedRange(timeZone),
                 )
             }
             finish(didSave)
@@ -139,35 +160,28 @@ class AddEventViewModel(
             setState { copy(isSaving = false, saveFailed = true) }
         }
     }
-
-    private fun validateDurationTime(
-        input: String,
-        currentHours: Int,
-        currentMinutes: Int,
-        isEditing: Boolean,
-    ): String? {
-        val time = input.toIntOrNull()
-        return when {
-            time == null || (time == 0 && !isEditing) -> "Please enter a valid number"
-            time < 0 -> "We can't time travel yet. Time cannot be negative"
-            // The editor can't express multi-day timed events, but it must not block editing one.
-            !isEditing && time + currentMinutes + (currentHours * 60) > 1440 -> "Durations must be in the same day"
-            else -> null // valid input
-        }
-    }
 }
 
 /**
- * Local start and end for the repository. Timed: start + duration on the real timeline (so it may cross
- * midnight when editing). All-day: first day at 00:00 and the last day (inclusive) at 23:59.
+ * Local start and end for the repository. Timed: start + elapsed duration on the real timeline.
+ * All-day: first day at 00:00 and the last day (inclusive) at 23:59:59.
  */
 internal fun State.toStartAndEnd(zone: TimeZone = TimeZone.currentSystemDefault()): Pair<LocalDateTime, LocalDateTime> {
-    val date = Instant.fromEpochMilliseconds(startDate).toLocalDateTime(TimeZone.UTC).date
+    val date = pickerDate(startDate)
     if (allDay) {
         val last = date.plus(allDayDays - 1, DateTimeUnit.DAY)
-        return LocalDateTime(date, LocalTime(0, 0)) to LocalDateTime(last, LocalTime(23, 59))
+        return LocalDateTime(date, LocalTime(0, 0)) to LocalDateTime(last, LocalTime(23, 59, 59))
     }
-    val start = LocalDateTime(date, LocalTime(startHours, startMinutes))
-    val minutes = durationInMinutes.toLongOrNull() ?: 0L
-    return start to CalendarMath.endAfter(start, minutes, zone)
+    val start = LocalDateTime(date, LocalTime(startHours, startMinutes, startSeconds))
+    return start to timedRange(zone).end.toLocalDateTime(zone)
+}
+
+internal fun pickerDate(timestamp: Long) =
+    Instant.fromEpochMilliseconds(timestamp).toLocalDateTime(TimeZone.UTC).date
+
+internal fun State.timedRange(zone: TimeZone): EventTimeRange {
+    val start = startInstantOverride ?: LocalDateTime(
+        pickerDate(startDate), LocalTime(startHours, startMinutes, startSeconds)
+    ).toInstant(zone)
+    return EventTimeRange(start, start + durationInSeconds.seconds)
 }

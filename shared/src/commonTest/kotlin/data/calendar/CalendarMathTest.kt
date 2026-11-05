@@ -212,4 +212,36 @@ class CalendarMathTest {
             assertTrue(r.isMultiDay)
         }
     }
+    @Test
+    fun eventKitAllDayBoundsRoundTripWithoutAnExtraEndingDay() {
+        for (zone in listOf(la, berlin, auckland)) {
+            val start = LocalDateTime(2026, 3, 28, 0, 0)
+            val inclusiveEnd = LocalDateTime(2026, 3, 30, 23, 59, 59)
+            val exclusiveEnd = CalendarMath.allDayEndExclusive(inclusiveEnd)
+            assertEquals(LocalDateTime(2026, 3, 31, 0, 0), exclusiveEnd)
+            val resolved = CalendarMath.resolveLocalCalendarTimes(
+                start.toInstant(zone).toEpochMilliseconds(),
+                exclusiveEnd.toInstant(zone).toEpochMilliseconds(),
+                allDay = true,
+                zone = zone,
+            )
+            assertEquals(start, resolved.startLocalDateTime)
+            assertEquals(inclusiveEnd, resolved.endLocalDateTime)
+            assertTrue(resolved.isMultiDay)
+        }
+    }
+
+    @Test
+    fun singleDayEventKitEventIsNotMultiDay() {
+        val start = LocalDateTime(2026, 3, 29, 0, 0)
+        val end = CalendarMath.allDayEndExclusive(start)
+        val resolved = CalendarMath.resolveLocalCalendarTimes(
+            start.toInstant(berlin).toEpochMilliseconds(),
+            end.toInstant(berlin).toEpochMilliseconds(),
+            allDay = true, zone = berlin,
+        )
+        assertFalse(resolved.isMultiDay)
+        assertEquals(start.date, resolved.endLocalDateTime.date)
+    }
+
 }

@@ -2,6 +2,7 @@ package repository
 
 import data.calendar.CalendarEntity
 import data.calendar.EventEntity
+import data.calendar.EventTimeRange
 import kotlinx.datetime.LocalDateTime
 
 interface CalendarRepository {
@@ -18,6 +19,8 @@ interface CalendarRepository {
         allDay: Boolean = false,
         /** Target calendar (an id from [getCalendars]); null = the default one. */
         calendarId: String? = null,
+        /** Exact timed endpoints, when supplied by the editor; ignored for all-day events. */
+        timedRange: EventTimeRange? = null,
     ): Boolean
 
     /**
@@ -32,6 +35,7 @@ interface CalendarRepository {
         startTime: LocalDateTime,
         endTime: LocalDateTime,
         allDay: Boolean,
+        timedRange: EventTimeRange? = null,
     ): Boolean
 
     /** Deletes the event [id]; for a recurring event this deletes the WHOLE series. Returns true on success. */
