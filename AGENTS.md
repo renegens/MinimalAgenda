@@ -9,7 +9,7 @@ device's own calendars. It is a Kotlin Multiplatform project with a shared Compo
 
 **Active branch is `develop`.** `main` was last merged in Nov 2024 and is far behind; base work on `develop`.
 
-- **iOS:** shipped and complete (EventKit, native event editor and pickers, local notifications,
+- **iOS:** was shipped (now removed from the App Store; kept in the repo as unsupported) and complete (EventKit, native event editor and pickers, local notifications,
   onboarding, demo mode, multi-day events, RevenueCat paywall UI, Mixpanel analytics in Swift).
 - **Android:** prototype only. `AndroidCalendarRepository.getEvents()` returns 8000 fake events, and
   `getEvent`, `getBuildVersion`, notification permission, notification scheduling and event editing are
@@ -18,7 +18,7 @@ device's own calendars. It is a Kotlin Multiplatform project with a shared Compo
 Android support is being planned. Decisions and open questions are tracked in the
 "MinimalAgenda — Android Support Decisions" doc: https://claude.ai/artifact/HjjwoK4A95C76Hm3YHXtTe
 Check it before making structural changes, and don't implement a decision that is still marked
-Proposed or Blocked unless the user asks.
+Proposed or Blocked unless the user asks. Work through the doc's Phases in order.
 
 ## Stack
 
@@ -66,22 +66,28 @@ iosApp/              Xcode project (SwiftUI host, Mixpanel init in iOSApp.swift)
 - **Register new classes in Koin** (`di/Modules.kt` for shared, platform modules for actuals).
 - **Time:** the app stores event times as epoch **seconds** and days as `epochDay` (`LocalDate.toEpochDays()`).
   Android's `CalendarContract` uses **milliseconds**, so convert at the repository boundary.
-- **Premium gating** goes through `guardPremium()` / `isPremium()` in `extensions/RevenueCatExtensions.kt`,
-  and the RevenueCat `Paywall` composable is used directly in `App.kt` and `Onboarding.kt`. The plan is to
-  put these behind injected interfaces so a FOSS Android build can drop RevenueCat. Don't add new direct
-  RevenueCat calls or imports in common code.
+- **Premium gating is being removed** (decision D11): RevenueCat, the paywall, `guardPremium()` / `isPremium()`
+  (`extensions/RevenueCatExtensions.kt`), `ShowPaywallOncePerDayUseCase`, `PaywallLocalDataSource` and the onboarding
+  paywall step all go, on iOS too. Every feature is free. Don't add new RevenueCat or paywall code.
 - **Demo mode** shows generated demo events (`DemoDayGenerator`, `DemoEventsRepository`) until the user
   hides it; keep it working when touching event loading.
 - `extensions.takingScreenshots` freezes "today" for store screenshots; it must stay `false` in commits.
 
-## Android plans (from the decisions doc, not yet implemented)
+## Android plans (accepted in the decisions doc, 2026-11-05; not yet implemented)
 
-- Two flavors: `play` (paid, Google Play) and `foss` (free, F-Droid, no Play Services or proprietary deps).
-- Likely module split into `shared/` + `androidApp/` (flavors) + `iosApp/` before upgrading to AGP 9.
+- Play build is paid upfront (2.49€), so there is no billing code anywhere. No analytics or crash SDKs in any build;
+  Mixpanel is removed from iOS.
+- Module split into `shared/` + `androidApp/` + `iosApp/`. `androidApp` has flavors `play` and `foss` that differ
+  only by `BuildConfig.SHOW_DONATE` (true in `foss`; no donation links in `play`).
+- Both flavors use applicationId `eu.giant.agenda`, signed with the same key. minSdk 26.
 - Read events from `CalendarContract.Instances`, not `Events`, so recurring events are expanded.
   All-day events are UTC midnight; compute their day in UTC.
-- Reminders via `AlarmManager` + `NotificationManager`, rescheduled after boot.
+- Add/edit events via `ACTION_INSERT` / `ACTION_EDIT` intents only (no `WRITE_CALENDAR`).
+- Reminders are opt-in per event: `AlarmManager` (`USE_EXACT_ALARM`) + `NotificationManager`, persisted in DataStore,
+  rescheduled after boot, and the event is re-checked when the alarm fires.
 - Nothing in the `foss` dependency graph may pull in GMS, Firebase, Play Billing, RevenueCat or analytics SDKs.
+- iOS stays in the repo as unsupported, but shared-code changes should still keep it building.
+- App will be renamed "Minimal Agenda", licensed GPL-3.0 (name and icon reserved).
 
 ## Build and run
 
@@ -96,6 +102,6 @@ There are no tests yet. When adding logic, add `commonTest` tests for use cases 
 
 - Keep changes minimal and focused on what was asked; don't refactor unrelated code.
 - Don't break iOS while working on Android: shared code changes must keep the iOS build working.
-- The RevenueCat key in `extensions/RevenueCatExtensions.kt` and the Mixpanel token in `iOSApp.swift` are
-  client-side keys; don't add other secrets to the repo.
+- Don't add secrets to the repo. The old RevenueCat and Mixpanel client keys stay in git history and will be
+  invalidated by deleting those projects before the repo goes public.
 - Commit or push only when asked.
