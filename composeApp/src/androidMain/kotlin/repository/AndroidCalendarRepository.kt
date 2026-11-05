@@ -193,8 +193,8 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 @OptIn(ExperimentalTime::class)
 fun getRandomTimestampWithinTwoYears(): Long {
     // Current time
-    val startYear = LocalDate(year = today.year - 2, monthNumber = 1, dayOfMonth = 1)
-    val endDate = LocalDate(year = startYear.year + 4, monthNumber = 12, dayOfMonth = 31)
+    val startYear = LocalDate(year = today.year - 2, month = 1, day = 1)
+    val endDate = LocalDate(year = startYear.year + 4, month = 12, day = 31)
 
 
     // Convert start and end times to epoch milliseconds for easier random calculation

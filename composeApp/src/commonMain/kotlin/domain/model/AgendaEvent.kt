@@ -3,7 +3,7 @@ package domain.model
 import data.local.HiddenEventEntity
 import extensions.currentLocalDateTime
 import extensions.takingScreenshots
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime

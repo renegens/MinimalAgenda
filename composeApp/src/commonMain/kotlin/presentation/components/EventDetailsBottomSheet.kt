@@ -153,7 +153,7 @@ private fun DetailRow(
 }
 
 private fun formatDate(dateTime: LocalDateTime): String {
-    val day = dateTime.dayOfMonth
+    val day = dateTime.day
     val month = dateTime.month.name.lowercase().replaceFirstChar { it.uppercase() }
     val year = dateTime.year
     return "$month $day, $year"

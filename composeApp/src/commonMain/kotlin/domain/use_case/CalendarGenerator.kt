@@ -16,8 +16,8 @@ class CalendarGenerator {
 
     private fun generateDays(): List<LocalDate> {
 
-        val startYear = LocalDate(year = today.year - 2, monthNumber = 1, dayOfMonth = 1)
-        val endDate = LocalDate(year = startYear.year + 4, monthNumber = 12, dayOfMonth = 31)
+        val startYear = LocalDate(year = today.year - 2, month = 1, day = 1)
+        val endDate = LocalDate(year = startYear.year + 4, month = 12, day = 31)
 
         // Initialize the list to hold LocalDate objects
         val dateList = mutableListOf<LocalDate>()
@@ -41,7 +41,7 @@ class CalendarGenerator {
                     agendaMonth = it.month.toAgendaMonth()
                 ),
                 dayInWeek = it.dayOfWeek.toDaysInWeek(),
-                dayOfMonth = it.dayOfMonth,
+                dayOfMonth = it.day,
                 epochDay = it.toEpochDays(),
             )
             list.add(day)

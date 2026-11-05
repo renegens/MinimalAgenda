@@ -48,7 +48,7 @@ fun CalendarIcon() {
                 verticalArrangement = Arrangement.Center
             ) {
                 Text(
-                    text = today.dayOfMonth.toString(),
+                    text = today.day.toString(),
                     style = DMSans24Black100,
                     color = MaterialTheme.colorScheme.tertiary,
                     textAlign = TextAlign.Center

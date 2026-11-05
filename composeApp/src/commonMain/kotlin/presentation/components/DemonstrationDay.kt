@@ -35,6 +35,7 @@ import presentation.theme.AppCornerShape
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
 import presentation.theme.InvertedAppTheme
+import kotlinx.datetime.number
 
 @Composable
 fun DemonstrationDay() {
@@ -70,8 +71,8 @@ fun DemonstrationDay() {
                 Spacer(modifier = Modifier.height(24.dp))
                 DayHeader(
                     day = today.dayOfWeek.toString().substring(0, 3),
-                    dayInMonth = today.dayOfMonth,
-                    month = today.monthNumber,
+                    dayInMonth = today.day,
+                    month = today.month.number,
                     isToday = true
                 )
                 Spacer(modifier = Modifier.height(16.dp))

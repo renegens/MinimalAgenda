@@ -17,8 +17,8 @@ fun createGridDay(agendaMonthYear: AgendaMonthYear): List<DayGrid> {
     for (day in 1..agendaMonthYear.daysInMonth) {
         val local = LocalDate(
             year = agendaMonthYear.agendaYear.year,
-            monthNumber = agendaMonthYear.agendaMonth.number,
-            dayOfMonth = day.toInt()
+            month = agendaMonthYear.agendaMonth.number,
+            day = day.toInt()
         )
         days.add(DayGrid(day, local.toEpochDays()))
     }
