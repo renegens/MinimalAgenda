@@ -70,8 +70,8 @@ fun YearHeader(agendaYear: AgendaYear, currentDate: LocalDate) {
 }
 
 @Composable
-private fun HeaderLarge(modifier: Modifier = Modifier, label: AnnotatedString) {
-    Box(Modifier.height(84.dp).fillMaxWidth().padding(horizontal = 16.dp)) {
+fun HeaderLarge(modifier: Modifier = Modifier, label: AnnotatedString) {
+    Box(Modifier.height(84.dp).fillMaxWidth().padding(horizontal = 12.dp)) {
         Text(
             style = DMSansBlack250,
             text = label,
@@ -105,7 +105,7 @@ fun NewEventHeader(label: String) {
             append(label)
         }
         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.tertiary)) {
-            append("Event")
+            append("Entry")
         }
     }
     Text(

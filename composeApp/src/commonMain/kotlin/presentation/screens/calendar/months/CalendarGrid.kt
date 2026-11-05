@@ -41,7 +41,7 @@ fun MonthGrid(
     monthYear: AgendaMonthYear,
     events: List<AgendaEvent>,
     currentDate: LocalDate,
-    onDayClicked: (Int) -> Unit,
+    onDayClicked: (Long) -> Unit,
     onYearClicked: (AgendaYear) -> Unit,
     showAll: Boolean
 ) {
@@ -79,7 +79,7 @@ fun CalendarDays(
     currentDate: LocalDate,
     showAll: Boolean,
     monthYear: AgendaMonthYear,
-    onDayClicked: (Int) -> Unit
+    onDayClicked: (Long) -> Unit
 ) {
     val gridDays by derivedStateOf {
         createGridDay(monthYear)

@@ -1,7 +1,9 @@
 package di
 
 import data.local.HiddenEventsLocalDataSource
+import data.local.LaunchCounterDataSource
 import data.local.SettingsLocalDataSource
+import data.local.SwipeToolTipDataSource
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.CalendarGenerator
 import domain.use_case.FlatCalendarViewFactory
@@ -9,6 +11,7 @@ import domain.use_case.GetAllEventsUseCase
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
+import domain.use_case.ShouldShowDemoModeUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.factoryOf
@@ -19,8 +22,8 @@ import org.koin.dsl.module
 
 import presentation.screens.add_event.AddEventViewModel
 import presentation.screens.calendar.CalendarViewModel
+import presentation.screens.onboarding.OnboardingViewModel
 import presentation.screens.main.AppViewModel
-import presentation.screens.paywall.PaywallViewModel
 import presentation.screens.settings.SettingsViewModel
 import repository.HiddenEventsRepository
 import repository.HiddenEventsRepositoryImpl
@@ -31,9 +34,9 @@ expect val platformModule: Module
 
 val sharedModule = module {
     viewModelOf(::AppViewModel)
+    viewModelOf(::OnboardingViewModel)
     viewModelOf(::CalendarViewModel)
     viewModelOf(::AddEventViewModel)
-    viewModelOf(::PaywallViewModel)
     viewModelOf(::SettingsViewModel)
 
     singleOf(::CalendarGenerator)
@@ -43,6 +46,7 @@ val sharedModule = module {
     factoryOf(::SaveSettingsUseCase)
     factoryOf(::ScheduleNotificationUseCase)
     singleOf(::AppThemeListenerUseCase)
+    factoryOf(::ShouldShowDemoModeUseCase)
 
     factoryOf(::FlatCalendarViewFactory)
 
@@ -50,7 +54,9 @@ val sharedModule = module {
     single { HiddenEventsRepositoryImpl(get()) }.bind<HiddenEventsRepository>()
 
     singleOf(::SettingsLocalDataSource)
+    singleOf(::SwipeToolTipDataSource)
     singleOf(::SettingsRepositoryImpl).bind<SettingsRepository>()
+    singleOf(::LaunchCounterDataSource)
 
     factory { ToggleEventVisibilityUseCase(get()) }
 }

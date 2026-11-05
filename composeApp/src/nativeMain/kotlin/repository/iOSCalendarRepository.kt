@@ -7,7 +7,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
 import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
+import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -23,8 +24,10 @@ import platform.Foundation.timeIntervalSince1970
 import platform.toEKEventDate
 import platform.uses24HourClock
 import kotlin.coroutines.resume
+import kotlin.time.ExperimentalTime
 
 @Suppress("ClassName")
+@OptIn(ExperimentalTime::class)
 class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
     private val eventStore = eventKit.eventStore
@@ -88,9 +91,16 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                 }
                 val timeZone = TimeZone.currentSystemDefault()
                 val uses24HourClock = uses24HourClock()
-                val localDateTime = Instant.fromEpochSeconds(
+                val startLocalDateTime = Instant.fromEpochSeconds(
                     ekEvent?.startDate?.timeIntervalSince1970?.toLong() ?: 0
                 ).toLocalDateTime(timeZone)
+
+                val endLocalDateTime = Instant.fromEpochSeconds(
+                    ekEvent?.endDate?.timeIntervalSince1970?.toLong() ?: 0
+                ).toLocalDateTime(timeZone)
+                val epochDay = startLocalDateTime.date.toEpochDays()
+                val isMultiDay = isMultiDay(startEpochDay = epochDay, end = endLocalDateTime.date)
+
                 ekEvent as EKEvent
                 val event = EventEntity(
                     id = ekEvent.eventIdentifier,
@@ -100,8 +110,10 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
                     allDay = ekEvent.allDay,
                     isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
-                    epochDay = localDateTime.date.toEpochDays(),
-                    localDateTime = localDateTime,
+                    epochDay = epochDay,
+                    startLocalDateTime = startLocalDateTime,
+                    endLocalDateTime = endLocalDateTime,
+                    isMultiDay = isMultiDay,
                     uses24HourClock = uses24HourClock
                 )
 
@@ -161,9 +173,16 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                     eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
                 val events = eventStore.eventsMatchingPredicate(predicate).map { ekEvent ->
                     ekEvent as EKEvent
-                    val localDateTime = Instant.fromEpochSeconds(
+                    val startLocalDateTime = Instant.fromEpochSeconds(
                         ekEvent.startDate?.timeIntervalSince1970?.toLong() ?: 0
                     ).toLocalDateTime(timeZone)
+
+                    val endLocalDateTime = Instant.fromEpochSeconds(
+                        ekEvent.endDate?.timeIntervalSince1970?.toLong() ?: 0
+                    ).toLocalDateTime(timeZone)
+
+                    val epochDay = startLocalDateTime.date.toEpochDays()
+                    val isMultiDay = isMultiDay(startEpochDay = epochDay, end = endLocalDateTime.date)
 
                     EventEntity(
                         id = ekEvent.eventIdentifier,
@@ -172,9 +191,11 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                         startTime = ekEvent.startDate?.timeIntervalSince1970?.toLong(),
                         endTime = ekEvent.endDate?.timeIntervalSince1970?.toLong(),
                         allDay = ekEvent.allDay,
-                        epochDay = localDateTime.date.toEpochDays(),
+                        epochDay = epochDay,
                         isRecurring = ekEvent.recurrenceRules().isNullOrEmpty().not(),
-                        localDateTime = localDateTime,
+                        startLocalDateTime = startLocalDateTime,
+                        endLocalDateTime = endLocalDateTime,
+                        isMultiDay = isMultiDay,
                         uses24HourClock = uses24HourClock
                     )
                 }
@@ -182,5 +203,9 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
                 continuation.resume(events)
             }
         }
+    }
+
+    private fun isMultiDay(startEpochDay: Long, end: LocalDate): Boolean {
+        return startEpochDay != end.toEpochDays()
     }
 }

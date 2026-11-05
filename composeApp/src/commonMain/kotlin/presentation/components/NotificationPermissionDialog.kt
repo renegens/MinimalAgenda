@@ -5,8 +5,8 @@ import androidx.compose.runtime.Composable
 @Composable
 fun NotificationPermissionDialog(onDismissRequest: () -> Unit) {
     AppAlertDialog(
-        title = "Notifications Not Enabled",
-        message = "It seems that notification permissions are currently not granted. To stay updated with important alerts and updates, you can enable notifications in your device’s system settings.",
-        onDismissRequest = onDismissRequest,
+        title = "Notifications Disabled",
+        message = "Notifications are currently disabled. Enable them in your device settings to receive event updates.",
+        onContinueRequest = onDismissRequest,
     )
 }

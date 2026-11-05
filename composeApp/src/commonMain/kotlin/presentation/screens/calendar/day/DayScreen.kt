@@ -1,12 +1,10 @@
 package presentation.screens.calendar.day
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.defaultMinSize
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -16,16 +14,19 @@ import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -39,41 +40,40 @@ import domain.model.DayListViewType
 import extensions.scrollToNowIfNeeded
 import extensions.today
 import kotlinx.datetime.LocalDate
-import platform.CalendarPermissionHandler
-import presentation.components.CalendarPermission
 import presentation.components.DayHeader
+import presentation.components.EventDetailsBottomSheet
+import presentation.components.EventOptionsMenu
 import presentation.components.ScrollablePaperBackground
 import presentation.components.SectionDivider
-import presentation.components.addHapticFeedback
+import presentation.components.addHapticFeedbackProminent
+import presentation.components.noRippleClickable
 import presentation.theme.DMSans18Bold60
 import presentation.theme.DMSans18Medium
-import presentation.theme.DMSansBlack36
 
-private val STICKY_HEADER_INDEX = 1
-
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DayScreen(
     items: List<DayListViewType>,
     appThemeMode: AppThemeMode,
-    onNowClicked: Boolean,
-    scrollToDay: Int,
+    onNowClicked: Int,
+    scrollToDay: Long,
     currentDate: LocalDate,
     showAll: Boolean,
     scrollToNow: Boolean,
     onHide: (AgendaEvent) -> Unit,
-    calendarPermission: CalendarPermissionHandler.State,
-    onRequestCalendarPermission: () -> Unit,
     onNotify: (AgendaEvent) -> Unit,
-    onEdit: (AgendaEvent) -> Unit
+    onEdit: (AgendaEvent) -> Unit,
+    onDetails: (AgendaEvent) -> Unit,
+    onOpenSettings: () -> Unit,
+    isDemoMode: Boolean,
 ) {
     if (items.isEmpty()) return
 
     val currentEpochDay = currentDate.toEpochDays()
 
-    val todayIndex by if (calendarPermission == CalendarPermissionHandler.State.FullAccess) {
-        mutableStateOf(items.findIndexOf(currentEpochDay))
-    } else {
-        mutableStateOf(items.findIndexOf(currentEpochDay) - STICKY_HEADER_INDEX)
+    // Recalculate todayIndex when items change (important for initial load when items load asynchronously)
+    val todayIndex = remember(items, currentEpochDay) { 
+        items.findIndexOf(currentEpochDay) 
     }
 
     val listState = rememberLazyListState()
@@ -89,25 +89,29 @@ fun DayScreen(
         }
     }
 
-    SideEffect {
-        if (scrollToNow) {
-            listState.requestScrollToItem(index = todayIndex)
+    // Watch both scrollToNow and todayIndex to handle:
+    // 1. scrollToNow changes to true when todayIndex is already valid
+    // 2. todayIndex becomes valid after scrollToNow is already true (async data load)
+    LaunchedEffect(scrollToNow, todayIndex) {
+        if (scrollToNow && todayIndex >= 0) {
+            listState.scrollToItem(index = todayIndex)
         }
     }
 
     var selectedItem by remember { mutableStateOf<AgendaEvent?>(null) }
     val hapticFeedback = LocalHapticFeedback.current
-    val eventsByEpochDay: Map<Int, List<DayListViewType.Event>> =
+    val eventsByEpochDay: Map<Long, List<DayListViewType.Event>> =
         items.filterIsInstance<DayListViewType.Event>().groupBy { it.event.epochDay!! }
+    
+    // Bottom sheet state for event details
+    val detailsSheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
+    var showDetailsBottomSheet by remember { mutableStateOf(false) }
+    var selectedEventForDetails by remember { mutableStateOf<AgendaEvent?>(null) }
+    val scope = rememberCoroutineScope()
 
     ScrollablePaperBackground(appThemeMode, listState) {
 
         LazyColumn(state = listState, modifier = Modifier.fillMaxSize()) {
-
-            CalendarPermission(
-                onPermissionRequest = onRequestCalendarPermission, state = calendarPermission
-            )
-
             items(items = items, key = { item -> item.uniqueId }, contentType = { item ->
                 when (item) {
                     is DayListViewType.Header -> "header"
@@ -138,12 +142,18 @@ fun DayScreen(
                             onNotify = onNotify,
                             onHide = onHide,
                             onEdit = onEdit,
+                            onDetails = {
+                                selectedEventForDetails = it
+                                showDetailsBottomSheet = true
+                            },
+                            onOpenSettings = onOpenSettings,
                             selectedItem = selectedItem,
                             onItemSelected = {
                                 selectedItem = it
                             },
                             showAll = showAll,
-                            hapticFeedback = hapticFeedback
+                            hapticFeedback = hapticFeedback,
+                            isDemoMode = isDemoMode
                         )
                     }
 
@@ -157,12 +167,40 @@ fun DayScreen(
             }
         }
     }
+    
+    // Event details bottom sheet
+    if (showDetailsBottomSheet) {
+        selectedEventForDetails?.let { event ->
+            ModalBottomSheet(
+                containerColor = MaterialTheme.colorScheme.surface,
+                onDismissRequest = {
+                    scope.launch { detailsSheetState.hide() }.invokeOnCompletion {
+                        if (!detailsSheetState.isVisible) {
+                            showDetailsBottomSheet = false
+                        }
+                    }
+                },
+                sheetState = detailsSheetState
+            ) {
+                EventDetailsBottomSheet(
+                    event = event,
+                    onDismiss = {
+                        scope.launch { detailsSheetState.hide() }.invokeOnCompletion {
+                            if (!detailsSheetState.isVisible) {
+                                showDetailsBottomSheet = false
+                            }
+                        }
+                    }
+                )
+            }
+        }
+    }
 }
 
 @Composable
 fun EmptyDay(
-    eventsByEpochDay: Map<Int, List<DayListViewType.Event>>,
-    epochDay: Int,
+    eventsByEpochDay: Map<Long, List<DayListViewType.Event>>,
+    epochDay: Long,
     showAll: Boolean
 ) {
     if (eventsByEpochDay[epochDay] == null) {
@@ -188,72 +226,69 @@ fun Event(
     onNotify: (AgendaEvent) -> Unit,
     onHide: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
+    onDetails: (AgendaEvent) -> Unit,
+    onOpenSettings: () -> Unit,
     selectedItem: AgendaEvent?,
     onItemSelected: (AgendaEvent?) -> Unit,
     showAll: Boolean,
-    hapticFeedback: HapticFeedback
+    hapticFeedback: HapticFeedback,
+    isDemoMode: Boolean
 ) {
     if (showAll.not() && event.isHidden) return
-
+    val textColor = if (selectedItem == event) {
+        MaterialTheme.colorScheme.secondary
+    } else {
+        event.getTextColor(showAll)
+    }
     Row(
-        modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(horizontal = 16.dp)
-    ) {
-        Time(agendaEvent = event, showAll = showAll)
-        Column(
-            modifier = Modifier.fillMaxWidth().background(
-                color = if (selectedItem == event) MaterialTheme.colorScheme.secondaryContainer else Color.Transparent
-            ).clickable {
-                hapticFeedback.addHapticFeedback()
-                if (selectedItem == event) {
-                    onItemSelected.invoke(null)
+        modifier = Modifier.fillMaxWidth().defaultMinSize(minHeight = 28.dp).wrapContentHeight()
+            .padding(horizontal = 16.dp).noRippleClickable {
+                hapticFeedback.addHapticFeedbackProminent()
+                // Special handling for demo event with id "6" - open settings instead of menu
+                if (event.id == "6" && isDemoMode) {
+                    onOpenSettings()
                 } else {
-                    onItemSelected.invoke(event)
+                    if (selectedItem == event) {
+                        onItemSelected.invoke(null)
+                    } else {
+                        onItemSelected.invoke(event)
+                    }
                 }
             }
-        ) {
-            val style = if (event.allDay.not() && event.hasPassedForToday(today.toEpochDays())) {
-                DMSans18Medium.copy(textDecoration = TextDecoration.LineThrough)
-            } else {
-                DMSans18Medium
+    ) {
+        Time(agendaEvent = event, textColor = textColor)
+        Column(modifier = Modifier.fillMaxWidth()) {
+
+            val style = when {
+                isDemoMode -> DMSans18Medium
+                event.allDay.not() && event.hasPassedForToday(today.toEpochDays()) -> DMSans18Medium.copy(textDecoration = TextDecoration.LineThrough)
+                else -> DMSans18Medium
             }
 
+            val title = if (event.isLastDayInMultiDayEvent) {
+                "${event.title} (Ending)"
+            } else {
+                event.title
+            }
             Text(
                 modifier = Modifier.padding(start = 4.dp),
-                text = event.title,
+                text = title,
                 style = style,
-                color = event.getTextColor(showAll),
+                color = textColor,
             )
-
-            AnimatedVisibility(visible = selectedItem == event) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                ) {
-                    TextButton(onClick = {
-                        onHide.invoke(event)
-                        onItemSelected.invoke(null)
-                    }) {
-                        val text = if (event.isHidden) {
-                            "Show"
-                        } else {
-                            "Hide"
-                        }
-                        Text(text.uppercase(), style = DMSansBlack36)
-                    }
-                    TextButton(onClick = {
-                        onNotify.invoke(event)
-                        onItemSelected.invoke(null)
-                    }) {
-                        Text("Notify".uppercase(), style = DMSansBlack36)
-                    }
-                    TextButton(onClick = {
-                        onEdit.invoke(event)
-                        onItemSelected.invoke(null)
-                    }) {
-                        Text("Edit".uppercase(), style = DMSansBlack36)
-                    }
-                }
-            }
         }
+
+        EventOptionsMenu(
+            event = event,
+            onNotify = onNotify,
+            onHide = onHide,
+            onEdit = onEdit,
+            onDetails = onDetails,
+            selectedItem = selectedItem,
+            hapticFeedback = hapticFeedback,
+            onItemSelected = onItemSelected,
+            isDemoMode = isDemoMode
+        )
     }
 }
 
@@ -281,41 +316,42 @@ fun EmptyMessage() {
 }
 
 @Composable
-fun Time(agendaEvent: AgendaEvent, showAll: Boolean) {
+fun Time(agendaEvent: AgendaEvent, textColor: Color) {
     val time = agendaEvent.getFormattedTime()
+
     Row(modifier = Modifier.width(time.getRowWidth().dp).padding(end = 8.dp)) {
         if (agendaEvent.allDay) {
             Text(
                 text = "All Day",
                 style = DMSans18Bold60,
-                color = agendaEvent.getTextColor(showAll)
+                color = textColor
             )
         } else {
             Text(
                 modifier = Modifier.weight(0.6F),
                 text = time.hours,
                 style = DMSans18Bold60,
-                color = agendaEvent.getTextColor(showAll)
+                color = textColor
             )
             Text(
                 modifier = Modifier.weight(1F),
                 text = time.minutes,
                 style = DMSans18Bold60,
-                color = agendaEvent.getTextColor(showAll)
+                color = textColor
             )
             time.ampm?.let {
                 Text(
                     modifier = Modifier.weight(1F),
                     text = it,
                     style = DMSans18Bold60,
-                    color = agendaEvent.getTextColor(showAll)
+                    color = textColor
                 )
             }
         }
     }
 }
 
-private fun List<DayListViewType>.findIndexOf(epochDay: Int): Int {
+private fun List<DayListViewType>.findIndexOf(epochDay: Long): Int {
     return indexOfFirst {
         (it is DayListViewType.Header) && it.agendaDay.epochDay == epochDay
     }

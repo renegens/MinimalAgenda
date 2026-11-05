@@ -10,7 +10,6 @@ import extensions.millisToEpochDay
 import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -21,7 +20,10 @@ import java.util.Calendar
 import java.util.Date
 import java.util.UUID
 import kotlin.random.Random
+import kotlin.time.ExperimentalTime
+import kotlin.time.Instant
 
+@OptIn(ExperimentalTime::class)
 class AndroidCalendarRepository(private val context: Context) : CalendarRepository {
 
     override suspend fun getCalendars(): List<CalendarEntity> {
@@ -69,7 +71,7 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
 
     @SuppressLint("SimpleDateFormat")
     fun dateFormatter(milliseconds: String): String {
-        return SimpleDateFormat("HH mm").format(Date(milliseconds.toLong())).toString()
+        return SimpleDateFormat("HH : mm").format(Date(milliseconds.toLong())).toString()
     }
 
     override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
@@ -87,8 +89,11 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                     allDay = false,
                     epochDay = calculateEpochDay(timestamp, TimeZone.currentSystemDefault()),
                     isRecurring = false,
-                    format = dateFormatter(timestamp.toString())
-                )
+                    startLocalDateTime = Instant.fromEpochSeconds(timestamp).toLocalDateTime(TimeZone.currentSystemDefault()),
+                    endLocalDateTime = Instant.fromEpochSeconds(timestamp + 6000).toLocalDateTime(TimeZone.currentSystemDefault()),
+                    uses24HourClock = false,
+                    isMultiDay = false,
+                    )
             )
         }
         return list
@@ -152,7 +157,11 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
                             endTime = startTime + 6000,
                             allDay = false,
                             isRecurring = false,
-                            epochDay = endTime.millisToEpochDay()
+                            epochDay = endTime.millisToEpochDay(),
+                            startLocalDateTime = Instant.fromEpochSeconds(startTime).toLocalDateTime(TimeZone.currentSystemDefault()),
+                            endLocalDateTime = Instant.fromEpochSeconds(startTime + 6000).toLocalDateTime(TimeZone.currentSystemDefault()),
+                            isMultiDay = false,
+                            uses24HourClock = false
                         )
                     )
                 }
@@ -176,15 +185,16 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         return false
     }
 
-    private fun calculateEpochDay(starTime: Long?, timeZone: TimeZone): Int {
+    private fun calculateEpochDay(starTime: Long?, timeZone: TimeZone): Long {
         return Instant.fromEpochSeconds(starTime ?: 0).toLocalDateTime(timeZone).date.toEpochDays()
     }
 }
 
+@OptIn(ExperimentalTime::class)
 fun getRandomTimestampWithinTwoYears(): Long {
     // Current time
-    val startYear = LocalDate(year = today.year - 2, monthNumber = 1, dayOfMonth = 1)
-    val endDate = LocalDate(year = startYear.year + 4, monthNumber = 12, dayOfMonth = 31)
+    val startYear = LocalDate(year = today.year - 2, month = 1, day = 1)
+    val endDate = LocalDate(year = startYear.year + 4, month = 12, day = 31)
 
 
     // Convert start and end times to epoch milliseconds for easier random calculation

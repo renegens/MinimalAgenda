@@ -10,6 +10,7 @@ object CustomColor {
     val Mint_500 = Color(0xFF00b1a9)
     val Rosa_500 = Color(0xFFf84a6d)
     val Orange_500 = Color(0xFFf26803)
+    val Orange_700 = Color(0xFFE25602)
     val Lila_500 = Color(0xFFb453d9)
     val Blue_500 = Color(0xFF0078fb)
 
@@ -29,6 +30,10 @@ object CustomColor {
     val Sepia_900 = Color(0xFFd5d1c7)
 
     val White_500 = Color(0xFFFFFFFF)
+
+    val APP_ICON_BACKGROUND_LIGHT = Color(0xFFF5F5F5)
+    val APP_ICON_BACKGROUND_DARK = Color(0xFF3E3D3D)
+
 }
 
 fun getLightColorScheme(primaryColor: Color): ColorScheme {
@@ -36,9 +41,11 @@ fun getLightColorScheme(primaryColor: Color): ColorScheme {
         primary = primaryColor, secondary =
         CustomColor.Gray_300,
         tertiary = CustomColor.Gray_500,
-        background = CustomColor.Sepia_500,
+        surface = CustomColor.White_500,
+        onSurface = CustomColor.Black_900,
         secondaryContainer = CustomColor.Sepia_900,
         inversePrimary = CustomColor.Black_900,
+        inverseOnSurface = CustomColor.Gray_200,
         inverseSurface = CustomColor.White_500,
         surfaceVariant = CustomColor.Sepia_100
     )
@@ -49,10 +56,12 @@ fun getDarkColorScheme(primaryColor: Color): ColorScheme {
         primary = primaryColor,
         secondary = CustomColor.Gray_500,
         tertiary = CustomColor.Gray_200,
-        background = CustomColor.Black_200,
         secondaryContainer = CustomColor.Black_900,
         inversePrimary = CustomColor.White_500,
+        inverseOnSurface = CustomColor.Black_200,
         inverseSurface = CustomColor.Black_900,
-        surfaceVariant = CustomColor.Black_200
+        surfaceVariant = CustomColor.Black_200,
+        surface = CustomColor.Black_900,
+        onSurface = CustomColor.White_500
     )
 }

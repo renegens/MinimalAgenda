@@ -10,8 +10,7 @@ import domain.use_case.GetAllEventsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
-import domain.use_case.FlatCalendarViewFactory
-import extensions.guardPremium
+import domain.use_case.GetSettingsUseCase
 import extensions.today
 import platform.CalendarPermissionHandler
 
@@ -21,7 +20,7 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-    private val flatCalendarViewFactory: FlatCalendarViewFactory
+    private val settingsUseCase: GetSettingsUseCase
 ) : BaseViewModel<Event, State, Effect>() {
 
     override fun createInitialState() = State()
@@ -44,8 +43,6 @@ class CalendarViewModel(
                 Section.Year -> setEffect {
                     Effect.ScrollYearToToday
                 }
-
-                Section.Settings -> {}
             }
 
             is Event.OnDayClicked -> setEffect {
@@ -59,8 +56,10 @@ class CalendarViewModel(
             is Event.OnYearClicked -> setEffect { Effect.GoToYear(event.agendaYear) }
 
             Event.OnRequestCalendarPermissionClicked -> viewModelScope.launch {
+
                 when (val state = permissionHandler.requestCalendarPermission()) {
                     CalendarPermissionHandler.State.FullAccess -> loadEventsFastAndSlow(scrollToNow = true)
+
                     else -> setState {
                         copy(
                             agendaEvents = emptyList(), calendarPermission = state
@@ -69,85 +68,68 @@ class CalendarViewModel(
                 }
             }
 
-            is Event.ToggleEventVisibility -> guardPremium(onSubscribed = {
-                toggleEventVisibility(
-                    event.agendaEvent
-                )
-            },
-                onPaywall = { setEffect { Effect.ShowPaywall } })
+            is Event.ToggleEventVisibility -> toggleEventVisibility(event.agendaEvent)
 
-            is Event.Notify -> guardPremium(onSubscribed = { notifyEvent(event.agendaEvent) },
-                onPaywall = { setEffect { Effect.ShowPaywall } })
+            is Event.Notify -> notifyEvent(event.agendaEvent)
 
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
-            is Event.OnEditEvent -> guardPremium(onSubscribed = { setEffect { Effect.ShowEdit(event.agendaEvent) } },
-                onPaywall = { setEffect { Effect.ShowPaywall } })
+            is Event.OnEditEvent -> setEffect { Effect.ShowEdit(event.agendaEvent) }
+            Event.ShowSettings -> setEffect { Effect.ShowSettings }
+            Event.RefreshSettings -> refreshSettings()
         }
     }
 
     private fun loadData() {
-        when (val permissionState = permissionHandler.getPermissionState()) {
-            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
+        viewModelScope.launch {
+            val eventsUIList = uiState.value.flatDaysAndEvents
+            val calendarPermissionState = permissionHandler.getPermissionState()
+            val settings = settingsUseCase()
 
-                val eventsUIList = uiState.value.flatDaysAndEvents
-
-                if (eventsUIList.isEmpty()) {
-                    loadEventsFastAndSlow(scrollToNow = true)
-                    return@launch
-                }
-
-                when (val slowIteration = getAllEventsUseCase(24)) {
-
-                    is GetAllEventsUseCase.State.Success -> {
-                        setState {
-                            copy(
-                                currentDate = today,
-                                flatDaysAndEvents = slowIteration.dayListViewTypes,
-                                agendaEvents = slowIteration.agendaEvents,
-                                scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size
-                            )
-                        }
-                    }
-                }
+            if (eventsUIList.isEmpty()) {
+                loadEventsFastAndSlow(
+                    scrollToNow = true
+                )
+                return@launch
             }
 
-            else -> setState {
-                State(
-                    days = calendarGenerator.calendar,
-                    flatDaysAndEvents = flatCalendarViewFactory.build(),
-                    calendarPermission = permissionState
-                )
+            when (val slowIteration = getAllEventsUseCase(24)) {
+                is GetAllEventsUseCase.State.Success -> {
+                    setState {
+                        copy(
+                            currentDate = today,
+                            calendarPermission = calendarPermissionState,
+                            flatDaysAndEvents = slowIteration.dayListViewTypes,
+                            agendaEvents = slowIteration.agendaEvents,
+                            isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
+                            scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size,
+                            hideBottomNavigation = settings.hideBottomNavigation
+                        )
+                    }
+                }
             }
         }
     }
 
     private fun reloadData() {
-        when (val permissionState = permissionHandler.getPermissionState()) {
-            CalendarPermissionHandler.State.FullAccess -> viewModelScope.launch {
-                when (val slowIteration = getAllEventsUseCase(24)) {
-                    is GetAllEventsUseCase.State.Success -> {
-                        setState {
-                            copy(
-                                flatDaysAndEvents = slowIteration.dayListViewTypes,
-                                agendaEvents = slowIteration.agendaEvents,
-                                scrollToNow = false
-                            )
-                        }
+        viewModelScope.launch {
+            when (val slowIteration = getAllEventsUseCase(24)) {
+                is GetAllEventsUseCase.State.Success -> {
+                    setState {
+                        copy(
+                            flatDaysAndEvents = slowIteration.dayListViewTypes,
+                            agendaEvents = slowIteration.agendaEvents,
+                            scrollToNow = false
+                        )
                     }
                 }
-            }
-
-            else -> setState {
-                State(
-                    days = calendarGenerator.calendar,
-                    flatDaysAndEvents = flatCalendarViewFactory.build(),
-                    calendarPermission = permissionState
-                )
             }
         }
     }
 
     private suspend fun loadEventsFastAndSlow(scrollToNow: Boolean) {
+        val calendarPermissionState = permissionHandler.getPermissionState()
+        val settings = settingsUseCase()
+
         when (val fastIteration = getAllEventsUseCase(1)) {
             is GetAllEventsUseCase.State.Success -> {
                 setState {
@@ -156,8 +138,10 @@ class CalendarViewModel(
                         days = calendarGenerator.calendar,
                         flatDaysAndEvents = fastIteration.dayListViewTypes,
                         agendaEvents = fastIteration.agendaEvents,
-                        calendarPermission = CalendarPermissionHandler.State.FullAccess,
-                        scrollToNow = scrollToNow
+                        isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
+                        calendarPermission = calendarPermissionState,
+                        scrollToNow = scrollToNow,
+                        hideBottomNavigation = settings.hideBottomNavigation
                     )
                 }
                 when (val slowIteration = getAllEventsUseCase(24)) {
@@ -198,6 +182,25 @@ class CalendarViewModel(
                 }
 
                 ScheduleNotificationUseCase.State.Success -> {}
+            }
+        }
+    }
+
+    private fun refreshSettings() {
+        viewModelScope.launch {
+            val settings = settingsUseCase()
+            val previousPermissionState = uiState.value.calendarPermission
+            val currentPermissionState = permissionHandler.getPermissionState()
+            
+            setState { copy(hideBottomNavigation = settings.hideBottomNavigation) }
+            
+            // If permission changed from denied/not determined to full access, reload events
+            if (previousPermissionState != CalendarPermissionHandler.State.FullAccess 
+                && currentPermissionState == CalendarPermissionHandler.State.FullAccess) {
+                loadEventsFastAndSlow(scrollToNow = true)
+            } else {
+                // Update permission state even if it didn't change to full access
+                setState { copy(calendarPermission = currentPermissionState) }
             }
         }
     }

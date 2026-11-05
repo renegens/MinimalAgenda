@@ -1,10 +1,12 @@
 package extensions
 
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
+import kotlin.time.ExperimentalTime
 
-fun Long.millisToEpochDay(): Int {
+@OptIn(ExperimentalTime::class)
+fun Long.millisToEpochDay(): Long {
     val instant = Instant.fromEpochMilliseconds(this)
 
     val timeZone = TimeZone.currentSystemDefault()
@@ -13,6 +15,7 @@ fun Long.millisToEpochDay(): Int {
     return localDate.toEpochDays()
 }
 
+@OptIn(ExperimentalTime::class)
 fun Long.millisToTime(): String {
     val instant = Instant.fromEpochSeconds(this)
 
@@ -30,6 +33,7 @@ fun Long.millisToTime(): String {
     return "$hoursString:$minutesString"
 }
 
+@OptIn(ExperimentalTime::class)
 fun Long.millisToHoursAndMinutes(): Pair<String, String> {
     val instant = Instant.fromEpochSeconds(this)
 

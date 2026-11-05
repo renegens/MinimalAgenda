@@ -6,17 +6,26 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.window.DialogProperties
 import getPlatform
-import io.github.alexzhirkevich.cupertino.CupertinoAlertDialog
-import io.github.alexzhirkevich.cupertino.CupertinoText
-import io.github.alexzhirkevich.cupertino.ExperimentalCupertinoApi
-import io.github.alexzhirkevich.cupertino.default
-import io.github.alexzhirkevich.cupertino.theme.CupertinoTheme
+import com.slapps.cupertino.CupertinoAlertDialog
+import com.slapps.cupertino.CupertinoText
+import com.slapps.cupertino.ExperimentalCupertinoApi
+import com.slapps.cupertino.default
+import com.slapps.cupertino.destructive
+import com.slapps.cupertino.theme.CupertinoTheme
 import presentation.theme.DMSans18Regular
 
 @OptIn(ExperimentalCupertinoApi::class)
 @Composable
-fun AppAlertDialog(title: String, message: String, onDismissRequest: () -> Unit) {
+fun AppAlertDialog(
+    title: String,
+    message: String,
+    confirmButtonLabel: String = "OK",
+    negativeButtonLabel: String? = null,
+    onContinueRequest: () -> Unit,
+    onNegativeRequest: (() -> Unit)? = null
+) {
     if (getPlatform().isAndroid) {
         AlertDialog(
             title = {
@@ -31,19 +40,29 @@ fun AppAlertDialog(title: String, message: String, onDismissRequest: () -> Unit)
                     color = MaterialTheme.colorScheme.inverseSurface
                 )
             },
-            onDismissRequest = onDismissRequest,
+            onDismissRequest = onContinueRequest,
             confirmButton = {
                 TextButton(
-                    onClick = onDismissRequest
+                    onClick = onContinueRequest
                 ) {
-                    Text("Ok")
+                    Text(confirmButtonLabel)
                 }
-            }
+            },
+            dismissButton = if (negativeButtonLabel != null) {
+                {
+                    TextButton(
+                        onClick = { onNegativeRequest?.invoke() ?: onContinueRequest() }
+                    ) {
+                        Text(negativeButtonLabel)
+                    }
+                }
+            } else null
         )
     } else {
         CupertinoTheme {
             CupertinoAlertDialog(
-                onDismissRequest = onDismissRequest,
+                properties = DialogProperties(dismissOnClickOutside = false),
+                onDismissRequest = onContinueRequest,
                 title = {
                     CupertinoText(title)
                 },
@@ -51,12 +70,21 @@ fun AppAlertDialog(title: String, message: String, onDismissRequest: () -> Unit)
                     CupertinoText(message)
                 }
             ) {
+                if (negativeButtonLabel != null) {
+                    destructive(
+                        onClick = {
+                            onNegativeRequest?.invoke() ?: onContinueRequest()
+                        }
+                    ) {
+                        CupertinoText(negativeButtonLabel)
+                    }
+                }
                 default(
                     onClick = {
-                        onDismissRequest.invoke()
+                        onContinueRequest.invoke()
                     }
                 ) {
-                    CupertinoText("OK")
+                    CupertinoText(confirmButtonLabel)
                 }
             }
         }

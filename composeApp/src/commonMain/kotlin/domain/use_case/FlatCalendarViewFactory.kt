@@ -15,7 +15,15 @@ class FlatCalendarViewFactory(
             flatDayWithEvents.add(DayListViewType.Header(calendarItem))
 
             grouped?.get(calendarItem.epochDay)?.let { events ->
-                events.sortedWith(compareBy({ it.startTimeInUTC }, { it.title })).forEach { event ->
+                events.sortedWith(compareBy({
+
+                    if (it.isLastDayInMultiDayEvent) {
+                        it.endTimeInUTC
+                    } else {
+                        it.startTimeInUTC
+                    }
+
+                }, { it.title })).forEach { event ->
                     flatDayWithEvents.add(DayListViewType.Event(event))
                 }
             }

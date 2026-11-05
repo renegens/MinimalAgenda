@@ -6,7 +6,7 @@ data class AppTheme(
 ) {
     companion object {
         val Default = AppTheme(
-            appColor = AppColor.Red,
+            appColor = AppColor.Orange,
             appThemeMode = AppThemeMode.FollowSystem
         )
     }

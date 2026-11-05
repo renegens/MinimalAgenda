@@ -17,8 +17,8 @@ fun createGridDay(agendaMonthYear: AgendaMonthYear): List<DayGrid> {
     for (day in 1..agendaMonthYear.daysInMonth) {
         val local = LocalDate(
             year = agendaMonthYear.agendaYear.year,
-            monthNumber = agendaMonthYear.agendaMonth.number,
-            dayOfMonth = day
+            month = agendaMonthYear.agendaMonth.number,
+            day = day.toInt()
         )
         days.add(DayGrid(day, local.toEpochDays()))
     }
@@ -37,8 +37,8 @@ fun createGridDay(agendaMonthYear: AgendaMonthYear): List<DayGrid> {
     return days
 }
 
-class DayGrid(val dayInMonth: Int = DONT_RENDER, val epochDay: Int = DONT_RENDER) {
+class DayGrid(val dayInMonth: Long = DONT_RENDER, val epochDay: Long = DONT_RENDER) {
     companion object {
-        const val DONT_RENDER = -1
+        const val DONT_RENDER = -1L
     }
 }

@@ -44,6 +44,11 @@ import androidx.compose.material3.TimePicker
 import androidx.compose.material3.TimePickerDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
+import com.slapps.cupertino.CupertinoDatePicker
+import com.slapps.cupertino.CupertinoTimePicker
+import com.slapps.cupertino.ExperimentalCupertinoApi
+import com.slapps.cupertino.rememberCupertinoDatePickerState
+import com.slapps.cupertino.rememberCupertinoTimePickerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
@@ -77,6 +82,7 @@ import presentation.components.clickableWithOpaqueText
 import presentation.theme.DMSans18Medium
 import presentation.theme.TextFieldStyleAddEvent
 import presentation.theme.TextFieldStyleDateAndTime
+import getPlatform
 
 @Composable
 fun AddEventScreen(onCancel: () -> Unit, onSave: () -> Unit) {
@@ -281,7 +287,7 @@ private fun DurationInput(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalCupertinoApi::class)
 @Composable
 private fun ColumnScope.DateAndTime(
     label: String,
@@ -292,20 +298,61 @@ private fun ColumnScope.DateAndTime(
     onTimeUpdate: (Triple<Long, Int, Int>) -> Unit,
     focusManager: FocusManager
 ) {
+    val isAndroid = getPlatform().isAndroid
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
 
-    val datePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
-    val timePickerState =
+    // Material3 pickers for Android
+    val materialDatePickerState = rememberDatePickerState(initialSelectedDateMillis = date)
+    val materialTimePickerState =
         rememberTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
 
-    val selectedDate = datePickerState.selectedDateMillis?.let {
-        onTimeUpdate(Triple(it, timePickerState.hour, timePickerState.minute))
-        formatTimestamp(it)
-    } ?: ""
+    // Cupertino pickers for iOS
+    val cupertinoDatePickerState = rememberCupertinoDatePickerState(initialSelectedDateMillis = date)
+    val cupertinoTimePickerState =
+        rememberCupertinoTimePickerState(initialHour = hours, initialMinute = minutes, is24Hour = true)
 
-    val selectedTime =
-        "${timePickerState.hour}:${timePickerState.minute.toString().padStart(2, '0')}"
+    // Watch for changes in picker states and update only when values actually change
+    // This prevents infinite recomposition while still capturing the latest values
+    // Only create the relevant LaunchedEffect per platform for efficiency
+    if (isAndroid) {
+        LaunchedEffect(
+            materialDatePickerState.selectedDateMillis,
+            materialTimePickerState.hour,
+            materialTimePickerState.minute
+        ) {
+            materialDatePickerState.selectedDateMillis?.let { dateMillis ->
+                onTimeUpdate(Triple(dateMillis, materialTimePickerState.hour, materialTimePickerState.minute))
+            }
+        }
+    } else {
+        LaunchedEffect(
+            cupertinoDatePickerState.selectedDateMillis,
+            cupertinoTimePickerState.hour,
+            cupertinoTimePickerState.minute
+        ) {
+            cupertinoDatePickerState.selectedDateMillis?.let { dateMillis ->
+                onTimeUpdate(Triple(dateMillis, cupertinoTimePickerState.hour, cupertinoTimePickerState.minute))
+            }
+        }
+    }
+
+    // Get selected values for display
+    val selectedDate = if (isAndroid) {
+        materialDatePickerState.selectedDateMillis?.let {
+            formatTimestamp(it)
+        } ?: ""
+    } else {
+        cupertinoDatePickerState.selectedDateMillis?.let {
+            formatTimestamp(it)
+        } ?: ""
+    }
+
+    val selectedTime = if (isAndroid) {
+        "${materialTimePickerState.hour}:${materialTimePickerState.minute.toString().padStart(2, '0')}"
+    } else {
+        "${cupertinoTimePickerState.hour}:${cupertinoTimePickerState.minute.toString().padStart(2, '0')}"
+    }
 
     DetailsItemRow {
         BodyText(label)
@@ -331,13 +378,21 @@ private fun ColumnScope.DateAndTime(
         enter = expandVertically(),
         exit = shrinkVertically()
     ) {
-        DatePicker(
-            title = null,
-            headline = null,
-            state = datePickerState,
-            colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-            showModeToggle = false,
-        )
+        if (isAndroid) {
+            DatePicker(
+                title = null,
+                headline = null,
+                state = materialDatePickerState,
+                colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
+                showModeToggle = false,
+            )
+        } else {
+            CupertinoDatePicker(
+                state = cupertinoDatePickerState,
+                modifier = Modifier.fillMaxWidth(),
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
+            )
+        }
     }
 
     AnimatedVisibility(
@@ -345,21 +400,30 @@ private fun ColumnScope.DateAndTime(
         enter = expandVertically(),
         exit = shrinkVertically()
     ) {
-        val density = LocalDensity.current.density
-        val s = Density(density, 0.8f)
+        if (isAndroid) {
+            val density = LocalDensity.current.density
+            val s = Density(density, 0.8f)
 
-        CompositionLocalProvider(
-            LocalDensity provides s,
-        ) {
-            TimePicker(
-                state = timePickerState, colors = TimePickerDefaults.colors(
-                    timeSelectorSelectedContentColor = MaterialTheme.colorScheme.primary,
-                    timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                ), modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+            CompositionLocalProvider(
+                LocalDensity provides s,
+            ) {
+                TimePicker(
+                    state = materialTimePickerState,
+                    colors = TimePickerDefaults.colors(
+                        timeSelectorSelectedContentColor = MaterialTheme.colorScheme.primary,
+                        timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    ),
+                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
+                )
+            }
+        } else {
+            CupertinoTimePicker(
+                state = cupertinoTimePickerState,
+                modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+                containerColor = MaterialTheme.colorScheme.secondaryContainer
             )
         }
-
     }
 }
 

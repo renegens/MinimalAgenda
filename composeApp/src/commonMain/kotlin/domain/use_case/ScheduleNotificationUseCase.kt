@@ -1,10 +1,11 @@
 package domain.use_case
 
 import domain.model.AgendaEvent
-import kotlinx.datetime.Clock
 import platform.NotificationHandler
 import platform.NotificationPermissionHandler
+import kotlin.time.Clock
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.ExperimentalTime
 
 class ScheduleNotificationUseCase(
     private val notificationHandler: NotificationHandler,
@@ -18,6 +19,7 @@ class ScheduleNotificationUseCase(
         object PermissionMissing : State()
     }
 
+    @OptIn(ExperimentalTime::class)
     suspend operator fun invoke(agendaEvent: AgendaEvent): State {
         val permissionGranted = notificationPermissionHandler.requestNotificationPermission()
         if (permissionGranted) {

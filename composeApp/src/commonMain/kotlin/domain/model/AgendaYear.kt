@@ -14,12 +14,12 @@ data class AgendaYear(
 
     fun isCurrent(localDate: LocalDate): Boolean = localDate.year == year
 
-    fun isEpochDayInRange(epochDay: Int): Boolean {
+    fun isEpochDayInRange(epochDay: Long): Boolean {
         val range = epochRange
-        return IntRange(range.first, range.second).contains(epochDay)
+        return LongRange(range.first, range.second).contains(epochDay)
     }
 
-    private val epochRange: Pair<Int, Int>
+    private val epochRange: Pair<Long, Long>
         get() {
             val firstDayOfYear = LocalDate(year, 1, 1)
             val firstEpochDay = firstDayOfYear.toEpochDays()

@@ -30,26 +30,12 @@ class AndroidModalPresenter : ModalPresenter {
 //                        viewModel.setEvent(AppContract.Event.NewEvent)
 //                    },
 //                    onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
-//                    notEligible = {
-//                        viewModel.setEvent(AppContract.Event.NotEligible)
 //                    })
 //            }
 //        }
     }
 
-    override fun presentPaywall(appTheme: AppTheme, onCompletion: () -> Unit) {
 
-        //navController.navigate(Screen.Paywall.route)
-
-        //        composable(
-//            route = Screen.Paywall.route,
-//            enterTransition = enterPush,
-//            exitTransition = exitPush
-//        ) {
-//            PaywallScreen(onCancel = { navController.navigateUp() },
-//                onPurchaseComplete = { navController.navigateUp() })
-//        }
-    }
 
 
 }

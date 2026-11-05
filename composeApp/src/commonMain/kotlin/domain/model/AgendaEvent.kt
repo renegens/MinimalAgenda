@@ -1,9 +1,9 @@
 package domain.model
 
 import data.local.HiddenEventEntity
+import extensions.currentLocalDateTime
 import extensions.takingScreenshots
-import kotlinx.datetime.Clock
-import kotlinx.datetime.Instant
+import kotlin.time.Instant
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
@@ -13,13 +13,16 @@ data class AgendaEvent(
     val title: String,
     val location: String? = "",
     val startTimeInUTC: Long,
-    val endTime: Long? = null,
+    val endTimeInUTC: Long? = null,
     val allDay: Boolean,
-    var epochDay: Int?,
+    var epochDay: Long?,
     var isRecurring: Boolean = false,
     var isHidden: Boolean,
-    val localDateTime: LocalDateTime,
-    val uses24HourClock: Boolean
+    val startLocalDateTime: LocalDateTime,
+    val endLocalDateTime: LocalDateTime,
+    val uses24HourClock: Boolean,
+    val isMultiDay: Boolean,
+    val isLastDayInMultiDayEvent: Boolean = false
 ) {
     fun toHiddenEventEntity() = HiddenEventEntity(eventId = id, epochDay = epochDay!!)
 
@@ -36,6 +39,12 @@ data class AgendaEvent(
     }
 
     fun getFormattedTime(): FormattedTime {
+        val localDateTime = if (isLastDayInMultiDayEvent) {
+            endLocalDateTime
+        } else {
+            startLocalDateTime
+        }
+
         val hour = localDateTime.time.hour
         val minute = localDateTime.time.minute
 
@@ -58,23 +67,9 @@ data class AgendaEvent(
         }
     }
 
-    fun getHoursAndMinutes(): Pair<Int, Int> {
-        val date = Instant.fromEpochSeconds(startTimeInUTC)
-            .toLocalDateTime(TimeZone.currentSystemDefault())
-        return date.hour to date.minute
-    }
-
-    fun getDuration(): Int {
-        return (endTime?.minus(startTimeInUTC))?.div(60)?.toInt() ?: 60
-    }
-
-    fun hasPassedForToday(today: Int): Boolean {
+    fun hasPassedForToday(today: Long): Boolean {
         if (takingScreenshots) return false
         if (epochDay != today) return false
-        val eventDate =
-            Instant.fromEpochSeconds(endTime ?: 0).toLocalDateTime(TimeZone.currentSystemDefault())
-        val currentLocalDateTime =
-            Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
-        return eventDate < currentLocalDateTime
+        return endLocalDateTime < currentLocalDateTime
     }
 }

@@ -21,37 +21,41 @@ class CalendarContract {
         val showAll: Boolean = false,
         val scrollToNow: Boolean = true,
         val currentDate: LocalDate = today,
-        val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
+        val hideBottomNavigation: Boolean = false,
+        val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined,
+        val isDemoMode: Boolean = false,
     ) : UiState
 
     sealed class Effect : UiEffect {
         object ScrollDayToToday : Effect()
         object ScrollMonthToToday : Effect()
         object ScrollYearToToday : Effect()
-        class GoToDay(val epochDay: Int) : Effect()
+        class GoToDay(val epochDay: Long) : Effect()
         class GoToMonth(val agendaMonthYear: AgendaMonthYear) : Effect()
         class GoToYear(val agendaYear: AgendaYear) : Effect()
-        object ShowPaywall : Effect()
-        class ShowEdit(val agendaEvent: AgendaEvent): Effect()
+        class ShowEdit(val agendaEvent: AgendaEvent) : Effect()
         object NotificationPermissionMissing : Effect()
+        object ShowSettings : Effect()
     }
 
     sealed class Event : UiEvent {
         object InitialDataLoad : Event()
         object ForceReload : Event()
         class OnNowClicked(val section: Section) : Event()
-        class OnDayClicked(val epochDay: Int) : Event()
+        class OnDayClicked(val epochDay: Long) : Event()
         class OnMonthClicked(val agendaMonthYear: AgendaMonthYear) : Event()
         class OnYearClicked(val agendaYear: AgendaYear) : Event()
         object OnRequestCalendarPermissionClicked : Event()
         class ToggleEventVisibility(val agendaEvent: AgendaEvent) : Event()
         class OnEditEvent(val agendaEvent: AgendaEvent) : Event()
         object ToggleActive : Event()
+        object ShowSettings: Event()
+        object RefreshSettings: Event()
         class Notify(val agendaEvent: AgendaEvent) : Event()
     }
 
     enum class Section(val position: Int) {
-        Day(0), Month(1), Year(2), Settings(3);
+        Day(0), Month(1), Year(2);
 
         companion object {
             fun fromInt(value: Int) = entries.first { it.position == value }

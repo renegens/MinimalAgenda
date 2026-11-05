@@ -76,6 +76,42 @@ val DMSansBlack250: TextStyle
         letterSpacing = (-6).sp,
     )
 
+val DMSansBlack150: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSansBlackFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 50.sp,
+        letterSpacing = (-3).sp,
+    )
+
+val DMSansBlack120: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSansBlackFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 40.sp,
+        letterSpacing = (-2).sp,
+    )
+
+val DMSansBlack100: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSansBlackFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 36.sp,
+        letterSpacing = (-1.5).sp,
+    )
+
+val DMSansBlack60: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSansBlackFamily,
+        fontWeight = FontWeight.Black,
+        fontSize = 20.sp,
+        letterSpacing = (-0.5).sp,
+    )
+
 val DMSansBlack36: TextStyle
     @Composable
     get() = TextStyle(
@@ -110,6 +146,16 @@ val DMSans24Medium60: TextStyle
         fontFamily = DMSans24ptFamily,
         fontWeight = FontWeight.Medium,
         fontSize = 20.sp,
+        letterSpacing = (-1).sp
+    )
+
+val DMSans24Light100: TextStyle
+    @Composable
+    get() = TextStyle(
+        fontFamily = DMSans24ptFamily,
+        fontWeight = FontWeight.Light,
+        fontSize = 26.sp,
+        letterSpacing = (-1).sp
     )
 
 val DMSans18Bold60: TextStyle

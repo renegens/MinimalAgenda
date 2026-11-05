@@ -1,29 +1,28 @@
 [versions]
-agp = "8.5.2"
-android-compileSdk = "34"
+agp = "8.13.1"
+android-compileSdk = "36"
 android-minSdk = "24"
-android-targetSdk = "34"
-androidx-activityCompose = "1.9.2"
-androidx-datastore = "1.1.1"
-compose-plugin = "1.7.0"
-kotlin = "2.0.21"
-kotlinx-datetime = "0.6.0"
-navigation = "2.7.0-alpha07"
-kotlinx-serialization-json = "1.7.2"
-androidx-lifecycle-viewmodel = "2.8.5"
-koin = "4.0.0"
-koinComposeMultiplatform = "4.0.0"
-purchases-kmp = "1.0.0+13.2.0"
-purchases-common = "13.2.0"
-cupertino = "0.1.0-alpha04"
-
+android-targetSdk = "36"
+androidx-activityCompose = "1.10.1"
+androidx-datastore = "1.1.7"
+composeMultiplatform = "1.9.3"
+kotlin = "2.2.20"
+kotlinx-datetime = "0.7.1"
+navigation = "2.9.2"
+kotlinx-serialization-json = "1.9.0"
+lifecycle-viewmodel = "2.9.6"
+koin = "4.1.1"
+koinComposeMultiplatform = "4.1.1"
+cupertino = "2.3.1"
 
 [libraries]
-cupertino-theme = { module = "io.github.alexzhirkevich:cupertino", version.ref = "cupertino" }
+cupertino = { group = "io.github.schott12521", name = "cupertino", version.ref = "cupertino" }
+cupertino-native = { group = "io.github.schott12521", name = "cupertino-native", version.ref = "cupertino" }
+cupertino-icons-extended = { group = "io.github.schott12521", name = "cupertino-icons-extended", version.ref = "cupertino" }
 androidx-activity-compose = { module = "androidx.activity:activity-compose", version.ref = "androidx-activityCompose" }
 kotlinx-datetime = {module = "org.jetbrains.kotlinx:kotlinx-datetime", version.ref = "kotlinx-datetime"}
 kotlinx-serialization-json = {module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "kotlinx-serialization-json"}
-androidx-lifecycle-viewmodel = {module = "androidx.lifecycle:lifecycle-viewmodel", version.ref = "androidx-lifecycle-viewmodel"}
+lifecycle-viewmodel = {module = "org.jetbrains.androidx.lifecycle:lifecycle", version.ref = "lifecycle-viewmodel"}
 androidx-datastore = { module = "androidx.datastore:datastore", version.ref = "androidx-datastore" }
 androidx-datastore-preferences = { module = "androidx.datastore:datastore-preferences", version.ref = "androidx-datastore" }
 koin-core = { module = "io.insert-koin:koin-core", version.ref = "koin" }
@@ -31,18 +30,15 @@ koin-compose = { module = "io.insert-koin:koin-compose", version.ref = "koinComp
 koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel", version.ref = "koinComposeMultiplatform" }
 koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
-purchases-core = { module = "com.revenuecat.purchases:purchases-kmp-core", version.ref = "purchases-kmp" }
 navigation-compose = { module = "org.jetbrains.androidx.navigation:navigation-compose", version.ref = "navigation" }
 
 
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
-jetbrainsCompose = { id = "org.jetbrains.compose", version.ref = "compose-plugin" }
-compose-compiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
+composeMultiplatform = { id = "org.jetbrains.compose", version.ref = "composeMultiplatform" }
+composeCompiler = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 kotlinMultiplatform = { id = "org.jetbrains.kotlin.multiplatform", version.ref = "kotlin" }
 kotlinSerialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
-cocoapods = { id = "org.jetbrains.kotlin.native.cocoapods", version.ref = "kotlin" }
-
 
 
