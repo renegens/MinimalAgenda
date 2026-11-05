@@ -24,6 +24,7 @@ class CalendarContract {
         val hideBottomNavigation: Boolean = false,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined,
         val isDemoMode: Boolean = false,
+        val noCalendars: Boolean = false,
     ) : UiState
 
     sealed class Effect : UiEffect {
@@ -46,6 +47,7 @@ class CalendarContract {
         class OnMonthClicked(val agendaMonthYear: AgendaMonthYear) : Event()
         class OnYearClicked(val agendaYear: AgendaYear) : Event()
         object OnRequestCalendarPermissionClicked : Event()
+        object OnCreateLocalCalendarClicked : Event()
         class ToggleEventVisibility(val agendaEvent: AgendaEvent) : Event()
         class OnEditEvent(val agendaEvent: AgendaEvent) : Event()
         object ToggleActive : Event()

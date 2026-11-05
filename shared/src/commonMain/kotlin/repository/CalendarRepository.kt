@@ -6,6 +6,8 @@ import kotlinx.datetime.LocalDateTime
 
 interface CalendarRepository {
     suspend fun getCalendars(): List<CalendarEntity>
+    /** Creates a calendar that lives only on this device. Returns true on success (always false on iOS). */
+    suspend fun createLocalCalendar(): Boolean
     suspend fun getEvents(durationInMonths: Int = 24): List<EventEntity>
     suspend fun getEvent(id: String): EventEntity?
     suspend fun addEvent(

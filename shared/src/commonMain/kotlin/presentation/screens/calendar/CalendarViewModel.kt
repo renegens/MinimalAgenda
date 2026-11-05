@@ -6,7 +6,9 @@ import domain.use_case.CalendarGenerator
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
+import domain.use_case.CreateLocalCalendarUseCase
 import domain.use_case.GetAllEventsUseCase
+import domain.use_case.HasCalendarsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
@@ -20,7 +22,9 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-    private val settingsUseCase: GetSettingsUseCase
+    private val settingsUseCase: GetSettingsUseCase,
+    private val hasCalendarsUseCase: HasCalendarsUseCase,
+    private val createLocalCalendarUseCase: CreateLocalCalendarUseCase,
 ) : BaseViewModel<Event, State, Effect>() {
 
     override fun createInitialState() = State()
@@ -68,6 +72,10 @@ class CalendarViewModel(
                 }
             }
 
+            Event.OnCreateLocalCalendarClicked -> viewModelScope.launch {
+                if (createLocalCalendarUseCase()) loadEventsFastAndSlow(scrollToNow = true)
+            }
+
             is Event.ToggleEventVisibility -> toggleEventVisibility(event.agendaEvent)
 
             is Event.Notify -> notifyEvent(event.agendaEvent)
@@ -84,6 +92,7 @@ class CalendarViewModel(
             val eventsUIList = uiState.value.flatDaysAndEvents
             val calendarPermissionState = permissionHandler.getPermissionState()
             val settings = settingsUseCase()
+            val noCalendars = calendarPermissionState == CalendarPermissionHandler.State.FullAccess && !hasCalendarsUseCase()
 
             if (eventsUIList.isEmpty()) {
                 loadEventsFastAndSlow(
@@ -101,6 +110,7 @@ class CalendarViewModel(
                             flatDaysAndEvents = slowIteration.dayListViewTypes,
                             agendaEvents = slowIteration.agendaEvents,
                             isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
+                            noCalendars = noCalendars,
                             scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size,
                             hideBottomNavigation = settings.hideBottomNavigation
                         )
@@ -129,6 +139,7 @@ class CalendarViewModel(
     private suspend fun loadEventsFastAndSlow(scrollToNow: Boolean) {
         val calendarPermissionState = permissionHandler.getPermissionState()
         val settings = settingsUseCase()
+        val noCalendars = calendarPermissionState == CalendarPermissionHandler.State.FullAccess && !hasCalendarsUseCase()
 
         when (val fastIteration = getAllEventsUseCase(1)) {
             is GetAllEventsUseCase.State.Success -> {
@@ -139,6 +150,7 @@ class CalendarViewModel(
                         flatDaysAndEvents = fastIteration.dayListViewTypes,
                         agendaEvents = fastIteration.agendaEvents,
                         isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
+                        noCalendars = noCalendars,
                         calendarPermission = calendarPermissionState,
                         scrollToNow = scrollToNow,
                         hideBottomNavigation = settings.hideBottomNavigation

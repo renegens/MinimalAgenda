@@ -187,6 +187,12 @@ fun CalendarScreen(
             }
 
             SafeTransparentNavigationContainer {
+              if (state.noCalendars) {
+                NoCalendarsView(
+                    appThemeMode = appThemeMode,
+                    onCreateCalendar = { viewModel.setEvent(Event.OnCreateLocalCalendarClicked) }
+                )
+              } else {
                 HorizontalPager(state = pagerState, beyondViewportPageCount = 3) { page ->
                     when (page) {
                         Section.Day.position -> DayScreen(
@@ -231,6 +237,7 @@ fun CalendarScreen(
                         )
                     }
                 }
+              }
             }
 
             if (showSettingsBottomSheet) {

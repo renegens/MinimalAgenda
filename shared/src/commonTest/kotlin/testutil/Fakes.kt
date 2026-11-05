@@ -25,8 +25,16 @@ class FakeCalendarRepository(
 ) : CalendarRepository {
     var getEventsCalls = 0
     var lastDuration: Int? = null
+    var calendars: List<CalendarEntity> = emptyList()
+    var createLocalCalendarCalls = 0
+    var createLocalCalendarResult = true
 
-    override suspend fun getCalendars(): List<CalendarEntity> = emptyList()
+    override suspend fun getCalendars(): List<CalendarEntity> = calendars
+
+    override suspend fun createLocalCalendar(): Boolean {
+        createLocalCalendarCalls++
+        return createLocalCalendarResult
+    }
 
     override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
         getEventsCalls++

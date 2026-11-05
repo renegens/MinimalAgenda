@@ -15,6 +15,7 @@ import platform.EventEditViewHandler
 import platform.ModalPresenter
 import platform.NotificationHandler
 import platform.NotificationPermissionHandler
+import platform.PermissionRequester
 import repository.CalendarRepository
 import repository.AndroidCalendarRepository
 
@@ -24,7 +25,8 @@ actual val platformModule: Module = module {
     single { AndroidNotificationHandler() }.bind<NotificationHandler>()
     single { AndroidNotificationPermissionHandler() }.bind<NotificationPermissionHandler>()
     single { AndroidCalendarRepository(get()) }.bind<CalendarRepository>()
-    single { AndroidCalendarPermissionHandler() }.bind<CalendarPermissionHandler>()
+    single { PermissionRequester() }
+    single { AndroidCalendarPermissionHandler(get(), get()) }.bind<CalendarPermissionHandler>()
     factory { Browser(get()) }
     factory { AndroidModalPresenter() }.bind<ModalPresenter>()
 }

@@ -1,178 +1,168 @@
 package repository
 
-import android.annotation.SuppressLint
+import android.content.ContentUris
+import android.content.ContentValues
 import android.content.Context
 import android.database.Cursor
+import android.graphics.Color
+import android.net.Uri
 import android.provider.CalendarContract
+import android.provider.CalendarContract.Calendars
+import android.provider.CalendarContract.Instances
 import data.calendar.CalendarEntity
+import data.calendar.CalendarMath
 import data.calendar.EventEntity
-import extensions.millisToEpochDay
-import extensions.today
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.datetime.LocalDate
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
-import kotlinx.datetime.atStartOfDayIn
-import kotlinx.datetime.toLocalDateTime
-import java.text.SimpleDateFormat
+import platform.uses24HourClock
 import java.util.Calendar
-import java.util.Date
-import java.util.UUID
-import kotlin.random.Random
-import kotlin.time.ExperimentalTime
-import kotlin.time.Instant
 
-@OptIn(ExperimentalTime::class)
 class AndroidCalendarRepository(private val context: Context) : CalendarRepository {
 
-    override suspend fun getCalendars(): List<CalendarEntity> {
-        return withContext(Dispatchers.IO) {
-            val calendars = mutableListOf<CalendarEntity>()
-            val projection = arrayOf(
-                CalendarContract.Calendars._ID,
-                CalendarContract.Calendars.CALENDAR_DISPLAY_NAME,
-                CalendarContract.Calendars.ACCOUNT_NAME,
-                CalendarContract.Calendars.ACCOUNT_TYPE
-            )
-            val uri = CalendarContract.Calendars.CONTENT_URI
-            val selection = null
-            val selectionArgs = null
-            val sortOrder = null
-
-            val cursor: Cursor? = context.contentResolver.query(
-                uri,
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder
-            )
-
-            cursor?.use {
-                val idIndex = it.getColumnIndex(CalendarContract.Calendars._ID)
-                val nameIndex = it.getColumnIndex(CalendarContract.Calendars.CALENDAR_DISPLAY_NAME)
-                val accountNameIndex = it.getColumnIndex(CalendarContract.Calendars.ACCOUNT_NAME)
-                val accountTypeIndex = it.getColumnIndex(CalendarContract.Calendars.ACCOUNT_TYPE)
-
-                while (it.moveToNext()) {
-                    val id = it.getLong(idIndex)
-                    val name = it.getString(nameIndex)
-                    val accountName = it.getString(accountNameIndex)
-                    val accountType = it.getString(accountTypeIndex)
-
-                    calendars.add(CalendarEntity(id.toString(), name, accountName, accountType))
-                }
-            }
-
-            return@withContext calendars
-        }
-
-    }
-
-    @SuppressLint("SimpleDateFormat")
-    fun dateFormatter(milliseconds: String): String {
-        return SimpleDateFormat("HH : mm").format(Date(milliseconds.toLong())).toString()
-    }
-
-    override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
-        val list = emptyList<EventEntity>().toMutableList()
-
-        for (i in 1..8000) {
-            val timestamp = getRandomTimestampWithinTwoYears()
-            list.add(
-                EventEntity(
-                    id = UUID.randomUUID().toString(),
-                    title = UUID.randomUUID().toString(),
-                    location = "",
-                    startTime = timestamp,
-                    endTime = timestamp + 6000,
-                    allDay = false,
-                    epochDay = calculateEpochDay(timestamp, TimeZone.currentSystemDefault()),
-                    isRecurring = false,
-                    startLocalDateTime = Instant.fromEpochSeconds(timestamp).toLocalDateTime(TimeZone.currentSystemDefault()),
-                    endLocalDateTime = Instant.fromEpochSeconds(timestamp + 6000).toLocalDateTime(TimeZone.currentSystemDefault()),
-                    uses24HourClock = false,
-                    isMultiDay = false,
-                    )
-            )
-        }
-        return list
-
-        return withContext(Dispatchers.IO) {
-            val events = mutableListOf<EventEntity>()
-            val projection = arrayOf(
-                CalendarContract.Events._ID,
-                CalendarContract.Events.TITLE,
-                CalendarContract.Events.DESCRIPTION,
-                CalendarContract.Events.DTSTART,
-                CalendarContract.Events.DTEND
-            )
-            val uri = CalendarContract.Events.CONTENT_URI
-
-            val startOfRange: Calendar = Calendar.getInstance().apply {
-                add(Calendar.YEAR, -2)
-            }
-
-            val endOfRange: Calendar = Calendar.getInstance().apply {
-                add(Calendar.YEAR, 2)
-            }
-
-            val selection =
-                "${CalendarContract.Events.CALENDAR_ID} = ? AND ${CalendarContract.Events.DTSTART} >= ? AND ${CalendarContract.Events.DTSTART} <= ?"
-            val selectionArgs = arrayOf(
-                "calendarId",
-                startOfRange.timeInMillis.toString(),
-                endOfRange.timeInMillis.toString()
-            )
-            val sortOrder = "${CalendarContract.Events.DTSTART} ASC"
-
-            val cursor: Cursor? = context.contentResolver.query(
-                uri,
-                projection,
-                selection,
-                selectionArgs,
-                sortOrder
-            )
-
-            cursor?.use {
-                val idIndex = it.getColumnIndex(CalendarContract.Events._ID)
-                val titleIndex = it.getColumnIndex(CalendarContract.Events.TITLE)
-                val descriptionIndex = it.getColumnIndex(CalendarContract.Events.DESCRIPTION)
-                val startTimeIndex = it.getColumnIndex(CalendarContract.Events.DTSTART)
-                val endTimeIndex = it.getColumnIndex(CalendarContract.Events.DTEND)
-
-                while (it.moveToNext()) {
-                    val id = it.getLong(idIndex)
-                    val title = it.getString(titleIndex)
-                    val description = it.getString(descriptionIndex)
-                    val startTime = it.getLong(startTimeIndex)
-                    val endTime = it.getLong(endTimeIndex)
-
-                    events.add(
-                        EventEntity(
-                            id = id.toString(),
-                            title = title,
-                            location = "",
-                            startTime = startTime,
-                            endTime = startTime + 6000,
-                            allDay = false,
-                            isRecurring = false,
-                            epochDay = endTime.millisToEpochDay(),
-                            startLocalDateTime = Instant.fromEpochSeconds(startTime).toLocalDateTime(TimeZone.currentSystemDefault()),
-                            endLocalDateTime = Instant.fromEpochSeconds(startTime + 6000).toLocalDateTime(TimeZone.currentSystemDefault()),
-                            isMultiDay = false,
-                            uses24HourClock = false
+    override suspend fun getCalendars(): List<CalendarEntity> = withContext(Dispatchers.IO) {
+        val calendars = mutableListOf<CalendarEntity>()
+        val projection = arrayOf(
+            Calendars._ID,
+            Calendars.CALENDAR_DISPLAY_NAME,
+            Calendars.ACCOUNT_NAME,
+            Calendars.ACCOUNT_TYPE,
+        )
+        try {
+            context.contentResolver.query(
+                Calendars.CONTENT_URI, projection, "${Calendars.VISIBLE} = 1", null, null
+            )?.use { cursor ->
+                while (cursor.moveToNext()) {
+                    calendars.add(
+                        CalendarEntity(
+                            id = cursor.getLong(0).toString(),
+                            name = cursor.getString(1).orEmpty(),
+                            accountName = cursor.getString(2).orEmpty(),
+                            accountType = cursor.getString(3).orEmpty(),
                         )
                     )
                 }
             }
+        } catch (_: SecurityException) {
+            return@withContext emptyList()
+        }
+        calendars
+    }
 
-            return@withContext events
+    override suspend fun createLocalCalendar(): Boolean = withContext(Dispatchers.IO) {
+        try {
+            val existing = context.contentResolver.query(
+                Calendars.CONTENT_URI,
+                arrayOf(Calendars._ID),
+                "${Calendars.ACCOUNT_NAME} = ? AND ${Calendars.ACCOUNT_TYPE} = ?",
+                arrayOf(LOCAL_ACCOUNT_NAME, CalendarContract.ACCOUNT_TYPE_LOCAL),
+                null
+            )?.use { if (it.moveToFirst()) it.getLong(0) else null }
+
+            if (existing != null) {
+                // Already there (probably hidden); make it visible again instead of adding a duplicate.
+                val values = ContentValues().apply {
+                    put(Calendars.VISIBLE, 1)
+                    put(Calendars.SYNC_EVENTS, 1)
+                }
+                val uri = asSyncAdapter(ContentUris.withAppendedId(Calendars.CONTENT_URI, existing))
+                return@withContext context.contentResolver.update(uri, values, null, null) > 0
+            }
+
+            val values = ContentValues().apply {
+                put(Calendars.ACCOUNT_NAME, LOCAL_ACCOUNT_NAME)
+                put(Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL)
+                put(Calendars.NAME, LOCAL_ACCOUNT_NAME)
+                put(Calendars.CALENDAR_DISPLAY_NAME, LOCAL_ACCOUNT_NAME)
+                put(Calendars.CALENDAR_COLOR, Color.parseColor("#E65100"))
+                put(Calendars.CALENDAR_ACCESS_LEVEL, Calendars.CAL_ACCESS_OWNER)
+                put(Calendars.OWNER_ACCOUNT, LOCAL_ACCOUNT_NAME)
+                put(Calendars.VISIBLE, 1)
+                put(Calendars.SYNC_EVENTS, 1)
+                put(Calendars.CALENDAR_TIME_ZONE, java.util.TimeZone.getDefault().id)
+            }
+            context.contentResolver.insert(asSyncAdapter(Calendars.CONTENT_URI), values) != null
+        } catch (_: SecurityException) {
+            false
+        } catch (_: RuntimeException) {
+            false
         }
     }
 
+    private fun asSyncAdapter(uri: Uri): Uri = uri.buildUpon()
+        .appendQueryParameter(CalendarContract.CALLER_IS_SYNCADAPTER, "true")
+        .appendQueryParameter(Calendars.ACCOUNT_NAME, LOCAL_ACCOUNT_NAME)
+        .appendQueryParameter(Calendars.ACCOUNT_TYPE, CalendarContract.ACCOUNT_TYPE_LOCAL)
+        .build()
+
+    /** Same window as the iOS repository: [now - months, now + months]. */
+    override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
+        val start = Calendar.getInstance().apply { add(Calendar.MONTH, -durationInMonths) }.timeInMillis
+        val end = Calendar.getInstance().apply { add(Calendar.MONTH, durationInMonths) }.timeInMillis
+        return queryInstances(start, end, selection = null, selectionArgs = null)
+    }
+
     override suspend fun getEvent(id: String): EventEntity? {
-        TODO("Not yet implemented")
+        val instance = CalendarMath.parseInstanceId(id) ?: return null
+        return queryInstances(
+            beginMillis = instance.beginMillis - 1,
+            endMillis = instance.beginMillis + 1,
+            selection = "${Instances.EVENT_ID} = ?",
+            selectionArgs = arrayOf(instance.eventId.toString()),
+        ).firstOrNull { it.id == id }
+    }
+
+    private suspend fun queryInstances(
+        beginMillis: Long,
+        endMillis: Long,
+        selection: String?,
+        selectionArgs: Array<String>?,
+    ): List<EventEntity> = withContext(Dispatchers.IO) {
+        val uri = Instances.CONTENT_URI.buildUpon().also {
+            ContentUris.appendId(it, beginMillis)
+            ContentUris.appendId(it, endMillis)
+        }.build()
+        val visibleOnly = "${Instances.VISIBLE} = 1"
+        val fullSelection = if (selection == null) visibleOnly else "($visibleOnly) AND ($selection)"
+        val zone = TimeZone.currentSystemDefault()
+        val uses24HourClock = uses24HourClock()
+        val events = mutableListOf<EventEntity>()
+
+        try {
+            val cursor: Cursor? = context.contentResolver.query(
+                uri, INSTANCE_PROJECTION, fullSelection, selectionArgs, "${Instances.BEGIN} ASC"
+            )
+            cursor?.use {
+                while (it.moveToNext()) {
+                    val eventId = it.getLong(0)
+                    val begin = it.getLong(1)
+                    val end = it.getLong(2)
+                    val allDay = it.getInt(5) != 0
+                    val times = CalendarMath.resolveTimes(begin, end, allDay, zone)
+
+                    events.add(
+                        EventEntity(
+                            id = CalendarMath.buildInstanceId(eventId, begin),
+                            title = it.getString(3),
+                            location = it.getString(4),
+                            startTime = times.startSeconds,
+                            endTime = times.endSeconds,
+                            allDay = allDay,
+                            isRecurring = CalendarMath.isRecurring(it.getString(6)),
+                            epochDay = times.epochDay,
+                            startLocalDateTime = times.startLocalDateTime,
+                            endLocalDateTime = times.endLocalDateTime,
+                            isMultiDay = times.isMultiDay,
+                            uses24HourClock = uses24HourClock,
+                        )
+                    )
+                }
+            }
+        } catch (_: SecurityException) {
+            return@withContext emptyList()
+        }
+        events
     }
 
     override suspend fun addEvent(
@@ -185,25 +175,18 @@ class AndroidCalendarRepository(private val context: Context) : CalendarReposito
         return false
     }
 
-    private fun calculateEpochDay(starTime: Long?, timeZone: TimeZone): Long {
-        return Instant.fromEpochSeconds(starTime ?: 0).toLocalDateTime(timeZone).date.toEpochDays()
+    private companion object {
+        const val LOCAL_ACCOUNT_NAME = "Minimal Agenda"
+
+        val INSTANCE_PROJECTION = arrayOf(
+            Instances.EVENT_ID,        // 0
+            Instances.BEGIN,           // 1
+            Instances.END,             // 2
+            Instances.TITLE,           // 3
+            Instances.EVENT_LOCATION,  // 4
+            Instances.ALL_DAY,         // 5
+            Instances.RRULE,           // 6
+            Instances.CALENDAR_COLOR,  // 7
+        )
     }
-}
-
-@OptIn(ExperimentalTime::class)
-fun getRandomTimestampWithinTwoYears(): Long {
-    // Current time
-    val startYear = LocalDate(year = today.year - 2, month = 1, day = 1)
-    val endDate = LocalDate(year = startYear.year + 4, month = 12, day = 31)
-
-
-    // Convert start and end times to epoch milliseconds for easier random calculation
-    val startMillis = startYear.atStartOfDayIn(TimeZone.currentSystemDefault()).epochSeconds
-    val endMillis = endDate.atStartOfDayIn(TimeZone.currentSystemDefault()).epochSeconds
-
-    // Generate a random time between startMillis and endMillis
-    val randomMillis = Random.nextLong(startMillis, endMillis)
-
-    // Convert the random milliseconds back to an Instant
-    return randomMillis
 }

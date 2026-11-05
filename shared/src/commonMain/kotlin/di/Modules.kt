@@ -7,7 +7,9 @@ import data.local.SwipeToolTipDataSource
 import domain.use_case.AppThemeListenerUseCase
 import domain.use_case.CalendarGenerator
 import domain.use_case.FlatCalendarViewFactory
+import domain.use_case.CreateLocalCalendarUseCase
 import domain.use_case.GetAllEventsUseCase
+import domain.use_case.HasCalendarsUseCase
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
 import domain.use_case.ScheduleNotificationUseCase
@@ -47,6 +49,8 @@ val sharedModule = module {
     factoryOf(::ScheduleNotificationUseCase)
     singleOf(::AppThemeListenerUseCase)
     factoryOf(::ShouldShowDemoModeUseCase)
+    factoryOf(::HasCalendarsUseCase)
+    factoryOf(::CreateLocalCalendarUseCase)
 
     factoryOf(::FlatCalendarViewFactory)
 

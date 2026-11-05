@@ -64,6 +64,9 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         }
     }
 
+    // iOS always has a local calendar; nothing to create.
+    override suspend fun createLocalCalendar(): Boolean = false
+
     private fun nsStartDateForCalendar(months: Int): NSDate {
         val calendar = NSCalendar.currentCalendar
         val currentDate = NSDate()
