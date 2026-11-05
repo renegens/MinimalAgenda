@@ -12,6 +12,7 @@ import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeout
 import platform.EventEditViewHandler
 import platform.ModalPresenter
+import kotlinx.datetime.LocalDate
 
 class AppViewModel(
     private val appThemeListenerUseCase: AppThemeListenerUseCase,
@@ -49,15 +50,16 @@ class AppViewModel(
                     onSave = { setState { copy(forceEventLoad = uiState.value.forceEventLoad + 1) } })
             }
 
-            Event.NewEvent -> showNewEventScreen()
+            is Event.NewEvent -> showNewEventScreen(event.date)
             Event.DismissOnboarding -> setEffect { Effect.CloseOnboardingAndGoToCalendar }
             Event.OnOpenDeviceSettings -> setEffect { Effect.OpenDeviceAppSettings }
         }
     }
 
-    private fun showNewEventScreen() {
+    private fun showNewEventScreen(date: LocalDate?) {
         modalPresenter.presentAddEvent(
             appTheme = uiState.value.appTheme,
+            date = date,
             onSave = { setState { copy(forceEventLoad = uiState.value.forceEventLoad + 1) } })
     }
 }

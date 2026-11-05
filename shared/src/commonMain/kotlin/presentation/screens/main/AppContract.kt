@@ -2,6 +2,7 @@ package presentation.screens.main
 
 import domain.model.AgendaEvent
 import domain.model.AppTheme
+import kotlinx.datetime.LocalDate
 import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
@@ -21,7 +22,7 @@ class AppContract {
 
     sealed class Event : UiEvent {
         class EditExternal(val agendaEvent: AgendaEvent) : Event()
-        object NewEvent : Event()
+        class NewEvent(val date: LocalDate? = null) : Event()
         object OnOpenDeviceSettings: Event()
         object DismissOnboarding : Event()
     }

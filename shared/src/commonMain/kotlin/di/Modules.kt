@@ -43,7 +43,7 @@ val sharedModule = module {
     viewModelOf(::CalendarViewModel)
     singleOf(::EventEditorRequests)
     viewModel { params ->
-        AddEventViewModel(get(), params.getOrNull<EventEditorRequest>() ?: EventEditorRequest.Add)
+        AddEventViewModel(get(), params.getOrNull<EventEditorRequest>() ?: EventEditorRequest.Add())
     }
     viewModelOf(::SettingsViewModel)
 

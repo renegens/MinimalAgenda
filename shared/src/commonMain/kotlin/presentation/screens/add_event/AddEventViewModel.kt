@@ -19,7 +19,7 @@ import kotlin.time.Instant
 
 class AddEventViewModel(
     private val repository: CalendarRepository,
-    private val request: EventEditorRequest = EventEditorRequest.Add,
+    private val request: EventEditorRequest = EventEditorRequest.Add(),
 ) : BaseViewModel<Event, State, Effect>() {
 
     // `request` isn't assigned yet when the base class asks for the initial state, so it is applied in init.

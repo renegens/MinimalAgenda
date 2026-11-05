@@ -66,7 +66,7 @@ fun App() {
                     CalendarScreen(appThemeMode = state.appTheme.appThemeMode,
                         forceEventLoad = state.forceEventLoad,
                         onAddEvent = {
-                            viewModel.setEvent(AppContract.Event.NewEvent)
+                            viewModel.setEvent(AppContract.Event.NewEvent(it))
                         },
                         onEditEvent = { viewModel.setEvent(AppContract.Event.EditExternal(it)) },
                         onOpenDeviceSettings = { viewModel.setEvent(AppContract.Event.OnOpenDeviceSettings) })

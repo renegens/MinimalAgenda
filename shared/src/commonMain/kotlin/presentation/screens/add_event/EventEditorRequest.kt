@@ -1,12 +1,13 @@
 package presentation.screens.add_event
 
 import domain.model.AgendaEvent
+import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
 
 /** What the shared event editor is opened for. */
 sealed interface EventEditorRequest {
-    data object Add : EventEditorRequest
+    data class Add(val date: LocalDate? = null) : EventEditorRequest
     class Edit(val event: AgendaEvent) : EventEditorRequest
 }
 

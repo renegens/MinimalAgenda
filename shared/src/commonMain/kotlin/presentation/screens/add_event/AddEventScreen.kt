@@ -94,7 +94,7 @@ import getPlatform
 fun AddEventScreen(
     onCancel: () -> Unit,
     onSave: () -> Unit,
-    request: EventEditorRequest = EventEditorRequest.Add,
+    request: EventEditorRequest = EventEditorRequest.Add(),
 ) {
     val viewModel: AddEventViewModel = koinViewModel(key = request.hashCode().toString()) { parametersOf(request) }
     val state by viewModel.uiState.collectAsState()

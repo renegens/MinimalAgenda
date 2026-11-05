@@ -2,7 +2,12 @@ package presentation.screens.add_event
 
 import data.calendar.CalendarEntity
 import domain.model.AgendaEvent
+import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.LocalDateTime
+import kotlinx.datetime.plus
+import kotlinx.datetime.toLocalDateTime
+import kotlin.time.Clock
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
 import kotlinx.datetime.daysUntil
@@ -71,8 +76,21 @@ class AddEventContract {
 }
 
 /** Initial editor state for [request]; for an edit it is prefilled from the event. */
-fun initialEditorState(request: EventEditorRequest): AddEventContract.State = when (request) {
-    EventEditorRequest.Add -> AddEventContract.State()
+fun initialEditorState(
+    request: EventEditorRequest,
+    now: LocalDateTime = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault()),
+): AddEventContract.State = when (request) {
+    is EventEditorRequest.Add -> {
+        val requestedDate = request.date ?: now.date
+        val isToday = requestedDate == now.date
+        val rollsToTomorrow = isToday && now.hour == 23
+        val date = if (rollsToTomorrow) requestedDate.plus(1, DateTimeUnit.DAY) else requestedDate
+        AddEventContract.State(
+            startDate = date.toPickerMillis(),
+            startHours = if (isToday) (now.hour + 1) % 24 else 9,
+            startMinutes = 0,
+        )
+    }
     is EventEditorRequest.Edit -> request.event.toEditorState()
 }
 

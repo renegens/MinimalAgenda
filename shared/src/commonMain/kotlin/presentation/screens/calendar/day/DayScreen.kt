@@ -1,5 +1,6 @@
 package presentation.screens.calendar.day
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -63,6 +64,7 @@ fun DayScreen(
     onHide: (AgendaEvent) -> Unit,
     onNotify: (AgendaEvent) -> Unit,
     onEdit: (AgendaEvent) -> Unit,
+    onAddEvent: (LocalDate) -> Unit,
     onDetails: (AgendaEvent) -> Unit,
     onOpenSettings: () -> Unit,
     isDemoMode: Boolean,
@@ -122,17 +124,23 @@ fun DayScreen(
                 when (item) {
                     is DayListViewType.Header -> {
                         Spacer(modifier = Modifier.height(24.dp))
-                        DayHeader(
-                            day = item.agendaDay.dayInWeek.short,
-                            dayInMonth = item.agendaDay.dayOfMonth,
-                            month = item.agendaDay.agendaMonthYear.agendaMonth.number,
-                            isToday = item.agendaDay.epochDay == currentEpochDay
-                        )
+                        val date = LocalDate.fromEpochDays(item.agendaDay.epochDay)
+                        Box(Modifier.fillMaxWidth().clickable(onClickLabel = "Create event") {
+                            onAddEvent(date)
+                        }) {
+                            DayHeader(
+                                day = item.agendaDay.dayInWeek.short,
+                                dayInMonth = item.agendaDay.dayOfMonth,
+                                month = item.agendaDay.agendaMonthYear.agendaMonth.number,
+                                isToday = item.agendaDay.epochDay == currentEpochDay
+                            )
+                        }
                         Spacer(modifier = Modifier.height(16.dp))
                         EmptyDay(
                             eventsByEpochDay = eventsByEpochDay,
                             epochDay = item.agendaDay.epochDay,
-                            showAll = showAll
+                            showAll = showAll,
+                            onAddEvent = { onAddEvent(date) }
                         )
                     }
 
@@ -201,11 +209,12 @@ fun DayScreen(
 fun EmptyDay(
     eventsByEpochDay: Map<Long, List<DayListViewType.Event>>,
     epochDay: Long,
-    showAll: Boolean
+    showAll: Boolean,
+    onAddEvent: () -> Unit,
 ) {
     if (eventsByEpochDay[epochDay] == null) {
         Spacer(modifier = Modifier.height(16.dp))
-        EmptyMessage()
+        EmptyMessage(onAddEvent)
     } else {
 
         if (showAll) {
@@ -215,7 +224,7 @@ fun EmptyDay(
         val hasAllEventsHidden =
             eventsByEpochDay[epochDay]?.none { it.event.isHidden.not() }
         if (hasAllEventsHidden == true) {
-            EmptyMessage()
+            EmptyMessage(onAddEvent)
         }
     }
 }
@@ -302,9 +311,11 @@ private fun AgendaEvent.getTextColor(showAll: Boolean): Color {
 }
 
 @Composable
-fun EmptyMessage() {
+fun EmptyMessage(onClick: (() -> Unit)? = null) {
     Box(
-        modifier = Modifier.height(56.dp).fillMaxWidth().padding(horizontal = 24.dp),
+        modifier = Modifier.height(56.dp).fillMaxWidth()
+            .then(if (onClick != null) Modifier.clickable(onClickLabel = "Create event", onClick = onClick) else Modifier)
+            .padding(horizontal = 24.dp),
         contentAlignment = Alignment.CenterStart
     ) {
         Text(

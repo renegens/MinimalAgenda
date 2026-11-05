@@ -24,6 +24,7 @@ import androidx.lifecycle.Lifecycle
 import domain.model.AgendaEvent
 import domain.model.AgendaMonthYear
 import domain.model.AppThemeMode
+import kotlinx.datetime.LocalDate
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import org.koin.compose.viewmodel.koinViewModel
@@ -47,7 +48,7 @@ import presentation.screens.settings.SettingsScreen
 @Composable
 fun CalendarScreen(
     appThemeMode: AppThemeMode,
-    onAddEvent: () -> Unit,
+    onAddEvent: (LocalDate?) -> Unit,
     onEditEvent: (AgendaEvent) -> Unit,
     onOpenDeviceSettings: () -> Unit,
     forceEventLoad: Int,
@@ -155,7 +156,7 @@ fun CalendarScreen(
                             onToggleActive = {
                                 viewModel.setEvent(Event.ToggleActive)
                             },
-                            onAdd = onAddEvent,
+                            onAdd = { onAddEvent(null) },
                             onSettings = {
                                 viewModel.setEvent(Event.ShowSettings)
                             },
@@ -206,6 +207,7 @@ fun CalendarScreen(
                             onNotify = { viewModel.setEvent(Event.Notify(it)) },
                             onHide = { viewModel.setEvent(Event.ToggleEventVisibility(it)) },
                             onEdit = { viewModel.setEvent(Event.OnEditEvent(it)) },
+                            onAddEvent = onAddEvent,
                             onDetails = { /* Details handled internally in DayScreen */ },
                             onOpenSettings = { viewModel.setEvent(Event.ShowSettings) },
                             isDemoMode = state.isDemoMode,
