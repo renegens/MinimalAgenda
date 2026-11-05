@@ -9,7 +9,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
@@ -30,7 +29,6 @@ fun SettingsScreen(
 ) {
     val viewModel: SettingsViewModel = koinViewModel()
     val state by viewModel.uiState.collectAsState()
-    val focusRequester = remember { FocusRequester() }
 
     LaunchedEffect(Unit) {
         viewModel.effect.collectLatest {
@@ -134,10 +132,9 @@ fun SettingsScreen(
         }
 
         SettingsItem {
-            NotificationTimeInput(
-                focusRequester = focusRequester,
+            NotificationTimeChips(
                 time = state.notificationTime,
-                onTimeEntered = { viewModel.setEvent(Event.OnNotificationTimeEntered(it)) }
+                onTimeSelected = { viewModel.setEvent(Event.OnNotificationTimeEntered(it)) }
             )
         }
 
