@@ -71,6 +71,10 @@ kotlin {
             implementation(libs.cupertino.native)
             implementation(libs.cupertino.icons.extended)
         }
+        commonTest.dependencies {
+            implementation(libs.kotlin.test)
+            implementation(libs.kotlinx.coroutines.test)
+        }
     }
 }
 
