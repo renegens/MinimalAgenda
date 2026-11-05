@@ -30,12 +30,14 @@ Versions live in `gradle/libs.versions.toml`.
 - Cupertino UI components (`io.github.schott12521:cupertino*` 2.3.1)
 - No billing, analytics or crash-reporting SDKs (decisions D10, D11)
 - iOS: static `ComposeApp` framework, no Swift packages. No CocoaPods.
-- Android: minSdk 24, compile/targetSdk 36, namespace and applicationId `eu.giant.agenda`
+- Android: minSdk 26, compile/targetSdk 36, applicationId `eu.giant.agenda` for both flavors
+- `shared` uses the KMP Android library plugin (`com.android.kotlin.multiplatform.library`); compose resources keep
+  the package `minimalagenda.composeapp.generated.resources` via `packageOfResClass`
 
 ## Layout
 
 ```
-composeApp/src/
+shared/src/         KMP library: all shared code; also builds the iOS `ComposeApp` framework
   commonMain/kotlin/
     data/            entities, constants, DataStore-backed local data sources
     domain/model/    UI-facing models (AgendaEvent, AgendaDay, ...)
@@ -45,10 +47,13 @@ composeApp/src/
     presentation/    base MVI classes, components, theme, screens:
                      main, calendar (day/months/years), add_event, onboarding, settings
     di/              Koin sharedModule + `expect val platformModule`
+  commonTest/        use-case and extension tests, repository fakes in testutil/
   androidMain/       Android actuals, AndroidCalendarRepository, Android Koin module
   nativeMain/        iOS actuals, iOSCalendarRepository (EventKit), iOS Koin module
   iosMain/           MainViewController entry point
-iosApp/              Xcode project (SwiftUI host)
+androidApp/          Android app: MainActivity, MyApplication, manifest, launcher resources;
+                     flavors `play` and `foss` (differ only by BuildConfig.SHOW_DONATE)
+iosApp/              Xcode project (SwiftUI host), runs :shared:embedAndSignAppleFrameworkForXcode
 ```
 
 ## Architecture conventions
@@ -73,10 +78,10 @@ iosApp/              Xcode project (SwiftUI host)
   hides it; keep it working when touching event loading.
 - `extensions.takingScreenshots` freezes "today" for store screenshots; it must stay `false` in commits.
 
-## Android plans (accepted in the decisions doc, 2026-11-05; not yet implemented)
+## Android plans (accepted in the decisions doc, 2026-11-05)
 
 - Play build is paid upfront (2.49€), so there is no billing code anywhere. No analytics or crash SDKs in any build.
-- Module split into `shared/` + `androidApp/` + `iosApp/`. `androidApp` has flavors `play` and `foss` that differ
+- Modules `shared/` + `androidApp/` + `iosApp/` (done). `androidApp` has flavors `play` and `foss` that differ
   only by `BuildConfig.SHOW_DONATE` (true in `foss`; no donation links in `play`).
 - Both flavors use applicationId `eu.giant.agenda`, signed with the same key. minSdk 26.
 - Read events from `CalendarContract.Instances`, not `Events`, so recurring events are expanded.
@@ -92,14 +97,16 @@ iosApp/              Xcode project (SwiftUI host)
 ## Build and run
 
 ```bash
-./gradlew :composeApp:assembleDebug       # Android (prototype, shows fake data)
-./gradlew :composeApp:linkDebugFrameworkIosSimulatorArm64   # shared code for iOS
-open iosApp/iosApp.xcodeproj              # iOS: build and run from Xcode
+./gradlew :androidApp:assemblePlayDebug :androidApp:assembleFossDebug   # Android
+./gradlew :shared:allTests                                             # Android host + iOS simulator tests
+./gradlew :shared:linkDebugFrameworkIosSimulatorArm64                  # shared code for iOS
+./gradlew :androidApp:dependencies --configuration fossReleaseRuntimeClasspath   # check foss has no proprietary deps
+open iosApp/iosApp.xcodeproj                                           # iOS: build and run from Xcode
 ```
 
 Gradle needs JDK 21; it fails on JDK 25. The Android SDK path goes in `local.properties` (gitignored).
 
-There are no tests yet. When adding logic, add `commonTest` tests for use cases where possible.
+Tests live in `shared/src/commonTest` (hand-written fakes, no mocking library). When adding logic, add tests for it there.
 
 ## Working rules
 

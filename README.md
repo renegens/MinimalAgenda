@@ -1,6 +1,6 @@
-This is a Kotlin Multiplatform project targeting Android, iOS, Desktop.
+This is a Kotlin Multiplatform project targeting Android and iOS.
 
-* `/composeApp` is for code that will be shared across your Compose Multiplatform applications.
+* `/shared` is a KMP library with code shared across platforms (it also builds the iOS `ComposeApp` framework).
   It contains several subfolders:
   - `commonMain` is for code that’s common for all targets.
   - Other folders are for Kotlin code that will be compiled for only the platform indicated in the folder name.
@@ -12,3 +12,4 @@ This is a Kotlin Multiplatform project targeting Android, iOS, Desktop.
 
 
 Learn more about [Kotlin Multiplatform](https://www.jetbrains.com/help/kotlin-multiplatform-dev/get-started.html)…
+* `/androidApp` is the Android application module (MainActivity, manifest, launcher resources) depending on `:shared`.

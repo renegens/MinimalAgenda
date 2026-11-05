@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
     plugins {
         alias(libs.plugins.kotlinMultiplatform)
-        alias(libs.plugins.androidApplication)
+        alias(libs.plugins.androidKmpLibrary)
         alias(libs.plugins.composeMultiplatform)
         alias(libs.plugins.composeCompiler)
         alias(libs.plugins.kotlinSerialization)
@@ -13,7 +13,16 @@ import org.jetbrains.kotlin.gradle.plugin.mpp.NativeBuildType
 
 
 kotlin {
-    androidTarget {
+    androidLibrary {
+        namespace = "eu.giant.agenda.shared"
+        compileSdk = libs.versions.android.compileSdk.get().toInt()
+        minSdk = libs.versions.android.minSdk.get().toInt()
+
+        androidResources {
+            enable = true
+        }
+        withHostTest {}
+
         @OptIn(ExperimentalKotlinGradlePluginApi::class)
         compilerOptions {
             jvmTarget.set(JvmTarget.JVM_11)
@@ -34,6 +43,10 @@ kotlin {
     }
 
     sourceSets {
+
+        all {
+            languageSettings.optIn("kotlin.time.ExperimentalTime")
+        }
 
         named { it.lowercase().startsWith("ios") }.configureEach {
             languageSettings {
@@ -78,43 +91,7 @@ kotlin {
     }
 }
 
-android {
-    namespace = "eu.giant.agenda"
-    compileSdk = libs.versions.android.compileSdk.get().toInt()
-
-    sourceSets["main"].manifest.srcFile("src/androidMain/AndroidManifest.xml")
-    sourceSets["main"].res.srcDirs("src/androidMain/res")
-    sourceSets["main"].resources.srcDirs("src/commonMain/resources")
-
-    defaultConfig {
-        applicationId = "eu.giant.agenda"
-        minSdk = libs.versions.android.minSdk.get().toInt()
-        targetSdk = libs.versions.android.targetSdk.get().toInt()
-        versionCode = 1
-        versionName = "1.0"
-    }
-    packaging {
-        resources {
-            excludes += "/META-INF/{AL2.0,LGPL2.1}"
-        }
-    }
-    buildTypes {
-        getByName("release") {
-            isMinifyEnabled = false
-            isDebuggable = false
-        }
-        getByName("debug") {
-            isDebuggable = true
-        }
-    }
-    compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
-    }
-    buildFeatures {
-        compose = true
-    }
-    dependencies {
-        debugImplementation(compose.uiTooling)
-    }
+compose.resources {
+    // Keep the pre-split generated package so existing imports stay unchanged.
+    packageOfResClass = "minimalagenda.composeapp.generated.resources"
 }
