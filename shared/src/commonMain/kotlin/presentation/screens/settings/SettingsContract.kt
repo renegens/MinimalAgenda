@@ -15,7 +15,6 @@ class SettingsContract {
         val appColor: AppColor = AppColor.Red,
         val privateNotifications: Boolean = true,
         val notificationTime: Int = 5,
-        val hideBottomNavigation: Boolean = false,
         val showDonate: Boolean = false,
         val showFocusModeSetup: Boolean = false,
         val calendarPermission: CalendarPermissionHandler.State = CalendarPermissionHandler.State.NotDetermined
@@ -30,7 +29,6 @@ class SettingsContract {
         object Load : Event()
         object OnDismiss : Event()
         class OnTogglePrivateNotifications(val checked: Boolean) : Event()
-        class OnToggleHideBottomNavigation(val checked: Boolean) : Event()
         class OnModeSelected(val appThemeMode: AppThemeMode) : Event()
         class OnColorSelected(val appColor: AppColor) : Event()
         object OnSentFeedback : Event()

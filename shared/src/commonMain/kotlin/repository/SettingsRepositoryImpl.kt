@@ -2,7 +2,6 @@ package repository
 
 import data.local.AppColorEntity
 import data.local.AppThemeModeEntity
-import data.local.OldSettingsEntity
 import data.local.SettingsEntity
 import data.local.SettingsLocalDataSource
 import domain.model.AppColor
@@ -11,87 +10,42 @@ import domain.model.AppThemeMode
 import domain.model.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.serialization.ExperimentalSerializationApi
+import kotlinx.coroutines.flow.onEach
 import kotlinx.serialization.json.Json
 
 class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalDataSource) :
     SettingsRepository {
 
-    @OptIn(ExperimentalSerializationApi::class)
     override suspend fun getSettings(): Settings {
         val json = settingsLocalDataSource.getSettings()
-        if (json.isEmpty()) {
-            val defaultSettings = Settings()
-            saveSettings(defaultSettings)
-            return defaultSettings
-        }
-
-        return try {
-            val entity = Json.decodeFromString<SettingsEntity>(json)
-            entity.asDomainModel()
-        } catch (_: kotlinx.serialization.MissingFieldException) {
-            // Handle migration from old settings format - preserve existing settings
-            val oldEntity = Json.decodeFromString<OldSettingsEntity>(json)
-            val migratedSettings = Settings(
-                appThemeMode = oldEntity.appTheme.asDomainModel(),
-                appColor = oldEntity.appColor.asDomainModel(),
-                privateNotifications = oldEntity.privateNotifications,
-                notificationTimeInMinutes = oldEntity.notificationTimeInMinutes,
-                hideBottomNavigation = false // Default value for new field
-            )
-            saveSettings(migratedSettings)
-            migratedSettings
-        }
+        val settings = SettingsJson.decode(json)
+        if (json.isEmpty()) saveSettings(settings)
+        return settings
     }
 
     override suspend fun saveSettings(settings: Settings) {
-        val objectToSave = Json.encodeToString(settings.asEntity())
-        settingsLocalDataSource.saveSettings(objectToSave)
+        settingsLocalDataSource.saveSettings(SettingsJson.encode(settings))
     }
 
-    @OptIn(ExperimentalSerializationApi::class)
-    override suspend fun appTheme(): Flow<AppTheme> {
-        return settingsLocalDataSource.settings().map {
-            if (it.isEmpty()) {
-                val defaultSettings = Settings()
-                saveSettings(defaultSettings)
+    override suspend fun appTheme(): Flow<AppTheme> = settingsLocalDataSource.settings()
+        .onEach { if (it.isEmpty()) saveSettings(Settings()) }
+        .appThemeValues()
+}
 
-                val appTheme = AppTheme(
-                    appColor = defaultSettings.appColor, appThemeMode = defaultSettings.appThemeMode
-                )
+/** Both persisted formats share these remaining fields; removed fields are ignored on read. */
+internal object SettingsJson {
+    private val json = Json { ignoreUnknownKeys = true }
 
-                return@map appTheme
-            }
-            val settings = try {
-                val entity = Json.decodeFromString<SettingsEntity>(it)
-                entity.asDomainModel()
-            } catch (_: kotlinx.serialization.MissingFieldException) {
-                // Handle migration from old settings format - preserve existing settings
-                val oldEntity = Json.decodeFromString<OldSettingsEntity>(it)
-                val migratedSettings = Settings(
-                    appThemeMode = oldEntity.appTheme.asDomainModel(),
-                    appColor = oldEntity.appColor.asDomainModel(),
-                    privateNotifications = oldEntity.privateNotifications,
-                    notificationTimeInMinutes = oldEntity.notificationTimeInMinutes,
-                    hideBottomNavigation = false // Default value for new field
-                )
-                saveSettings(migratedSettings)
-                migratedSettings
-            }
+    fun decode(value: String): Settings =
+        if (value.isEmpty()) Settings() else json.decodeFromString<SettingsEntity>(value).asDomainModel()
 
-            return@map AppTheme(
-                appColor = settings.appColor,
-                appThemeMode = settings.appThemeMode
-            )
-        }
-    }
+    fun encode(settings: Settings): String = json.encodeToString(settings.asEntity())
 
     private fun Settings.asEntity() = SettingsEntity(
         appTheme = appThemeMode.asEntity(),
         appColor = appColor.asEntity(),
         privateNotifications = privateNotifications,
         notificationTimeInMinutes = notificationTimeInMinutes,
-        hideBottomNavigation = hideBottomNavigation
     )
 
     private fun SettingsEntity.asDomainModel() = Settings(
@@ -99,7 +53,6 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
         appColor = appColor.asDomainModel(),
         privateNotifications = privateNotifications,
         notificationTimeInMinutes = notificationTimeInMinutes,
-        hideBottomNavigation = hideBottomNavigation
     )
 
     private fun AppThemeModeEntity.asDomainModel() = when (this) {
@@ -131,4 +84,10 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
         AppColorEntity.Lila -> AppColor.Lila
         AppColorEntity.Blue -> AppColor.Blue
     }
+}
+
+/** Shared transformation for the app's live theme observer, including legacy settings JSON. */
+internal fun Flow<String>.appThemeValues(): Flow<AppTheme> = map { value ->
+    val settings = SettingsJson.decode(value)
+    AppTheme(appColor = settings.appColor, appThemeMode = settings.appThemeMode)
 }

@@ -44,8 +44,6 @@ class SettingsViewModel(
 
             is Event.OnTogglePrivateNotifications -> setPrivateNotification(event.checked)
 
-            is Event.OnToggleHideBottomNavigation -> setHideBottomNavigation(event.checked)
-
             is Event.OnNotificationTimeEntered -> setNotificationTime(event.time)
 
             Event.OnSentFeedback -> TODO()
@@ -60,7 +58,6 @@ class SettingsViewModel(
                             appThemeMode = settings.appThemeMode,
                             privateNotifications = settings.privateNotifications,
                             notificationTime = settings.notificationTimeInMinutes,
-                            hideBottomNavigation = settings.hideBottomNavigation,
                             calendarPermission = permissionState
                         )
                     }
@@ -124,21 +121,12 @@ class SettingsViewModel(
         }
     }
 
-    private fun setHideBottomNavigation(isChecked: Boolean) {
-        viewModelScope.launch {
-            val currentSettings = uiState.value.toSettings()
-            saveSettingsUseCase.invoke(currentSettings.copy(hideBottomNavigation = isChecked))
-            setState { copy(hideBottomNavigation = isChecked) }
-        }
-    }
-
     private fun State.toSettings(): Settings {
         return Settings(
             appThemeMode = appThemeMode,
             appColor = appColor,
             privateNotifications = privateNotifications,
             notificationTimeInMinutes = notificationTime,
-            hideBottomNavigation = hideBottomNavigation
         )
     }
 }

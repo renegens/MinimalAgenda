@@ -6,7 +6,7 @@ Minimal Agenda is a minimalist agenda that shows the events from the calendars a
 <li>Works with every calendar on your device (Google, Nextcloud/DAVx5, local and others)</li>
 <li>Add, edit and delete events; recurring events and multi-day events are supported</li>
 <li>Optional reminders for individual events, with discreet notifications that hide event names on the lock screen</li>
-<li>Light, dark and system themes, accent colors, immersive mode</li>
+<li>Light, dark and system themes, accent colors</li>
 <li>If your device has no calendar, you can create a device-only one</li>
 </ul>
 

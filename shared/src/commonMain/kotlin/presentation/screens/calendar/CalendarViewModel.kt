@@ -12,7 +12,6 @@ import domain.use_case.HasCalendarsUseCase
 import domain.use_case.ScheduleNotificationUseCase
 import domain.use_case.ToggleEventVisibilityUseCase
 import domain.model.DayListViewType
-import domain.use_case.GetSettingsUseCase
 import extensions.today
 import platform.CalendarPermissionHandler
 
@@ -22,7 +21,6 @@ class CalendarViewModel(
     private val calendarGenerator: CalendarGenerator,
     private val toggleEventVisibilityUseCase: ToggleEventVisibilityUseCase,
     private val scheduleNotificationUseCase: ScheduleNotificationUseCase,
-    private val settingsUseCase: GetSettingsUseCase,
     private val hasCalendarsUseCase: HasCalendarsUseCase,
     private val createLocalCalendarUseCase: CreateLocalCalendarUseCase,
 ) : BaseViewModel<Event, State, Effect>() {
@@ -83,7 +81,7 @@ class CalendarViewModel(
             Event.ToggleActive -> setState { copy(showAll = !uiState.value.showAll) }
             is Event.OnEditEvent -> setEffect { Effect.ShowEdit(event.agendaEvent) }
             Event.ShowSettings -> setEffect { Effect.ShowSettings }
-            Event.RefreshSettings -> refreshSettings()
+            Event.RefreshPermissions -> refreshPermissions()
         }
     }
 
@@ -91,7 +89,6 @@ class CalendarViewModel(
         viewModelScope.launch {
             val eventsUIList = uiState.value.flatDaysAndEvents
             val calendarPermissionState = permissionHandler.getPermissionState()
-            val settings = settingsUseCase()
             val noCalendars = calendarPermissionState == CalendarPermissionHandler.State.FullAccess && !hasCalendarsUseCase()
 
             if (eventsUIList.isEmpty()) {
@@ -112,7 +109,6 @@ class CalendarViewModel(
                             isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
                             noCalendars = noCalendars,
                             scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size,
-                            hideBottomNavigation = settings.hideBottomNavigation
                         )
                     }
                 }
@@ -138,7 +134,6 @@ class CalendarViewModel(
 
     private suspend fun loadEventsFastAndSlow(scrollToNow: Boolean) {
         val calendarPermissionState = permissionHandler.getPermissionState()
-        val settings = settingsUseCase()
         val noCalendars = calendarPermissionState == CalendarPermissionHandler.State.FullAccess && !hasCalendarsUseCase()
 
         when (val fastIteration = getAllEventsUseCase(1)) {
@@ -153,7 +148,6 @@ class CalendarViewModel(
                         noCalendars = noCalendars,
                         calendarPermission = calendarPermissionState,
                         scrollToNow = scrollToNow,
-                        hideBottomNavigation = settings.hideBottomNavigation
                     )
                 }
                 when (val slowIteration = getAllEventsUseCase(24)) {
@@ -196,14 +190,11 @@ class CalendarViewModel(
         }
     }
 
-    private fun refreshSettings() {
+    private fun refreshPermissions() {
         viewModelScope.launch {
-            val settings = settingsUseCase()
             val previousPermissionState = uiState.value.calendarPermission
             val currentPermissionState = permissionHandler.getPermissionState()
-            
-            setState { copy(hideBottomNavigation = settings.hideBottomNavigation) }
-            
+
             // If permission changed from denied/not determined to full access, reload events
             if (previousPermissionState != CalendarPermissionHandler.State.FullAccess 
                 && currentPermissionState == CalendarPermissionHandler.State.FullAccess) {

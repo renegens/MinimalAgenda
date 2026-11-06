@@ -79,8 +79,7 @@ class SettingsUseCasesTest {
         val repo = FakeSettingsRepository()
         val settings = Settings(
             appThemeMode = AppThemeMode.DefaultDark,
-            privateNotifications = true,
-            hideBottomNavigation = true
+            privateNotifications = true
         )
         SaveSettingsUseCase(repo)(settings)
         assertSame(settings, repo.saved)
@@ -94,6 +93,5 @@ class SettingsUseCasesTest {
         assertEquals(AppColor.Orange, s.appColor)
         assertFalse(s.privateNotifications)
         assertEquals(5, s.notificationTimeInMinutes)
-        assertFalse(s.hideBottomNavigation)
     }
 }

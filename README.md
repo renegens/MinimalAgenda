@@ -13,7 +13,7 @@ Built with Kotlin Multiplatform and a shared Compose Multiplatform UI.
 - Reads every calendar on the device (recurring and multi-day events included)
 - Add, edit and delete events from within the app
 - Optional per-event reminders, with discreet notifications that hide event names on the lock screen
-- Light, dark and system themes, accent colors, immersive mode
+- Light, dark and system themes, accent colors
 - Creates a device-only calendar if you have none
 - Every feature is free
 

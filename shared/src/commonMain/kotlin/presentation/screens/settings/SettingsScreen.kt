@@ -122,14 +122,6 @@ fun SettingsScreen(
             ItemBody("Hide event names on your lock screen for total privacy.")
         }
 
-        SettingsItem {
-            SwitchSettingItem(
-                title = "Immersive Mode", // Sounds cooler than "Hide Bottom Nav"
-                isChecked = state.hideBottomNavigation,
-                onCheckedChange = { viewModel.setEvent(Event.OnToggleHideBottomNavigation(it)) }
-            )
-            ItemBody("Hide the navigation bar to maximize your screen space.")
-        }
 
         SettingsItem {
             NotificationTimeChips(

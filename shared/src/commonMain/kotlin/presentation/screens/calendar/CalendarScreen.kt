@@ -85,7 +85,7 @@ fun CalendarScreen(
     LaunchedEffect(settingsSheetState.isVisible) {
         if (!settingsSheetState.isVisible && showSettingsBottomSheet) {
             // Sheet was just hidden, check if permission changed
-            viewModel.setEvent(Event.RefreshSettings)
+            viewModel.setEvent(Event.RefreshPermissions)
         }
     }
 
@@ -165,20 +165,18 @@ fun CalendarScreen(
                 }
             },
             bottomBar = {
-                if (state.hideBottomNavigation.not()) {
-                    FloatingBottomNavigation(
-                        currentSection = Section.fromInt(pagerState.currentPage),
-                        onSectionSelected = { tappedSection, currentSection ->
-                            if (tappedSection == currentSection) {
-                                viewModel.setEvent(Event.OnNowClicked(currentSection))
-                            } else {
-                                scope.launch {
-                                    pagerState.animateScrollToPage(tappedSection.position)
-                                }
+                FloatingBottomNavigation(
+                    currentSection = Section.fromInt(pagerState.currentPage),
+                    onSectionSelected = { tappedSection, currentSection ->
+                        if (tappedSection == currentSection) {
+                            viewModel.setEvent(Event.OnNowClicked(currentSection))
+                        } else {
+                            scope.launch {
+                                pagerState.animateScrollToPage(tappedSection.position)
                             }
                         }
-                    )
-                }
+                    }
+                )
             }) {
 
             if (shouldShowNotificationPermission) {
@@ -259,7 +257,7 @@ fun CalendarScreen(
                             scope.launch { settingsSheetState.hide() }.invokeOnCompletion {
                                 if (!settingsSheetState.isVisible) {
                                     showSettingsBottomSheet = false
-                                    viewModel.setEvent(Event.RefreshSettings)
+                                    viewModel.setEvent(Event.RefreshPermissions)
                                 }
                             }
                         },
