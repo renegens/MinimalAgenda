@@ -8,6 +8,7 @@ import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
 import kotlinx.coroutines.launch
 import data.DONATE_URL
+import data.SUPPORT_ISSUES_URL
 import platform.AppConfig
 import platform.Browser
 import platform.CalendarPermissionHandler
@@ -46,7 +47,7 @@ class SettingsViewModel(
 
             is Event.OnNotificationTimeEntered -> setNotificationTime(event.time)
 
-            Event.OnSentFeedback -> TODO()
+            Event.OnContactSupport -> browser.openUrl(SUPPORT_ISSUES_URL)
             Event.Load -> {
                 viewModelScope.launch {
                     val settings = getSettingsUseCase()

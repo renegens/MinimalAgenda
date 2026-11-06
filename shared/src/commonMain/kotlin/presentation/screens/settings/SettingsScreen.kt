@@ -13,6 +13,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.flow.collectLatest
 import org.koin.compose.viewmodel.koinViewModel
 import platform.CalendarPermissionHandler
+import data.iosSupportEmail
 import platform.sendEmail
 import presentation.components.AppAlertDialog
 import presentation.components.noRippleClickable
@@ -166,7 +167,7 @@ fun SettingsScreen(
             if (showEmailError) {
                 AppAlertDialog(
                     title = "Mail Unavailable",
-                    message = "Please configure a mail account on your device to send feedback.",
+                    message = "Open an email app to contact $iosSupportEmail, or use Contact Support to report an issue on GitHub.",
                     onContinueRequest = { showEmailError = false }
                 )
             }
@@ -178,9 +179,17 @@ fun SettingsScreen(
                 "Contact Support",
                 Modifier
                     .padding(vertical = 8.dp)
-                    .noRippleClickable { sendEmail { showEmailError = true } },
+                    .noRippleClickable { viewModel.setEvent(Event.OnContactSupport) },
                 style = iosBody,
                 color = MaterialTheme.colorScheme.primary
+            )
+            Text(
+                "or email us",
+                Modifier
+                    .padding(vertical = 8.dp)
+                    .noRippleClickable { sendEmail { showEmailError = true } },
+                style = iosBody,
+                color = MaterialTheme.colorScheme.secondary
             )
         }
 

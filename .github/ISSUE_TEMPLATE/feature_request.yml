@@ -1,0 +1,26 @@
+name: Feature request
+description: Suggest an improvement to Minimal Agenda.
+title: "[Feature]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Suggestions are welcome. Submitting a feature request does not imply any commitment to implementing it or providing a timeline.
+  - type: textarea
+    id: problem
+    attributes:
+      label: What problem would this solve?
+      description: Explain the use case using sample event names if needed.
+    validations:
+      required: true
+  - type: textarea
+    id: solution
+    attributes:
+      label: Suggested improvement
+      description: Describe how you would like the app to work.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered (optional)

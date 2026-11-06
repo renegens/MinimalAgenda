@@ -31,7 +31,7 @@ class SettingsContract {
         class OnTogglePrivateNotifications(val checked: Boolean) : Event()
         class OnModeSelected(val appThemeMode: AppThemeMode) : Event()
         class OnColorSelected(val appColor: AppColor) : Event()
-        object OnSentFeedback : Event()
+        object OnContactSupport : Event()
         class OnNotificationTimeEntered(val time: Int) : Event()
         object OnRequestCalendarPermission : Event()
         object OnOpenDeviceSettings : Event()

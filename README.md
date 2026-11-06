@@ -85,6 +85,9 @@ Repository secrets required by the workflow:
 
 ## Support
 
+Report bugs and suggest features through [GitHub Issues](https://github.com/renegens/MinimalAgenda/issues/new/choose),
+or email [ios@giant-solutions.eu](mailto:ios@giant-solutions.eu). Feature requests do not imply a commitment to implementation.
+
 Minimal Agenda is free and open source. If you like it, you can support development through
 [GitHub Sponsors](https://github.com/sponsors/renegens).
 

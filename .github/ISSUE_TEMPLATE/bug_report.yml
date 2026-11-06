@@ -1,0 +1,61 @@
+name: Bug report
+description: Report a problem with Minimal Agenda on Android.
+title: "[Bug]: "
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Please describe the problem using sample event names. Redact personal information from any screenshots or logs.
+  - type: input
+    id: app-version
+    attributes:
+      label: App version
+      description: Include the version name and version code if available.
+    validations:
+      required: true
+  - type: dropdown
+    id: build-flavor
+    attributes:
+      label: Build
+      options:
+        - Google Play
+        - FOSS (GitHub Releases or another FOSS distributor)
+        - Built from source
+    validations:
+      required: true
+  - type: input
+    id: device
+    attributes:
+      label: Device manufacturer and model
+    validations:
+      required: true
+  - type: input
+    id: android-version
+    attributes:
+      label: Android version
+    validations:
+      required: true
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      description: Describe the steps that lead to the problem.
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: textarea
+    id: actual
+    attributes:
+      label: Actual behavior
+    validations:
+      required: true
+  - type: textarea
+    id: logs
+    attributes:
+      label: Additional details or logs (optional)
+      description: Share relevant technical details only, with personal information removed.
