@@ -19,17 +19,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import com.slapps.cupertino.CupertinoDropdownMenu
-import com.slapps.cupertino.CupertinoIcon
-import com.slapps.cupertino.MenuAction
-import com.slapps.cupertino.icons.CupertinoIcons
-import com.slapps.cupertino.icons.outlined.Clock
-import com.slapps.cupertino.icons.outlined.Ellipsis
-import com.slapps.cupertino.icons.outlined.Eye
-import com.slapps.cupertino.icons.outlined.EyeSlash
-import com.slapps.cupertino.icons.outlined.Gear
-import com.slapps.cupertino.icons.outlined.Plus
-import com.slapps.cupertino.theme.CupertinoTheme
 
 
 @Composable
@@ -68,8 +57,8 @@ fun SimpleTransparentToolbar(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                CupertinoIcon(
-                    imageVector = CupertinoIcons.Outlined.Ellipsis,
+                AppIcon(
+                    symbol = AppSymbol.Menu,
                     contentDescription = "Menu",
                     modifier = Modifier.size(20.dp),
                     tint = MaterialTheme.colorScheme.onSurface
@@ -93,93 +82,91 @@ fun CalendarToolbarMenu(
 
     val haptic = LocalHapticFeedback.current
 
-    CupertinoTheme {
-        CupertinoDropdownMenu(
-            offset = DpOffset(100.dp, -(4).dp),
-            expanded = isVisible,
-            containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
-            onDismissRequest = {
-                haptic.addHapticFeedbackProminent()
-                onDismiss()
-            }
+    AppDropdownMenu(
+        offset = DpOffset(100.dp, -(4).dp),
+        expanded = isVisible,
+        containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
+        onDismissRequest = {
+            haptic.addHapticFeedbackProminent()
+            onDismiss()
+        }
+    ) {
+        // Removed FloatingBackground, just use Column directly
+        Column(
+            modifier = Modifier.padding(vertical = 8.dp)
         ) {
-            // Removed FloatingBackground, just use Column directly
-            Column(
-                modifier = Modifier.padding(vertical = 8.dp)
+            AppMenuAction(
+                onClick = {
+                    haptic.addHapticFeedbackProminent()
+                    onToggleActive()
+                    onDismiss()
+                },
+                icon = {
+                    val image = if (showAll) {
+                        AppSymbol.Visibility
+                    } else {
+                        AppSymbol.VisibilityOff
+                    }
+                    AppIcon(
+                        symbol = image,
+                        contentDescription = "toggle visibility",
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
+                }
             ) {
-                MenuAction(
-                    onClick = {
-                        haptic.addHapticFeedbackProminent()
-                        onToggleActive()
-                        onDismiss()
-                    },
-                    icon = {
-                        val image = if (showAll) {
-                            CupertinoIcons.Default.Eye
-                        } else {
-                            CupertinoIcons.Default.EyeSlash
-                        }
-                        CupertinoIcon(
-                            imageVector = image,
-                            contentDescription = "toggle visibility",
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                ) {
-                    val text = if (showAll) "Hide hidden events" else "Show hidden events"
-                    Label(text)
+                val text = if (showAll) "Hide hidden events" else "Show hidden events"
+                Label(text)
+            }
+            HorizontalDivider()
+            AppMenuAction(
+                onClick = {
+                    haptic.addHapticFeedbackProminent()
+                    onNowClicked()
+                    onDismiss()
+                },
+                icon = {
+                    AppIcon(
+                        symbol = AppSymbol.Clock,
+                        contentDescription = "now",
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
                 }
-                HorizontalDivider()
-                MenuAction(
-                    onClick = {
-                        haptic.addHapticFeedbackProminent()
-                        onNowClicked()
-                        onDismiss()
-                    },
-                    icon = {
-                        CupertinoIcon(
-                            imageVector = CupertinoIcons.Default.Clock,
-                            contentDescription = "now",
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                ) {
-                    Label("Today")
+            ) {
+                Label("Today")
+            }
+            HorizontalDivider()
+            AppMenuAction(
+                onClick = {
+                    haptic.addHapticFeedbackProminent()
+                    onAdd()
+                    onDismiss()
+                },
+                icon = {
+                    AppIcon(
+                        symbol = AppSymbol.Add,
+                        contentDescription = "add",
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
                 }
-                HorizontalDivider()
-                MenuAction(
-                    onClick = {
-                        haptic.addHapticFeedbackProminent()
-                        onAdd()
-                        onDismiss()
-                    },
-                    icon = {
-                        CupertinoIcon(
-                            imageVector = CupertinoIcons.Default.Plus,
-                            contentDescription = "add",
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                ) {
-                    Label("New Event")
+            ) {
+                Label("New Event")
+            }
+            HorizontalDivider()
+            AppMenuAction(
+                onClick = {
+                    haptic.addHapticFeedbackProminent()
+                    onSettings()
+                    onDismiss()
+                },
+                icon = {
+                    AppIcon(
+                        symbol = AppSymbol.Settings,
+                        contentDescription = "settings",
+                        tint = MaterialTheme.colorScheme.tertiary
+                    )
                 }
-                HorizontalDivider()
-                MenuAction(
-                    onClick = {
-                        haptic.addHapticFeedbackProminent()
-                        onSettings()
-                        onDismiss()
-                    },
-                    icon = {
-                        CupertinoIcon(
-                            imageVector = CupertinoIcons.Default.Gear,
-                            contentDescription = "settings",
-                            tint = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                ) {
-                    Label("Settings")
-                }
+            ) {
+                Label("Settings")
             }
         }
     }

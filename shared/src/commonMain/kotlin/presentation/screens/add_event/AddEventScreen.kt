@@ -29,11 +29,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
-import androidx.compose.material3.DatePicker
-import androidx.compose.material3.DatePickerState
-import androidx.compose.material3.TimePickerState
-import androidx.compose.material3.DatePickerDefaults
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -42,25 +37,12 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextFieldDefaults
-import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TimePickerDefaults
-import androidx.compose.material3.rememberDatePickerState
-import androidx.compose.material3.rememberTimePickerState
-import com.slapps.cupertino.CupertinoDatePicker
-import com.slapps.cupertino.CupertinoTimePicker
-import com.slapps.cupertino.ExperimentalCupertinoApi
-import com.slapps.cupertino.rememberCupertinoDatePickerState
-import com.slapps.cupertino.rememberCupertinoTimePickerState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.key
-import androidx.compose.runtime.snapshotFlow
-import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -69,22 +51,21 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.semantics.selected
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import data.calendar.CalendarEntity
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.drop
 import org.koin.compose.viewmodel.koinViewModel
 import org.koin.core.parameter.parametersOf
 import presentation.components.AppAlertDialog
+import presentation.components.AppDatePicker
+import presentation.components.AppTimePicker
 import platform.formatTimestamp
 import platform.formatLocalTime
 import platform.uses24HourClock
@@ -92,7 +73,6 @@ import presentation.components.NewEventHeader
 import presentation.components.clickableWithOpaqueText
 import presentation.theme.DMSans18Medium
 import presentation.theme.TextFieldStyleAddEvent
-import getPlatform
 
 @Composable
 fun AddEventScreen(
@@ -383,7 +363,6 @@ private fun DurationChips(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalCupertinoApi::class)
 @Composable
 private fun ColumnScope.DateAndTime(
     label: String,
@@ -394,7 +373,6 @@ private fun ColumnScope.DateAndTime(
     onTimeUpdate: (Triple<Long, Int, Int>) -> Unit,
     focusManager: FocusManager
 ) {
-    val isAndroid = getPlatform().isAndroid
     val is24Hour = uses24HourClock()
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
@@ -426,44 +404,8 @@ private fun ColumnScope.DateAndTime(
         enter = expandVertically(),
         exit = shrinkVertically()
     ) {
-        if (isAndroid) {
-            val pickerState = rememberDatePickerState(initialSelectedDateMillis = date)
-            LaunchedEffect(date) {
-                if (pickerState.selectedDateMillis != date) {
-                    pickerState.selectedDateMillis = date
-                    pickerState.displayedMonthMillis = date
-                }
-            }
-            // Only writes from the control invoke callbacks; model synchronization uses the delegate.
-            val controlledState = object : DatePickerState by pickerState {
-                override var selectedDateMillis: Long?
-                    get() = pickerState.selectedDateMillis
-                    set(value) {
-                        pickerState.selectedDateMillis = value
-                        value?.let { onTimeUpdate(Triple(it, hours, minutes)) }
-                    }
-            }
-            DatePicker(
-                title = null,
-                headline = null,
-                state = controlledState,
-                colors = DatePickerDefaults.colors(containerColor = MaterialTheme.colorScheme.secondaryContainer),
-                showModeToggle = false,
-            )
-        } else {
-            key(date) {
-                val pickerState = rememberCupertinoDatePickerState(initialSelectedDateMillis = date)
-                LaunchedEffect(pickerState) {
-                    snapshotFlow { pickerState.selectedDateMillis }.drop(1).collect {
-                        onTimeUpdate(Triple(it, hours, minutes))
-                    }
-                }
-                CupertinoDatePicker(
-                    state = pickerState,
-                    modifier = Modifier.fillMaxWidth(),
-                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                )
-            }
+        AppDatePicker(date = date) { selectedDate ->
+            onTimeUpdate(Triple(selectedDate, hours, minutes))
         }
     }
 
@@ -472,80 +414,14 @@ private fun ColumnScope.DateAndTime(
         enter = expandVertically(),
         exit = shrinkVertically()
     ) {
-        if (isAndroid) {
-            val pickerState = rememberTimePickerState(hours, minutes, is24Hour)
-            LaunchedEffect(hours, minutes) {
-                pickerState.hour = hours
-                pickerState.minute = minutes
-            }
-            val controlledState = object : TimePickerState by pickerState {
-                override var hour: Int
-                    get() = pickerState.hour
-                    set(value) {
-                        pickerState.hour = value
-                        onTimeUpdate(Triple(date, value, pickerState.minute))
-                    }
-                override var minute: Int
-                    get() = pickerState.minute
-                    set(value) {
-                        pickerState.minute = value
-                        onTimeUpdate(Triple(date, pickerState.hour, value))
-                    }
-            }
-            val density = LocalDensity.current.density
-            CompositionLocalProvider(LocalDensity provides Density(density, 0.8f)) {
-                TimePicker(
-                    state = controlledState,
-                    colors = TimePickerDefaults.colors(
-                        timeSelectorSelectedContentColor = MaterialTheme.colorScheme.primary,
-                        timeSelectorSelectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                        timeSelectorUnselectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
-                    ),
-                    modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally)
-                )
-            }
-        } else {
-            CupertinoTimeControl(hours, minutes, is24Hour) { hour, minute ->
-                onTimeUpdate(Triple(date, hour, minute))
-            }
+        AppTimePicker(
+            hours = hours,
+            minutes = minutes,
+            is24Hour = is24Hour,
+            modifier = Modifier.fillMaxWidth().align(Alignment.CenterHorizontally),
+        ) { selectedHour, selectedMinute ->
+            onTimeUpdate(Triple(date, selectedHour, selectedMinute))
         }
-
-    }
-}
-
-@OptIn(ExperimentalCupertinoApi::class)
-@Composable
-private fun CupertinoTimeControl(
-    hours: Int,
-    minutes: Int,
-    is24Hour: Boolean,
-    onTimeUpdate: (Int, Int) -> Unit,
-) {
-    val modelTime = hours to minutes
-    var seed by remember { mutableStateOf(modelTime) }
-    var lastEmitted by remember { mutableStateOf(modelTime) }
-    val currentModel by rememberUpdatedState(modelTime)
-    val onUpdate by rememberUpdatedState(onTimeUpdate)
-    LaunchedEffect(modelTime) {
-        if (modelTime != lastEmitted) seed = modelTime
-        lastEmitted = modelTime
-    }
-    val activeSeed = seed
-    key(activeSeed, is24Hour) {
-        val pickerState = rememberCupertinoTimePickerState(activeSeed.first, activeSeed.second, is24Hour)
-        LaunchedEffect(pickerState) {
-            snapshotFlow { pickerState.hour to pickerState.minute }.drop(1).collect { value ->
-                if (activeSeed == seed && currentModel == lastEmitted) {
-                    lastEmitted = value
-                    onUpdate(value.first, value.second)
-                }
-            }
-        }
-        CupertinoTimePicker(
-            state = pickerState,
-            modifier = Modifier.fillMaxWidth(),
-            containerColor = MaterialTheme.colorScheme.secondaryContainer,
-        )
     }
 }
 

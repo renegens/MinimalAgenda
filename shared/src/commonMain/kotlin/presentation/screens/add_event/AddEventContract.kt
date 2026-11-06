@@ -18,7 +18,7 @@ import presentation.base.UiEffect
 import presentation.base.UiEvent
 import presentation.base.UiState
 
-/** Picker convention (Material and Cupertino date pickers): UTC midnight of the selected calendar date. */
+/** Picker convention: UTC midnight of the selected calendar date. */
 fun LocalDate.toPickerMillis(): Long = atStartOfDayIn(TimeZone.UTC).toEpochMilliseconds()
 
 internal val durationQuickPicks = listOf(10, 15, 30, 60, 90, 120)
