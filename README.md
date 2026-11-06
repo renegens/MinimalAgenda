@@ -1,18 +1,22 @@
 # Minimal Agenda
 
-A minimal, private agenda that shows the events from your device's own calendars.
+A minimal, private agenda for your device's own calendars.
 
 - **Android:** supported (Google Play and a free FOSS build).
 - **iOS:** the code is kept in the repository but is **unsupported** (the app is no longer in the App Store).
 
-Built with Kotlin Multiplatform and a shared Compose Multiplatform UI.
+Built with Kotlin Multiplatform and a shared Compose Multiplatform UI. Shared control wrappers use Material 3
+on Android and retain Cupertino controls on iOS; Cupertino dependencies are scoped to iOS only.
 
 ## Features
 
 - Agenda view of your events, with month and year overviews
 - Reads every calendar on the device (recurring and multi-day events included)
-- Add, edit and delete events from within the app
+- Add, edit and delete events from within the app; tap a day header or empty day to start with that date
+- Quick duration chips and Starts/Ends controls for longer and multi-day events; all-day end dates are inclusive
+- Dates follow your locale, and times follow your system 12/24-hour setting
 - Optional per-event reminders, with discreet notifications that hide event names on the lock screen
+- Reminder timing chips for At start, 5, 10, 15, 30 and 60 minutes; existing custom offsets are preserved
 - Light, dark and system themes, accent colors
 - Creates a device-only calendar if you have none
 - Every feature is free
@@ -45,7 +49,20 @@ Requirements: JDK 21 (Gradle fails on JDK 25) and the Android SDK (path in `loca
 ./gradlew :shared:linkDebugFrameworkIosSimulatorArm64                   # shared code for iOS (macOS only)
 ```
 
-iOS: open `iosApp/iosApp.xcodeproj` in Xcode (unsupported).
+iOS: open `iosApp/iosApp.xcodeproj` in Xcode (unsupported). For `xcodebuild`, set
+`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
+
+To check the Android UI on the project emulator:
+
+```bash
+~/.local/bin/android --no-metrics emulator start --headless minimal-agenda-api36
+./gradlew :androidApp:installFossDebug
+~/Library/Android/sdk/platform-tools/adb -s emulator-5554 shell am start -W -n eu.giant.agenda/.MainActivity
+~/Library/Android/sdk/platform-tools/adb -s emulator-5554 exec-out screencap -p > /tmp/minimal-agenda.png
+~/Library/Android/sdk/platform-tools/adb -s emulator-5554 emu kill
+```
+
+Always specify the emulator serial when using `adb` and stop the emulator after verification.
 
 Flavors: `play` and `foss` (they differ only by `BuildConfig.SHOW_DONATE`).
 `-PversionName=1.2.3 -PversionCode=10203` override the version.
@@ -57,8 +74,12 @@ shared/       KMP library: shared UI, domain and data code; platform actuals; bu
 androidApp/   Android app (MainActivity, manifest, resources), flavors play and foss
 iosApp/       Xcode project (SwiftUI host), unsupported
 fastlane/     F-Droid / IzzyOnDroid store metadata
-.github/      CI and release workflows
+.github/      CI, release workflows and issue templates
+docs/         accepted launch-polish decisions
 ```
+
+The accepted launch changes and behavior conventions are recorded in
+[Launch polish decisions](docs/launch-polish-decisions.md).
 
 ## Release
 
