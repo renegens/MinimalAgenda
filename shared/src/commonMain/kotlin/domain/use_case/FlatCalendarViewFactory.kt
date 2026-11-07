@@ -6,6 +6,8 @@ import domain.model.DayListViewType
 class FlatCalendarViewFactory(
     private val calendarGenerator: CalendarGenerator
 ) {
+    val coveredDays: LongRange
+        get() = calendarGenerator.calendar.first().epochDay..calendarGenerator.calendar.last().epochDay
 
     fun build(allEvents: List<AgendaEvent>? = null): List<DayListViewType> {
         val flatDayWithEvents = mutableListOf<DayListViewType>()

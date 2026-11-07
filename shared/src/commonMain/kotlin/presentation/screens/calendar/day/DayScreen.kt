@@ -331,7 +331,7 @@ fun Time(agendaEvent: AgendaEvent, textColor: Color) {
     val time = agendaEvent.getFormattedTime()
 
     Row(modifier = Modifier.width(time.getRowWidth().dp).padding(end = 8.dp)) {
-        if (agendaEvent.allDay) {
+        if (agendaEvent.displaysAllDay) {
             Text(
                 text = "All Day",
                 style = DMSans18Bold60,

@@ -4,6 +4,7 @@ import androidx.lifecycle.viewModelScope
 import data.calendar.EventTimeRange
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import kotlinx.datetime.DateTimeUnit
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.LocalTime
@@ -43,6 +44,7 @@ class AddEventViewModel(
     }
 
     override fun handleEvent(event: Event) {
+        if (uiState.value.isSaving) return
         when (event) {
             is Event.ToggleAllDay -> setState {
                 val end = toStartAndEnd(timeZone).second
@@ -122,26 +124,28 @@ class AddEventViewModel(
         viewModelScope.launch {
             val (start, end) = state.toStartAndEnd(timeZone)
             val id = state.editingEventId
-            val didSave = if (id == null) {
-                repository.addEvent(
-                    title = state.title.trim(),
-                    location = state.location.trim(),
-                    startTime = start,
-                    endTime = end,
-                    allDay = state.allDay,
-                    calendarId = state.calendarId,
-                    timedRange = if (state.allDay) null else state.timedRange(timeZone),
-                )
-            } else {
-                repository.updateEvent(
-                    id = id,
-                    title = state.title.trim(),
-                    location = state.location.trim(),
-                    startTime = start,
-                    endTime = end,
-                    allDay = state.allDay,
-                    timedRange = if (state.allDay) null else state.timedRange(timeZone),
-                )
+            val didSave = writeResult {
+                if (id == null) {
+                    repository.addEvent(
+                        title = state.title.trim(),
+                        location = state.location.trim(),
+                        startTime = start,
+                        endTime = end,
+                        allDay = state.allDay,
+                        calendarId = state.calendarId,
+                        timedRange = if (state.allDay) null else state.timedRange(timeZone),
+                    )
+                } else {
+                    repository.updateEvent(
+                        id = id,
+                        title = state.title.trim(),
+                        location = state.location.trim(),
+                        startTime = start,
+                        endTime = end,
+                        allDay = state.allDay,
+                        timedRange = if (state.allDay) null else state.timedRange(timeZone),
+                    )
+                }
             }
             finish(didSave)
         }
@@ -150,7 +154,15 @@ class AddEventViewModel(
     private fun delete() {
         val id = uiState.value.editingEventId ?: return
         setState { copy(isSaving = true, saveFailed = false) }
-        viewModelScope.launch { finish(repository.deleteEvent(id)) }
+        viewModelScope.launch { finish(writeResult { repository.deleteEvent(id) }) }
+    }
+
+    private suspend fun writeResult(block: suspend () -> Boolean): Boolean = try {
+        block()
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
+        false
     }
 
     private fun finish(success: Boolean) {

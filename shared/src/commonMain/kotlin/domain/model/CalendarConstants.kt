@@ -27,6 +27,5 @@ fun DayOfWeek.toDaysInWeek(): DayInWeek {
         DayOfWeek.FRIDAY -> DayInWeek.Friday
         DayOfWeek.SATURDAY -> DayInWeek.Saturday
         DayOfWeek.SUNDAY -> DayInWeek.Sunday
-        else -> throw IllegalArgumentException(this.toString())
     }
 }

@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.androidApplication)
-    alias(libs.plugins.kotlinAndroid)
     alias(libs.plugins.composeMultiplatform)
     alias(libs.plugins.composeCompiler)
 }
@@ -16,8 +15,9 @@ val keyPasswordValue = signingValue("MINIMAL_AGENDA_KEY_PASSWORD")
 val hasReleaseSigning = listOf(keystorePath, keystorePassword, keyAliasValue, keyPasswordValue).all { it != null }
 
 kotlin {
+    jvmToolchain(21)
     compilerOptions {
-        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_11)
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
@@ -72,8 +72,8 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -83,10 +83,10 @@ android {
 
 dependencies {
     implementation(projects.shared)
-    implementation(compose.runtime)
-    implementation(compose.ui)
+    implementation(libs.compose.runtime)
+    implementation(libs.compose.ui)
     implementation(libs.androidx.activity.compose)
     implementation(libs.koin.android)
     implementation(libs.koin.core)
-    debugImplementation(compose.uiTooling)
+    debugImplementation(libs.compose.ui.tooling)
 }

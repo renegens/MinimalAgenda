@@ -3,7 +3,6 @@ package data.local
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.intPreferencesKey
 import data.DataStore
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -14,9 +13,7 @@ class LaunchCounterDataSource(private val dataStore: DataStore) {
     }
 
     suspend fun getCount(): Int {
-        return dataStore.preferences.data.catch {
-           0
-        }.map {
+        return dataStore.preferences.data.recoverReadErrors().map {
             return@map it[intPreferencesKey(COUNTER)] ?: 0
         }.first()
     }

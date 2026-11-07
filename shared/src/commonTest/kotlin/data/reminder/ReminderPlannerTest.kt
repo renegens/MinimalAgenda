@@ -54,4 +54,11 @@ class ReminderPlannerTest {
             ReminderPlanner.decide(reminder, shifted, EventLookup(shifted, false), 900),
         )
     }
+
+    @Test fun deliveryUsesTheCurrentPrivacySettingAndCurrentEventTitle() {
+        val old = reminder.copy(body = "Sensitive old title")
+        assertEquals("You have an upcoming event.", old.bodyForDelivery(true, "New title"))
+        assertEquals("New title", old.bodyForDelivery(false, "New title"))
+        assertEquals("Sensitive old title", old.bodyForDelivery(false))
+    }
 }

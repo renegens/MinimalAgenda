@@ -35,11 +35,15 @@ class GetAllEventsUseCase(
         allEvents.forEach { event ->
             if (event.isMultiDay) {
                 // Generate an event for each day in the span
-                val daysInSpan = event.startLocalDateTime.date.toEpochDays()..event.endLocalDateTime.date.toEpochDays()
+                val firstDay = event.startLocalDateTime.date.toEpochDays()
+                val lastDay = event.endLocalDateTime.date.toEpochDays()
+                // A provider can return a decades-long event overlapping the query. Expand only visible days.
+                val daysInSpan = maxOf(firstDay, flatCalendarViewFactory.coveredDays.first)..
+                    minOf(lastDay, flatCalendarViewFactory.coveredDays.last)
 
-                daysInSpan.forEachIndexed { index, day ->
-                    val isLastDay = (index.toLong() == daysInSpan.last - daysInSpan.first) // Check if it's the last day
-                    val isIntermediateDay = index > 0 && !isLastDay // Any day after the start but before the last
+                daysInSpan.forEach { day ->
+                    val isLastDay = day == lastDay
+                    val isIntermediateDay = day > firstDay && !isLastDay
 
                     val dailyEvent = when {
                         isLastDay -> event.copy(
@@ -48,7 +52,7 @@ class GetAllEventsUseCase(
                         )
                         isIntermediateDay -> event.copy(
                             epochDay = day,
-                            allDay = true, // Mark as an all-day event for intermediate days
+                            isIntermediateDay = true,
                             isLastDayInMultiDayEvent = false // Ensure not marked as subsequent
                         )
                         else -> event.copy(

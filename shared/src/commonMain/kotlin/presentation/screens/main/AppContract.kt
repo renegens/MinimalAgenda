@@ -10,6 +10,7 @@ import presentation.base.UiState
 class AppContract {
 
     data class State(
+        val isLoading: Boolean = true,
         val forceEventLoad: Int = 0,
         val appTheme: AppTheme = AppTheme.Default,
         val shouldShowOnboarding: Boolean = false,

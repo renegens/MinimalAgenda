@@ -9,17 +9,15 @@ import platform.EventKitUI.EKEventEditViewActionDeleted
 import platform.EventKitUI.EKEventEditViewActionSaved
 import platform.EventKitUI.EKEventEditViewController
 import platform.EventKitUI.EKEventEditViewDelegateProtocol
-import platform.EventKitUI.EKEventViewAction
-import platform.EventKitUI.EKEventViewController
-import platform.EventKitUI.EKEventViewDelegateProtocol
 import platform.UIKit.UIApplication
 import platform.UIKit.UIColor
-import platform.UIKit.UINavigationController
 import platform.darwin.NSObject
 
 class EKEventEditViewViewHandler(eventKit: EventKit) : EventEditViewHandler {
 
     private val eventStore = eventKit.eventStore
+    // EventKitUI retains its delegate weakly; keep it alive until the editor finishes.
+    private var activeDelegate: EKEventEditViewDelegate? = null
 
     override suspend fun openAddEvent(onSave: () -> Unit) {
         withContext(Dispatchers.Main) {
@@ -29,7 +27,7 @@ class EKEventEditViewViewHandler(eventKit: EventKit) : EventEditViewHandler {
             eventEditVC.eventStore = eventStore
             eventEditVC.navigationBar.tintColor = UIColor.brownColor
 
-            eventEditVC.editViewDelegate = EKEventEditViewDelegate(onSave)
+            eventEditVC.editViewDelegate = EKEventEditViewDelegate(onSave) { activeDelegate = null }.also { activeDelegate = it }
 
             val rootVC = UIApplication.sharedApplication.keyWindow?.rootViewController
 
@@ -39,13 +37,13 @@ class EKEventEditViewViewHandler(eventKit: EventKit) : EventEditViewHandler {
         }
     }
 
-    override suspend fun openEdit(agendaEvent: AgendaEvent, onSave: () -> Unit) {
+    override suspend fun openEdit(agendaEvent: AgendaEvent, onSave: () -> Unit): Unit = withContext(Dispatchers.Main) {
             val event = eventStore.eventWithIdentifier(agendaEvent.id)
             if (event != null) {
                 val eventEditVC = EKEventEditViewController()
                 eventEditVC.event = event
                 eventEditVC.eventStore = eventStore
-                eventEditVC.editViewDelegate = EKEventEditViewDelegate(onSave)
+                eventEditVC.editViewDelegate = EKEventEditViewDelegate(onSave) { activeDelegate = null }.also { activeDelegate = it }
 
                 val rootVC = UIApplication.sharedApplication.keyWindow?.rootViewController
 
@@ -56,49 +54,20 @@ class EKEventEditViewViewHandler(eventKit: EventKit) : EventEditViewHandler {
             }
     }
 
-    private fun openView(agendaEvent: AgendaEvent, onSave: () -> Unit){
-        val event = eventStore.eventWithIdentifier(agendaEvent.id)
-
-        val eventViewController = EKEventViewController()
-        eventViewController.event = event
-        eventViewController.allowsEditing = true
-        eventViewController.delegate = EKEventViewDelegate(onSave)
-
-       // Present the EKEventViewController
-        val rootVC = UIApplication.sharedApplication.keyWindow?.rootViewController
-        val navigationController =
-            UINavigationController(rootViewController = eventViewController)
-        rootVC?.presentViewController(
-            navigationController,
-            animated = true,
-            completion = null
-        )
-    }
-
-    private class EKEventEditViewDelegate(private val onSave: () -> Unit) : NSObject(),
+    private class EKEventEditViewDelegate(private val onSave: () -> Unit, private val onFinished: () -> Unit) : NSObject(),
         EKEventEditViewDelegateProtocol {
 
         override fun eventEditViewController(
             controller: EKEventEditViewController,
             didCompleteWithAction: EKEventEditViewAction
         ) {
+            onFinished()
             if (didCompleteWithAction == EKEventEditViewActionSaved || didCompleteWithAction == EKEventEditViewActionDeleted){
                 controller.dismissViewControllerAnimated(true, null)
                 onSave.invoke()
             } else {
                 controller.dismissViewControllerAnimated(true, null)
             }
-        }
-    }
-
-    private class EKEventViewDelegate(private val onSave: () -> Unit) : NSObject(),
-        EKEventViewDelegateProtocol {
-
-        override fun eventViewController(
-            controller: EKEventViewController,
-            didCompleteWithAction: EKEventViewAction
-        ) {
-            controller.dismissViewControllerAnimated(true, { onSave.invoke() })
         }
     }
 

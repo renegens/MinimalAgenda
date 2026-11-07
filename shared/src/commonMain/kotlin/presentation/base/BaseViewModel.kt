@@ -6,6 +6,7 @@ import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.receiveAsFlow
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 
 abstract class BaseViewModel<Event : UiEvent, State : UiState, Effect : UiEffect> : ViewModel() {
@@ -35,8 +36,7 @@ abstract class BaseViewModel<Event : UiEvent, State : UiState, Effect : UiEffect
      * Set new Ui State
      */
     protected fun setState(reduce: State.() -> State) {
-        val newState = currentState.reduce()
-        _uiState.value = newState
+        _uiState.update(reduce)
     }
 
     /**

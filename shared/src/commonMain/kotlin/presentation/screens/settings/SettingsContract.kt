@@ -11,6 +11,7 @@ class SettingsContract {
 
     data class State(
         val isLoading: Boolean = true,
+        val saveFailed: Boolean = false,
         val appThemeMode: AppThemeMode = AppThemeMode.FollowSystem,
         val appColor: AppColor = AppColor.Red,
         val privateNotifications: Boolean = true,

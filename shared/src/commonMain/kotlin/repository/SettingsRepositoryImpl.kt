@@ -10,7 +10,7 @@ import domain.model.AppThemeMode
 import domain.model.Settings
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onEach
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalDataSource) :
@@ -18,9 +18,7 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
 
     override suspend fun getSettings(): Settings {
         val json = settingsLocalDataSource.getSettings()
-        val settings = SettingsJson.decode(json)
-        if (json.isEmpty()) saveSettings(settings)
-        return settings
+        return SettingsJson.decode(json)
     }
 
     override suspend fun saveSettings(settings: Settings) {
@@ -28,7 +26,6 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
     }
 
     override suspend fun appTheme(): Flow<AppTheme> = settingsLocalDataSource.settings()
-        .onEach { if (it.isEmpty()) saveSettings(Settings()) }
         .appThemeValues()
 }
 
@@ -36,8 +33,11 @@ class SettingsRepositoryImpl(private val settingsLocalDataSource: SettingsLocalD
 internal object SettingsJson {
     private val json = Json { ignoreUnknownKeys = true }
 
-    fun decode(value: String): Settings =
-        if (value.isEmpty()) Settings() else json.decodeFromString<SettingsEntity>(value).asDomainModel()
+    fun decode(value: String): Settings = try {
+        if (value.isBlank()) Settings() else json.decodeFromString<SettingsEntity>(value).asDomainModel()
+    } catch (_: SerializationException) {
+        Settings()
+    }
 
     fun encode(settings: Settings): String = json.encodeToString(settings.asEntity())
 

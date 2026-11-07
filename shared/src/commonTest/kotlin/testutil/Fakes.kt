@@ -33,6 +33,7 @@ class FakeCalendarRepository(
     val updated = mutableListOf<SavedEvent>()
     val deleted = mutableListOf<String>()
     var saveResult = true
+    var beforeWrite: suspend () -> Unit = {}
 
     override suspend fun getCalendars(): List<CalendarEntity> = calendars
 
@@ -58,6 +59,7 @@ class FakeCalendarRepository(
         calendarId: String?,
         timedRange: EventTimeRange?,
     ): Boolean {
+        beforeWrite()
         added.add(SavedEvent(null, title, location, startTime, endTime, allDay, calendarId, timedRange))
         return saveResult
     }
@@ -71,11 +73,13 @@ class FakeCalendarRepository(
         allDay: Boolean,
         timedRange: EventTimeRange?,
     ): Boolean {
+        beforeWrite()
         updated.add(SavedEvent(id, title, location, startTime, endTime, allDay, null, timedRange))
         return saveResult
     }
 
     override suspend fun deleteEvent(id: String): Boolean {
+        beforeWrite()
         deleted.add(id)
         return saveResult
     }

@@ -32,7 +32,7 @@ import org.koin.compose.viewmodel.koinViewModel
 import presentation.components.PaperBackground
 import presentation.components.noRippleClickable
 import presentation.theme.DMSans24Medium60
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 
 @Composable
 fun Onboarding(dismiss: () -> Unit, openSettings: () -> Unit) {

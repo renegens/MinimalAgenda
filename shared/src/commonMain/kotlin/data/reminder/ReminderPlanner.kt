@@ -15,6 +15,10 @@ data class ScheduledReminder(
     val endSeconds: Long,
 )
 
+/** Apply today's privacy preference at delivery, even if the reminder originally included the event name. */
+fun ScheduledReminder.bodyForDelivery(privateNotifications: Boolean, currentTitle: String? = null): String =
+    if (privateNotifications) "You have an upcoming event." else currentTitle ?: body
+
 /** Start and end of an event, epoch seconds. */
 data class EventTimes(val startSeconds: Long, val endSeconds: Long)
 

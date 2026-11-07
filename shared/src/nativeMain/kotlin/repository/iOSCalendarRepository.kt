@@ -7,7 +7,6 @@ import data.calendar.CalendarMath
 import kotlinx.cinterop.ExperimentalForeignApi
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.IO
-import kotlinx.coroutines.suspendCancellableCoroutine
 import kotlinx.coroutines.withContext
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -23,7 +22,6 @@ import platform.Foundation.dateWithTimeIntervalSince1970
 import platform.Foundation.timeIntervalSince1970
 import platform.toEKEventDate
 import platform.uses24HourClock
-import kotlin.coroutines.resume
 import kotlin.time.ExperimentalTime
 
 @Suppress("ClassName")
@@ -32,35 +30,18 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
     private val eventStore = eventKit.eventStore
 
-    override suspend fun getCalendars(): List<CalendarEntity> {
-        return withContext(Dispatchers.IO) {
-            suspendCancellableCoroutine { continuation ->
-                eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
-                    if (granted) {
-                        val calendars =
-                            eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent).map {
-                                (it as EKCalendar).let { calendar ->
-                                    CalendarEntity(
-                                        id = calendar.calendarIdentifier,
-                                        name = calendar.title,
-                                        accountName = "",
-                                        accountType = calendar.type.name
-                                    )
-
-                                }
-                            }
-
-                        if (calendars.isEmpty()) {
-                            continuation.resume(emptyList())
-                        } else {
-                            continuation.resume(calendars)
-                        }
-
-                    } else {
-                        continuation.resume(emptyList())
-                    }
-                }
-            }
+    // Permission requests belong to CalendarPermissionHandler (including the pre-iOS-17 API).
+    override suspend fun getCalendars(): List<CalendarEntity> = withContext(Dispatchers.IO) {
+        eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent).map { value ->
+            val calendar = value as EKCalendar
+            CalendarEntity(
+                id = calendar.calendarIdentifier,
+                name = calendar.title,
+                accountName = "",
+                accountType = calendar.type.name,
+                canWrite = calendar.allowsContentModifications,
+                isPrimary = calendar.calendarIdentifier == eventStore.defaultCalendarForNewEvents()?.calendarIdentifier,
+            )
         }
     }
 
@@ -85,19 +66,8 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         return threeYearsInFuture ?: NSDate()
     }
 
-    override suspend fun getEvent(id: String): EventEntity? {
-        return withContext(Dispatchers.IO) {
-            suspendCancellableCoroutine { continuation ->
-                val ekEvent = eventStore.eventWithIdentifier(id)
-                if (ekEvent == null) {
-                    continuation.resume(null)
-                    return@suspendCancellableCoroutine
-                }
-                val event = ekEvent.toEntity(TimeZone.currentSystemDefault(), uses24HourClock())
-
-                continuation.resume(event)
-            }
-        }
+    override suspend fun getEvent(id: String): EventEntity? = withContext(Dispatchers.IO) {
+        eventStore.eventWithIdentifier(id)?.toEntity(TimeZone.currentSystemDefault(), uses24HourClock())
     }
 
     @OptIn(ExperimentalForeignApi::class)
@@ -111,37 +81,22 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
         timedRange: EventTimeRange?,
     ): Boolean {
         return withContext(Dispatchers.IO) {
-            suspendCancellableCoroutine { continuation ->
-                try {
-                    val calendar = eventStore.defaultCalendarForNewEvents()
-
-                    if (calendar == null) {
-                        continuation.resume(false)
-                        return@suspendCancellableCoroutine
-                    }
-
-                    val newEvent = EKEvent.eventWithEventStore(eventStore)
-
-                    newEvent.title = title
-                    newEvent.location = location
-                    newEvent.startDate = if (!allDay && timedRange != null)
-                        NSDate.dateWithTimeIntervalSince1970(timedRange.start.epochSeconds.toDouble())
-                    else startTime.toEKEventDate()
-                    newEvent.endDate = if (!allDay && timedRange != null)
-                        NSDate.dateWithTimeIntervalSince1970(timedRange.end.epochSeconds.toDouble())
-                    else (if (allDay) CalendarMath.allDayEndExclusive(endTime) else endTime).toEKEventDate()
-                    newEvent.allDay = allDay
-                    newEvent.calendar = calendar
-
-                    eventStore.saveEvent(
-                        event = newEvent, span = EKSpan.EKSpanThisEvent, commit = true, error = null
-                    )
-
-                    continuation.resume(true)
-                } catch (e: Exception) {
-                    continuation.resume(false)
-                }
-            }
+            val calendar = if (calendarId == null) eventStore.defaultCalendarForNewEvents()
+                else eventStore.calendarWithIdentifier(calendarId)
+            if (calendar == null || !calendar.allowsContentModifications) return@withContext false
+            val newEvent = EKEvent.eventWithEventStore(eventStore)
+            newEvent.calendar = calendar
+            newEvent.allDay = allDay
+            newEvent.title = title
+            newEvent.location = location
+            newEvent.startDate = if (!allDay && timedRange != null)
+                NSDate.dateWithTimeIntervalSince1970(timedRange.start.epochSeconds.toDouble())
+            else startTime.toEKEventDate()
+            newEvent.endDate = if (!allDay && timedRange != null)
+                NSDate.dateWithTimeIntervalSince1970(timedRange.end.epochSeconds.toDouble())
+            else (if (allDay) CalendarMath.allDayEndExclusive(endTime) else endTime).toEKEventDate()
+            // EventKit returns false (with NSError), rather than throwing, when saving fails.
+            eventStore.saveEvent(newEvent, EKSpan.EKSpanThisEvent, true, null)
         }
     }
 
@@ -158,25 +113,14 @@ class iOSCalendarRepository(eventKit: EventKit) : CalendarRepository {
 
     override suspend fun deleteEvent(id: String): Boolean = false
 
-    override suspend fun getEvents(durationInMonths: Int): List<EventEntity> {
-        return withContext(Dispatchers.IO) {
-            suspendCancellableCoroutine { continuation ->
-
-                val timeZone = TimeZone.currentSystemDefault()
-                val uses24HourClock = uses24HourClock()
-                val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
-                val startDate = nsStartDateForCalendar(durationInMonths)
-                val endDate = nsEndDateForCalendar(durationInMonths)
-                val predicate =
-                    eventStore.predicateForEventsWithStartDate(startDate, endDate, calendars)
-                val events = eventStore.eventsMatchingPredicate(predicate).map { ekEvent ->
-                    ekEvent as EKEvent
-                    ekEvent.toEntity(timeZone, uses24HourClock)
-                }
-
-                continuation.resume(events)
-            }
-        }
+    override suspend fun getEvents(durationInMonths: Int): List<EventEntity> = withContext(Dispatchers.IO) {
+        val timeZone = TimeZone.currentSystemDefault()
+        val clock24 = uses24HourClock()
+        val calendars = eventStore.calendarsForEntityType(EKEntityType.EKEntityTypeEvent)
+        val predicate = eventStore.predicateForEventsWithStartDate(
+            nsStartDateForCalendar(durationInMonths), nsEndDateForCalendar(durationInMonths), calendars,
+        )
+        eventStore.eventsMatchingPredicate(predicate).map { (it as EKEvent).toEntity(timeZone, clock24) }
     }
 
     private fun EKEvent.toEntity(zone: TimeZone, uses24HourClock: Boolean): EventEntity {

@@ -11,7 +11,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import kotlinx.coroutines.flow.collectLatest
 import navigation.Screen
-import org.jetbrains.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.Preview
 import org.koin.compose.KoinContext
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
@@ -27,6 +27,8 @@ import presentation.theme.AppTheme
 fun App() {
         val viewModel: AppViewModel = koinViewModel()
         val state by viewModel.uiState.collectAsState()
+        // Resolve the initial route asynchronously before creating the navigation graph.
+        if (state.isLoading) return
         val navController = rememberNavController()
         val editorRequests: EventEditorRequests = koinInject()
         val start = if (state.shouldShowOnboarding) {
@@ -47,9 +49,10 @@ fun App() {
         LaunchedEffect(Unit) {
             viewModel.effect.collectLatest {
                 when (it) {
-                    AppContract.Effect.CloseOnboardingAndGoToCalendar -> navController.navigate(
-                        Screen.Agenda.route
-                    )
+                    AppContract.Effect.CloseOnboardingAndGoToCalendar -> navController.navigate(Screen.Agenda.route) {
+                        popUpTo(Screen.Onboarding.route) { inclusive = true }
+                        launchSingleTop = true
+                    }
 
                     AppContract.Effect.OpenDeviceAppSettings -> openSettings()
                 }

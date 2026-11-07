@@ -75,6 +75,14 @@ fun SettingsScreen(
         Spacer(modifier = Modifier.height(24.dp))
 
         if (state.isLoading) return
+        if (state.saveFailed) {
+            Text(
+                "Couldn't save your preference. Please try again.",
+                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp),
+                color = MaterialTheme.colorScheme.primary,
+                style = iosBody,
+            )
+        }
 
         // --- SECTION 1: CALENDAR CONNECTION ---
         SettingsItem {

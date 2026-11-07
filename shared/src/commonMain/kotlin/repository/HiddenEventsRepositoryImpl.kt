@@ -3,41 +3,34 @@ package repository
 import data.local.HiddenEventEntity
 import data.local.HiddenEventsLocalDataSource
 import domain.model.AgendaEvent
-import kotlinx.serialization.encodeToString
+import kotlinx.serialization.SerializationException
 import kotlinx.serialization.json.Json
 
 class HiddenEventsRepositoryImpl(private val hiddenEventsLocalDataSource: HiddenEventsLocalDataSource) :
     HiddenEventsRepository {
 
-    override suspend fun getEvents(): List<HiddenEventEntity> {
-        val json = hiddenEventsLocalDataSource.getEvents()
-        if (json.isEmpty()) return emptyList()
-        return Json.decodeFromString<List<HiddenEventEntity>>(json)
+    override suspend fun getEvents(): List<HiddenEventEntity> =
+        HiddenEventsJson.decode(hiddenEventsLocalDataSource.getEvents())
+
+    override suspend fun hideEvent(agendaEvent: AgendaEvent) = update(agendaEvent) { events, event -> events + event }
+    override suspend fun unhiddenEvent(agendaEvent: AgendaEvent) = update(agendaEvent) { events, event -> events - event }
+    override suspend fun toggleEventVisibility(agendaEvent: AgendaEvent) = update(agendaEvent) { events, event ->
+        if (event in events) events - event else events + event
     }
 
-    override suspend fun hideEvent(agendaEvent: AgendaEvent) {
-        val list = getEvents().toMutableList()
-        list.add(agendaEvent.toHiddenEventEntity())
-        val listToSave = Json.encodeToString(list)
-        hiddenEventsLocalDataSource.saveEvents(listToSave)
-    }
-
-    override suspend fun unhiddenEvent(agendaEvent: AgendaEvent) {
-        val list = getEvents().toMutableList()
-        list.remove(agendaEvent.toHiddenEventEntity())
-        val listToSave = Json.encodeToString(list)
-        hiddenEventsLocalDataSource.saveEvents(listToSave)
-    }
-
-    override suspend fun toggleEventVisibility(agendaEvent: AgendaEvent) {
-        val list = getEvents().toMutableList()
-        val hiddenEventEntity = agendaEvent.toHiddenEventEntity()
-        if (list.contains(hiddenEventEntity)) {
-            list.remove(hiddenEventEntity)
-        } else {
-            list.add(hiddenEventEntity)
+    private suspend fun update(event: AgendaEvent, transform: (Set<HiddenEventEntity>, HiddenEventEntity) -> Set<HiddenEventEntity>) {
+        hiddenEventsLocalDataSource.updateEvents { stored ->
+            HiddenEventsJson.encode(transform(HiddenEventsJson.decode(stored).toSet(), event.toHiddenEventEntity()).toList())
         }
-        val listToSave = Json.encodeToString(list)
-        hiddenEventsLocalDataSource.saveEvents(listToSave)
     }
+}
+
+internal object HiddenEventsJson {
+    private val json = Json { ignoreUnknownKeys = true }
+    fun decode(value: String): List<HiddenEventEntity> = try {
+        if (value.isBlank()) emptyList() else json.decodeFromString<List<HiddenEventEntity>>(value)
+    } catch (_: SerializationException) {
+        emptyList()
+    }
+    fun encode(value: List<HiddenEventEntity>): String = json.encodeToString(value)
 }

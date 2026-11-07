@@ -39,5 +39,5 @@ val nextHour: Int
     }
 
 @OptIn(ExperimentalTime::class)
-val currentLocalDateTime =
-    Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())
+val currentLocalDateTime
+    get() = Clock.System.now().toLocalDateTime(TimeZone.currentSystemDefault())

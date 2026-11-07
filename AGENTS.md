@@ -26,16 +26,17 @@ inaccessible during the work and was not edited. These local decisions are Accep
 
 ## Stack
 
-Versions live in `gradle/libs.versions.toml`.
+Versions live in `gradle/libs.versions.toml`. The [code audit](docs/code-audit-2026-11-07.md)
+records the Nov 2026 dependency update, compatibility ceilings, verification and remaining limits.
 
-- Kotlin 2.2.20, Compose Multiplatform 1.9.3, AGP 8.13.1, Gradle 8.13
-- Koin 4.1 for DI, AndroidX DataStore for settings, kotlinx-datetime 0.7.1, kotlinx-serialization
-- Navigation 2.9.2 and lifecycle 2.9.6 from JetBrains
+- Kotlin 2.4.21, Compose Multiplatform 1.12.2, AGP 9.3.1, Gradle 9.7.0
+- Koin 4.2.2 for DI, AndroidX DataStore 1.3.0 for settings, kotlinx-datetime 0.8.0, kotlinx-serialization 1.12.0
+- Navigation 2.10.0 and lifecycle 2.11.0 from JetBrains
 - Cupertino UI components (`io.github.schott12521:cupertino*` 2.3.1) are iOS-only dependencies in `nativeMain`.
   Android uses Material 3 through shared control wrappers; keep Cupertino imports out of common and Android code.
 - No billing, analytics or crash-reporting SDKs (decisions D10, D11)
 - iOS: static `ComposeApp` framework, no Swift packages. No CocoaPods.
-- Android: minSdk 26, compile/targetSdk 36, applicationId `eu.giant.agenda` for both flavors
+- Android: minSdk 26, compileSdk 37 / targetSdk 36, applicationId `eu.giant.agenda` for both flavors
 - `shared` uses the KMP Android library plugin (`com.android.kotlin.multiplatform.library`); compose resources keep
   the package `minimalagenda.composeapp.generated.resources` via `packageOfResClass`
 
@@ -139,7 +140,10 @@ iosApp/              Xcode project (SwiftUI host), runs :shared:embedAndSignAppl
 open iosApp/iosApp.xcodeproj                                           # iOS: build and run from Xcode
 ```
 
-Gradle needs JDK 21; it fails on JDK 25. The Android SDK path goes in `local.properties` (gitignored).
+Use JDK 21 (the pinned Java toolchain) and Android SDK 37. Java/Kotlin bytecode targets JVM 17.
+The Android SDK path goes in `local.properties` (gitignored). AGP uses built-in Kotlin in `androidApp`.
+AGP and Gradle stay within Kotlin’s published tested compatibility range; see the code audit report.
+iOS targets are device arm64 and Apple Silicon simulator arm64; current dependencies no longer publish Intel simulator variants.
 
 For `xcodebuild`, set `DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
 

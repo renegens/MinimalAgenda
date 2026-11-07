@@ -1,6 +1,8 @@
 package presentation.screens.add_event
 
 import data.calendar.CalendarEntity
+import kotlinx.coroutines.CompletableDeferred
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
@@ -200,5 +202,32 @@ class AddEventViewModelTest {
         val (start, end) = state.toStartAndEnd(TimeZone.UTC)
         assertEquals(LocalDateTime(2026, 3, 10, 23, 0), start)
         assertEquals(LocalDateTime(2026, 3, 11, 1, 0), end)
+    }
+
+    @Test
+    fun providerExceptionsLeaveTheEditorOpenForRetry() = runTest {
+        val repo = FakeCalendarRepository().apply { beforeWrite = { error("provider unavailable") } }
+        val vm = editVm(repo)
+        vm.setEvent(Event.OnSave)
+        assertTrue(vm.uiState.value.saveFailed)
+        assertFalse(vm.uiState.value.isSaving)
+        vm.setEvent(Event.OnDelete)
+        vm.setEvent(Event.OnConfirm)
+        assertTrue(vm.uiState.value.saveFailed)
+        assertFalse(vm.uiState.value.isSaving)
+    }
+
+    @Test
+    fun repeatedDeleteConfirmationWhileAWriteSuspendsDoesNotDeleteTwice() = runTest {
+        val gate = CompletableDeferred<Unit>()
+        val repo = FakeCalendarRepository().apply { beforeWrite = { gate.await() } }
+        val vm = editVm(repo)
+        vm.setEvent(Event.OnDelete)
+        vm.setEvent(Event.OnConfirm)
+        assertTrue(vm.uiState.value.isSaving)
+        vm.setEvent(Event.OnDelete)
+        vm.setEvent(Event.OnConfirm)
+        gate.complete(Unit)
+        assertEquals(listOf("7/1000"), repo.deleted)
     }
 }

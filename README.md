@@ -39,7 +39,12 @@ no donation link.
 
 ## Build
 
-Requirements: JDK 21 (Gradle fails on JDK 25) and the Android SDK (path in `local.properties`, which is gitignored).
+Requirements: JDK 21 and Android SDK 37 (path in `local.properties`, which is gitignored).
+The build pins Java toolchain 21 and targets JVM 17. Android supports API 26+, targeting API 36.
+
+Toolchain: Kotlin 2.4.21, Compose Multiplatform 1.12.2, AGP 9.3.1 and Gradle 9.7.0.
+AGP and Gradle follow Kotlin’s tested compatibility range. See [the code audit](docs/code-audit-2026-11-07.md)
+for dependency versions, fixes and verification.
 
 ```bash
 ./gradlew :androidApp:assemblePlayDebug :androidApp:assembleFossDebug   # debug APKs
@@ -50,7 +55,8 @@ Requirements: JDK 21 (Gradle fails on JDK 25) and the Android SDK (path in `loca
 ```
 
 iOS: open `iosApp/iosApp.xcodeproj` in Xcode (unsupported). For `xcodebuild`, set
-`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`.
+`DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer`. The supported build targets are arm64 iPhones
+and Apple Silicon simulators; current dependencies no longer provide Intel simulator variants.
 
 To check the Android UI on the project emulator:
 

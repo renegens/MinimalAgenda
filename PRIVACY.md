@@ -9,7 +9,8 @@ Minimal Agenda collects no data.
 - **Notifications:** notifications are used only for the event reminders you set. They are scheduled and shown
   locally on your device.
 - **Links:** the app opens a link in your browser only when you tap one. The app itself makes no network requests.
-- **Local settings:** your preferences (theme, colors, reminders) are stored on your device only.
+- **Local settings:** your preferences (theme, colors, reminders) are stored on your device only. Android app
+  backups and device transfers exclude this data, including saved reminder event names.
 
 Contact: ios@giant-solutions.eu
 

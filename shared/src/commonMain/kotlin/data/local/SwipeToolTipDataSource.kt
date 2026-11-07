@@ -3,7 +3,6 @@ package data.local
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import data.DataStore
-import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 
@@ -14,9 +13,7 @@ class SwipeToolTipDataSource(private val dataStore: DataStore) {
     }
 
     suspend fun get(): Boolean {
-        return dataStore.preferences.data.catch {
-           false
-        }.map {
+        return dataStore.preferences.data.recoverReadErrors().map {
             return@map it[booleanPreferencesKey(SWIPE_TOOLTIP)] ?: false
         }.first()
     }

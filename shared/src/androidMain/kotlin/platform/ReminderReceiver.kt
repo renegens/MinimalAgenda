@@ -8,6 +8,8 @@ import data.reminder.EventTimes
 import data.reminder.ReminderOutcome
 import data.reminder.ReminderPlanner
 import data.reminder.ScheduledReminderStore
+import data.reminder.bodyForDelivery
+import domain.use_case.GetSettingsUseCase
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -41,7 +43,8 @@ class ReminderReceiver : BroadcastReceiver() {
         val reminder = store.get(id) ?: return
         val now = Clock.System.now().epochSeconds
 
-        val instance = repository.getEvent(id)?.let { e ->
+        val instanceEvent = repository.getEvent(id)
+        val instance = instanceEvent?.let { e ->
             val start = e.startTime ?: return@let null
             EventTimes(start, e.endTime ?: start)
         }
@@ -49,7 +52,10 @@ class ReminderReceiver : BroadcastReceiver() {
 
         when (val outcome = ReminderPlanner.decide(reminder, instance, event, now)) {
             ReminderOutcome.Show -> {
-                ReminderNotifier(context).show(reminder)
+                val settings = koin.get<GetSettingsUseCase>()()
+                ReminderNotifier(context).show(reminder.copy(
+                    body = reminder.bodyForDelivery(settings.privateNotifications, instanceEvent?.title),
+                ))
                 store.remove(id)
             }
             ReminderOutcome.Drop -> store.remove(id)

@@ -102,7 +102,9 @@ class GetAllEventsUseCaseTest {
         val (first, middle, last) = events
         assertFalse(first.allDay)
         assertFalse(first.isLastDayInMultiDayEvent)
-        assertTrue(middle.allDay)
+        assertFalse(middle.allDay)
+        assertTrue(middle.displaysAllDay)
+        assertTrue(middle.isIntermediateDay)
         assertFalse(middle.isLastDayInMultiDayEvent)
         assertFalse(last.allDay)
         assertTrue(last.isLastDayInMultiDayEvent)
@@ -242,5 +244,32 @@ class GetAllEventsUseCaseTest {
         val result = run()
         assertEquals(listOf("ok"), result.agendaEvents.map { it.id })
         assertEquals("", result.agendaEvents.single().title)
+    }
+
+    @Test
+    fun editingAnIntermediateDayKeepsTheOriginalTimedRange() = runTest {
+        val end = day.plus(DatePeriod(days = 2))
+        calendarRepo.events = listOf(eventEntity(id = "long", start = at(day, 22), end = at(end, 8)))
+        val intermediate = run().agendaEvents[1]
+        val state = presentation.screens.add_event.initialEditorState(
+            presentation.screens.add_event.EventEditorRequest.Edit(intermediate),
+        )
+        assertFalse(state.allDay)
+        assertEquals(day.toEpochDays() * 86_400_000L, state.startDate)
+        assertEquals(34 * 3600L, state.durationInSeconds)
+    }
+
+    @Test
+    fun veryLongProviderEventIsExpandedOnlyInsideTheVisibleCalendar() = runTest {
+        calendarRepo.events = listOf(eventEntity(
+            id = "long", start = at(LocalDate(today.year - 100, 1, 1), 9),
+            end = at(LocalDate(today.year + 100, 1, 1), 10),
+        ))
+        val calendar = CalendarGenerator().calendar
+        val events = run().agendaEvents
+        assertEquals(calendar.size, events.size)
+        assertEquals(calendar.first().epochDay, events.first().epochDay)
+        assertEquals(calendar.last().epochDay, events.last().epochDay)
+        assertTrue(events.all { it.displaysAllDay && !it.allDay && !it.isLastDayInMultiDayEvent })
     }
 }

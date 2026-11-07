@@ -61,4 +61,11 @@ class SettingsMigrationTest {
     fun emptySettingsStillUseTheAppDefaults() {
         assertEquals(Settings(), SettingsJson.decode(""))
     }
+
+    @Test
+    fun damagedOrUnknownSettingsDoNotCrashStartup() {
+        for (json in listOf("{", "null", "[]", "{\"appTheme\":\"RemovedTheme\"}", " ")) {
+            assertEquals(Settings(), SettingsJson.decode(json))
+        }
+    }
 }

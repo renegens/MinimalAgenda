@@ -3,6 +3,7 @@ package presentation.screens.calendar
 import androidx.lifecycle.viewModelScope
 import domain.model.AgendaEvent
 import domain.use_case.CalendarGenerator
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import presentation.base.BaseViewModel
 import presentation.screens.calendar.CalendarContract.*
@@ -24,6 +25,8 @@ class CalendarViewModel(
     private val hasCalendarsUseCase: HasCalendarsUseCase,
     private val createLocalCalendarUseCase: CreateLocalCalendarUseCase,
 ) : BaseViewModel<Event, State, Effect>() {
+
+    private var loadJob: Job? = null
 
     override fun createInitialState() = State()
 
@@ -60,7 +63,7 @@ class CalendarViewModel(
             Event.OnRequestCalendarPermissionClicked -> viewModelScope.launch {
 
                 when (val state = permissionHandler.requestCalendarPermission()) {
-                    CalendarPermissionHandler.State.FullAccess -> loadEventsFastAndSlow(scrollToNow = true)
+                    CalendarPermissionHandler.State.FullAccess -> loadData(scrollToNow = true)
 
                     else -> setState {
                         copy(
@@ -71,7 +74,7 @@ class CalendarViewModel(
             }
 
             Event.OnCreateLocalCalendarClicked -> viewModelScope.launch {
-                if (createLocalCalendarUseCase()) loadEventsFastAndSlow(scrollToNow = true)
+                if (createLocalCalendarUseCase()) loadData(scrollToNow = true)
             }
 
             is Event.ToggleEventVisibility -> toggleEventVisibility(event.agendaEvent)
@@ -85,15 +88,16 @@ class CalendarViewModel(
         }
     }
 
-    private fun loadData() {
-        viewModelScope.launch {
+    private fun loadData(scrollToNow: Boolean? = null) {
+        loadJob?.cancel()
+        loadJob = viewModelScope.launch {
             val eventsUIList = uiState.value.flatDaysAndEvents
             val calendarPermissionState = permissionHandler.getPermissionState()
             val noCalendars = calendarPermissionState == CalendarPermissionHandler.State.FullAccess && !hasCalendarsUseCase()
 
             if (eventsUIList.isEmpty()) {
                 loadEventsFastAndSlow(
-                    scrollToNow = true
+                    scrollToNow = scrollToNow ?: true
                 )
                 return@launch
             }
@@ -108,7 +112,7 @@ class CalendarViewModel(
                             agendaEvents = slowIteration.agendaEvents,
                             isDemoMode = calendarPermissionState != CalendarPermissionHandler.State.FullAccess,
                             noCalendars = noCalendars,
-                            scrollToNow = eventsUIList.size != slowIteration.dayListViewTypes.size,
+                            scrollToNow = scrollToNow ?: (eventsUIList.size != slowIteration.dayListViewTypes.size),
                         )
                     }
                 }
@@ -117,19 +121,8 @@ class CalendarViewModel(
     }
 
     private fun reloadData() {
-        viewModelScope.launch {
-            when (val slowIteration = getAllEventsUseCase(24)) {
-                is GetAllEventsUseCase.State.Success -> {
-                    setState {
-                        copy(
-                            flatDaysAndEvents = slowIteration.dayListViewTypes,
-                            agendaEvents = slowIteration.agendaEvents,
-                            scrollToNow = false
-                        )
-                    }
-                }
-            }
-        }
+        // Refresh the complete calendar state, including permission/demo/no-calendar flags.
+        loadData(scrollToNow = false)
     }
 
     private suspend fun loadEventsFastAndSlow(scrollToNow: Boolean) {
@@ -171,7 +164,15 @@ class CalendarViewModel(
                     val events = replaceEvent(
                         uiState.value.flatDaysAndEvents, agendaEvent, state.agendaEvent
                     )
-                    setState { copy(flatDaysAndEvents = events, scrollToNow = false) }
+                    setState {
+                        copy(
+                            flatDaysAndEvents = events,
+                            agendaEvents = agendaEvents.map {
+                                if (it.id == agendaEvent.id && it.epochDay == agendaEvent.epochDay) state.agendaEvent else it
+                            },
+                            scrollToNow = false,
+                        )
+                    }
                 }
             }
         }
@@ -195,10 +196,9 @@ class CalendarViewModel(
             val previousPermissionState = uiState.value.calendarPermission
             val currentPermissionState = permissionHandler.getPermissionState()
 
-            // If permission changed from denied/not determined to full access, reload events
-            if (previousPermissionState != CalendarPermissionHandler.State.FullAccess 
-                && currentPermissionState == CalendarPermissionHandler.State.FullAccess) {
-                loadEventsFastAndSlow(scrollToNow = true)
+            // Reload for grants and revocations so stale provider events cannot remain visible.
+            if (previousPermissionState != currentPermissionState) {
+                loadData(scrollToNow = true)
             } else {
                 // Update permission state even if it didn't change to full access
                 setState { copy(calendarPermission = currentPermissionState) }

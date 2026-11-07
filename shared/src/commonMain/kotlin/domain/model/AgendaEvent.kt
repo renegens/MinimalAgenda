@@ -22,8 +22,11 @@ data class AgendaEvent(
     val endLocalDateTime: LocalDateTime,
     val uses24HourClock: Boolean,
     val isMultiDay: Boolean,
-    val isLastDayInMultiDayEvent: Boolean = false
+    val isLastDayInMultiDayEvent: Boolean = false,
+    /** Display a timed event as covering an entire intermediate day without changing its calendar type. */
+    val isIntermediateDay: Boolean = false,
 ) {
+    val displaysAllDay: Boolean get() = allDay || isIntermediateDay
     fun toHiddenEventEntity() = HiddenEventEntity(eventId = id, epochDay = epochDay!!)
 
     fun idWithoutRID() = id.substringBeforeLast("/RID=")

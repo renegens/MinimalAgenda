@@ -4,6 +4,7 @@ import data.reminder.ScheduledReminder
 import data.reminder.ScheduledReminderStore
 import domain.use_case.GetSettingsUseCase
 import repository.AndroidCalendarRepository
+import kotlinx.coroutines.CancellationException
 import kotlin.time.Clock
 
 /** Schedules an AlarmManager alarm and persists the reminder so it survives reboots and can be re-checked. */
@@ -36,6 +37,8 @@ class AndroidNotificationHandler(
         store.save(reminder)
         scheduler.schedule(reminder)
         true
+    } catch (cancelled: CancellationException) {
+        throw cancelled
     } catch (_: Exception) {
         false
     }

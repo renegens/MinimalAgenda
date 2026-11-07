@@ -16,14 +16,8 @@ class iOSCalendarPermissionHandler(eventKit: EventKit) : CalendarPermissionHandl
 
     override suspend fun requestCalendarPermission(): CalendarPermissionHandler.State {
         return suspendCancellableCoroutine { continuation ->
-            val system =
-                UIDevice.currentDevice.systemVersion.substring(startIndex = 0, endIndex = 2)
-                    .toIntOrNull()
-            if (system == null) {
-                continuation.resumeWith(Result.success(CalendarPermissionHandler.State.NotDetermined))
-            }
-
-            if (system!! >= iOS_17) {
+            val system = UIDevice.currentDevice.systemVersion.substringBefore('.').toIntOrNull() ?: 0
+            if (system >= iOS_17) {
                 eventStore.requestFullAccessToEventsWithCompletion { granted, error ->
                     if (granted) {
                         continuation.resumeWith(Result.success(CalendarPermissionHandler.State.FullAccess))

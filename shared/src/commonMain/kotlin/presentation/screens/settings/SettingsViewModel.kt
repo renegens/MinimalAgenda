@@ -7,6 +7,9 @@ import domain.model.Settings
 import domain.use_case.GetSettingsUseCase
 import domain.use_case.SaveSettingsUseCase
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
+import okio.IOException
 import data.DONATE_URL
 import data.SUPPORT_ISSUES_URL
 import platform.AppConfig
@@ -25,6 +28,7 @@ class SettingsViewModel(
     appConfig: AppConfig
 ) : BaseViewModel<Event, State, Effect>() {
 
+    private val settingsWriteMutex = Mutex()
     private val donateEnabled = appConfig.showDonate
     private val focusModeSetupEnabled = appConfig.showFocusModeSetup
 
@@ -90,35 +94,31 @@ class SettingsViewModel(
         setState { copy(calendarPermission = permissionState) }
     }
 
-    private fun setPrivateNotification(isChecked: Boolean) {
-        viewModelScope.launch {
-            val currentSettings = uiState.value.toSettings()
-            saveSettingsUseCase.invoke(currentSettings.copy(privateNotifications = isChecked))
-            setState { copy(privateNotifications = isChecked) }
-        }
-    }
+    private fun setPrivateNotification(isChecked: Boolean) = updateSettings { copy(privateNotifications = isChecked) }
+    private fun setAppThemeMode(mode: AppThemeMode) = updateSettings { copy(appThemeMode = mode) }
+    private fun setAppColor(color: AppColor) = updateSettings { copy(appColor = color) }
+    private fun setNotificationTime(time: Int) = updateSettings { copy(notificationTimeInMinutes = time) }
 
-    private fun setAppThemeMode(appThemeMode: AppThemeMode) {
+    /** Queue complete snapshots so two quick changes cannot overwrite one another while a write suspends. */
+    private fun updateSettings(change: Settings.() -> Settings) {
         viewModelScope.launch {
-            val currentSettings = uiState.value.toSettings()
-            saveSettingsUseCase.invoke(currentSettings.copy(appThemeMode = appThemeMode))
-            setState { copy(appThemeMode = appThemeMode) }
-        }
-    }
-
-    private fun setAppColor(appColor: AppColor) {
-        viewModelScope.launch {
-            val currentSettings = uiState.value.toSettings()
-            saveSettingsUseCase.invoke(currentSettings.copy(appColor = appColor))
-            setState { copy(appColor = appColor) }
-        }
-    }
-
-    private fun setNotificationTime(time: Int) {
-        viewModelScope.launch {
-            val currentSettings = uiState.value.toSettings()
-            saveSettingsUseCase.invoke(currentSettings.copy(notificationTimeInMinutes = time))
-            setState { copy(notificationTime = time) }
+            settingsWriteMutex.withLock {
+                val next = uiState.value.toSettings().change()
+                try {
+                    saveSettingsUseCase(next)
+                    setState {
+                        copy(
+                            appThemeMode = next.appThemeMode,
+                            appColor = next.appColor,
+                            privateNotifications = next.privateNotifications,
+                            notificationTime = next.notificationTimeInMinutes,
+                            saveFailed = false,
+                        )
+                    }
+                } catch (_: IOException) {
+                    setState { copy(saveFailed = true) }
+                }
+            }
         }
     }
 

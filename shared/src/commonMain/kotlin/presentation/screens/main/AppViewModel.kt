@@ -5,11 +5,9 @@ import data.local.LaunchCounterDataSource
 import domain.use_case.AppThemeListenerUseCase
 import presentation.base.BaseViewModel
 import presentation.screens.main.AppContract.*
-import kotlinx.coroutines.TimeoutCancellationException
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
-import kotlinx.coroutines.withTimeout
+import okio.IOException
 import platform.EventEditViewHandler
 import platform.ModalPresenter
 import kotlinx.datetime.LocalDate
@@ -23,18 +21,13 @@ class AppViewModel(
 
     init {
         viewModelScope.launch {
-            runBlocking {
-                try {
-                    withTimeout(1000L) {
-                        if (launchCounterDataSource.getCount() == 0) {
-                            setState { copy(shouldShowOnboarding = true) }
-                        }
-                        launchCounterDataSource.increment()
-                    }
-                } catch (e: TimeoutCancellationException) {
-                    println("Task timed out: ${e.message}")
-                }
+            val firstLaunch = launchCounterDataSource.getCount() == 0
+            try {
+                launchCounterDataSource.increment()
+            } catch (_: IOException) {
+                // A temporarily unavailable preferences file must not block opening the app.
             }
+            setState { copy(isLoading = false, shouldShowOnboarding = firstLaunch) }
             appThemeListenerUseCase().collectLatest {
                 setState { copy(appTheme = it) }
             }
