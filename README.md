@@ -79,7 +79,7 @@ Flavors: `play` and `foss` (they differ only by `BuildConfig.SHOW_DONATE`).
 shared/       KMP library: shared UI, domain and data code; platform actuals; builds the iOS ComposeApp framework
 androidApp/   Android app (MainActivity, manifest, resources), flavors play and foss
 iosApp/       Xcode project (SwiftUI host), unsupported
-fastlane/     F-Droid / IzzyOnDroid store metadata
+fastlane/     store metadata and images (F-Droid, IzzyOnDroid, Google Play)
 .github/      CI, release workflows and issue templates
 docs/         accepted launch-polish decisions
 ```
@@ -95,11 +95,18 @@ them, release builds are unsigned and the build still succeeds:
 `MINIMAL_AGENDA_KEYSTORE` (path), `MINIMAL_AGENDA_KEYSTORE_PASSWORD`, `MINIMAL_AGENDA_KEY_ALIAS`, `MINIMAL_AGENDA_KEY_PASSWORD`
 
 Pushing a tag such as `v1.2.3` runs `.github/workflows/release.yml`, which runs the tests, builds the signed
-FOSS APK and the Play AAB, and creates a GitHub Release with the APK attached. The AAB is kept only as a
-workflow artifact; upload it to Google Play by hand. `versionName` is the tag without the leading `v`, and
-`versionCode` is `major*10000 + minor*100 + patch` (v1.2.3 gives 10203).
+FOSS APK and the Play AAB, and creates a GitHub Release with the APK attached. When the
+`PLAY_SERVICE_ACCOUNT_JSON` secret is set, it also uploads the AAB to Google Play (internal track, draft by
+default). The AAB is always kept as a workflow artifact as well. `versionName` is the tag without the leading
+`v`, and `versionCode` is `major*10000 + minor*100 + patch` (v1.2.3 gives 10203). Tags with a suffix
+(`v1.2.3-rc1`) become GitHub pre-releases and are not uploaded to Google Play, since the suffix does not
+change `versionCode`.
 
-Repository secrets required by the workflow:
+Release notes for Google Play (and F-Droid/IzzyOnDroid) come from
+`fastlane/metadata/android/en-US/changelogs/<versionCode>.txt` (at most 500 characters). Add one before
+tagging.
+
+Repository secrets and variables used by the workflow:
 
 | Secret | Content |
 | --- | --- |
@@ -107,6 +114,14 @@ Repository secrets required by the workflow:
 | `KEYSTORE_PASSWORD` | keystore password |
 | `KEY_ALIAS` | key alias |
 | `KEY_PASSWORD` | key password |
+| `PLAY_SERVICE_ACCOUNT_JSON` | optional: Google Play service account JSON key; enables the Play upload |
+
+| Variable | Default | Content |
+| --- | --- | --- |
+| `PLAY_TRACK` | `internal` | Play track: `internal`, `alpha`, `beta` or `production` |
+| `PLAY_RELEASE_STATUS` | `draft` | `draft` or `completed`; Play accepts only `draft` until the app is published once |
+
+The full first-release checklist is in [docs/release-checklist.md](docs/release-checklist.md).
 
 `.github/workflows/ci.yml` runs the Android host tests and debug builds on every push to `main`.
 

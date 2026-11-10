@@ -169,7 +169,12 @@ and APK contents when distinguishing metadata from packaged Android dependencies
   Never commit a keystore (`*.jks`, `*.keystore` are gitignored).
 - `-PversionName=... -PversionCode=...` override the defaults in `androidApp/build.gradle.kts`.
 - Pushing a `v*` tag runs `.github/workflows/release.yml` (tests, signed FOSS APK attached to a GitHub Release,
-  Play AAB as a workflow artifact). `ci.yml` runs tests and debug builds on `main`. Details in README.
+  Play AAB as a workflow artifact, and uploaded to Google Play when `PLAY_SERVICE_ACCOUNT_JSON` is set).
+  `ci.yml` runs tests and debug builds on `main`. Details in README; first-release steps in
+  `docs/release-checklist.md`.
+- Every release needs `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt` (≤ 500 characters).
+  Store images live in `fastlane/metadata/android/en-US/images/`; Play screenshots must be at most 2:1
+  (capture with `adb -s emulator-5554 shell wm size 1080x2160`, then `wm size reset`).
 
 ## Working rules
 

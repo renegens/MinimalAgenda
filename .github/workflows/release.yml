@@ -64,7 +64,51 @@ jobs:
       - name: Create GitHub Release with FOSS APK
         env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release create "$GITHUB_REF_NAME" "dist/MinimalAgenda-${VERSION_NAME}.apk" --generate-notes --title "$GITHUB_REF_NAME"
+        run: |
+          # Tags with a suffix (v1.2.0-rc1) are marked as pre-releases.
+          PRERELEASE=""
+          [[ "$VERSION_NAME" == *-* ]] && PRERELEASE="--prerelease"
+          gh release create "$GITHUB_REF_NAME" "dist/MinimalAgenda-${VERSION_NAME}.apk" \
+            --generate-notes --title "$GITHUB_REF_NAME" $PRERELEASE
+
+      # Google Play upload. Skipped until the PLAY_SERVICE_ACCOUNT_JSON secret exists, and for suffixed tags
+      # (a suffix does not change versionCode, so v1.2.0-rc1 and v1.2.0 could not both be uploaded).
+      - name: Check Google Play upload
+        id: play
+        env:
+          PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+        run: |
+          if [[ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]]; then
+            echo "::notice::PLAY_SERVICE_ACCOUNT_JSON is not set; upload the AAB artifact to Google Play by hand."
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$VERSION_NAME" == *-* ]]; then
+            echo "::notice::Pre-release tag; not uploading to Google Play."
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "upload=true" >> "$GITHUB_OUTPUT"
+          fi
+          # Play release notes come from the F-Droid changelog for this versionCode (max 500 characters).
+          NOTES="fastlane/metadata/android/en-US/changelogs/${VERSION_CODE}.txt"
+          mkdir -p dist/whatsnew
+          if [[ -f "$NOTES" ]]; then
+            cp "$NOTES" dist/whatsnew/whatsnew-en-US
+          else
+            echo "::warning::No changelog at $NOTES; the Play release has no release notes."
+          fi
+
+      - name: Upload Play AAB to Google Play
+        if: steps.play.outputs.upload == 'true'
+        uses: r0adkll/upload-google-play@v1.1.5
+        with:
+          serviceAccountJsonPlainText: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          packageName: eu.giant.agenda
+          releaseFiles: dist/MinimalAgenda-${{ env.VERSION_NAME }}-play.aab
+          # Repository variables: PLAY_TRACK (internal, alpha, beta, production) and PLAY_RELEASE_STATUS
+          # (draft, completed). Keep draft until the app has been published once: Google Play only accepts
+          # draft releases for an app that has never been published.
+          track: ${{ vars.PLAY_TRACK || 'internal' }}
+          status: ${{ vars.PLAY_RELEASE_STATUS || 'draft' }}
+          whatsNewDirectory: ${{ hashFiles('dist/whatsnew/whatsnew-en-US') != '' && 'dist/whatsnew' || '' }}
 
       - name: Remove keystore
         if: always()

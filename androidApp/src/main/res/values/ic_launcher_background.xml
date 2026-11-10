@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Paper color of the launcher art, filling the adaptive icon around the inset art. -->
+    <color name="ic_launcher_background">#F4F1EC</color>
+</resources>
