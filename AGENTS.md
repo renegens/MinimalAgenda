@@ -92,7 +92,7 @@ iosApp/              Xcode project (SwiftUI host), runs :shared:embedAndSignAppl
 
 ## Android plans (accepted in the decisions doc, 2026-11-05)
 
-- Play build is paid upfront (2.49€), so there is no billing code anywhere. No analytics or crash SDKs in any build.
+- Play build is paid upfront (2.99 € shown in eurozone stores, changed from 2.49 € on 2026-11-11), so there is no billing code anywhere. No analytics or crash SDKs in any build.
 - Modules `shared/` + `androidApp/` + `iosApp/` (done). `androidApp` has flavors `play` and `foss` that differ
   only by `BuildConfig.SHOW_DONATE` (true in `foss`; no donation links in `play`).
 - Both flavors use applicationId `eu.giant.agenda`, signed with the same key. minSdk 26.
@@ -173,8 +173,9 @@ and APK contents when distinguishing metadata from packaged Android dependencies
   `ci.yml` runs tests and debug builds on `main`. Details in README; first-release steps in
   `docs/release-checklist.md`.
 - Every release needs `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt` (≤ 500 characters).
-  Store images live in `fastlane/metadata/android/en-US/images/`; Play screenshots must be at most 2:1
-  (capture with `adb -s emulator-5554 shell wm size 1080x2160`, then `wm size reset`).
+  Store images live in `fastlane/metadata/android/en-US/images/`; Play phone screenshots must be 9:16.
+  `phoneScreenshots/*.png` are 1080×1920 composites (headline, paper background, framed device) built from raw
+  captures taken with `adb -s emulator-5554 shell wm size 1080x2160`, then `wm size reset`.
 
 ## Working rules
 

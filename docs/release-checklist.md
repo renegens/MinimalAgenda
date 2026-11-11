@@ -28,7 +28,8 @@ throwaway key. The steps below need your accounts, keys or decisions.
 
 1. Create the app: name "Minimal Agenda", default language English (United States), **App**, **Paid**.
    A paid app needs a payments profile (merchant account) linked to the developer account.
-2. Set the price to 2.49 € (Monetize > Products > App pricing).
+2. Set the price to 2.99 € (Monetize > Products > App pricing). Play adds VAT to the price you enter, so check that
+   eurozone countries show 2.99 € and edit outliers per country.
 3. **App signing:** keep FOSS and Play builds on the same signature by choosing to use your own app signing
    key ("Export and upload a key from Java keystore", using Google's PEPK tool) instead of a Google-generated
    key. If Google generates the key, Play installs and GitHub/IzzyOnDroid APKs cannot update each other.
@@ -43,7 +44,7 @@ throwaway key. The steps below need your accounts, keys or decisions.
      answer the declaration if Play Console asks for one
 5. Store listing: use the texts below and upload from `fastlane/metadata/android/en-US/images/`:
    `icon.png` (512×512), `featureGraphic.png` (1024×500, a draft, replace if you want) and
-   `phoneScreenshots/*.png` (1080×2160).
+   `phoneScreenshots/*.png` (1080×1920, 9:16).
 6. **Upload the first AAB by hand.** Google Play's API cannot create the first release of a new app. Take the
    AAB from the `play-release-aab` artifact of the release workflow run (or build it locally with the signing
    variables set: `./gradlew :androidApp:bundlePlayRelease -PversionName=1.0.0 -PversionCode=10000`) and
