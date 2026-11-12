@@ -11,9 +11,9 @@ device's own calendars. It is a Kotlin Multiplatform project with a shared Compo
 
 - **iOS:** was shipped (now removed from the App Store; kept in the repo as unsupported) and complete (EventKit, native event editor and pickers, local notifications,
   onboarding, demo mode, multi-day events).
-- **Android:** feature-complete, not yet released. Reads real calendars (`CalendarContract.Instances`), offers a
+- **Android:** released on Google Play and GitHub Releases (1.0.1, 2026-11-12). Reads real calendars (`CalendarContract.Instances`), offers a
   device-only calendar when none exist, adds/edits/deletes events in the shared editor, and schedules per-event
-  reminders. Release prep (rename, license, signing, CI) is done; see "Release" below.
+  reminders. See "Release" below for how to ship a new version.
 
 Decisions and open questions are tracked in the
 "MinimalAgenda — Android Support Decisions" doc: https://claude.ai/artifact/HjjwoK4A95C76Hm3YHXtTe
@@ -176,6 +176,31 @@ and APK contents when distinguishing metadata from packaged Android dependencies
   Store images live in `fastlane/metadata/android/en-US/images/`; Play phone screenshots must be 9:16.
   `phoneScreenshots/*.png` are 1080×1920 composites (headline, paper background, framed device) built from raw
   captures taken with `adb -s emulator-5554 shell wm size 1080x2160`, then `wm size reset`.
+- Released on Google Play (production, 2.99 €) and GitHub Releases, both at 1.0.1 (10001) since 2026-11-12.
+  Keep both on the same version: one tag publishes both. Repository variables `PLAY_TRACK=production` and
+  `PLAY_RELEASE_STATUS=completed` make the workflow roll out to Play production (after Google's review).
+
+### Making a release (only when the user asks)
+
+1. Pick the next version: `vMAJOR.MINOR.PATCH`, higher than the latest tag (`git tag --sort=-v:refname | head -1`).
+   `versionCode = major*10000 + minor*100 + patch` (v1.0.2 → 10002). A versionCode can never be reused on Play.
+2. Add `fastlane/metadata/android/en-US/changelogs/<versionCode>.txt`: one or two plain sentences for users,
+   ≤ 500 characters, no markdown. It becomes the Play "What's new" text.
+3. Run the Android checks from "Build and run" and make sure `extensions.takingScreenshots` is `false`.
+4. Commit on `main`, push, then tag and push the tag:
+   `git tag v1.0.2 && git push origin main && git push origin v1.0.2`.
+5. Watch it: `gh run list --workflow=release.yml --limit 1`, then `gh run watch <id> --exit-status`.
+   Check `gh release view v1.0.2` has `MinimalAgenda-1.0.2.apk`, and verify the signer if needed
+   (`apksigner verify --print-certs`, SHA-256 `B5:0E:C2:45…63:29:6B:FA`).
+6. If a versionCode was already uploaded to Play by hand, run `gh variable set PLAY_UPLOAD --body false` before
+   pushing the tag and `gh variable delete PLAY_UPLOAD` after the run, so only the GitHub Release is created.
+7. A failed run after the GitHub Release step: fix the cause, then delete the release and tag
+   (`gh release delete vX --cleanup-tag`, `git tag -d vX`) before tagging again. Never move a published tag that
+   Play already received; bump the version instead.
+
+Local release builds read the keystore password from the macOS Keychain
+(`security find-generic-password -s 'Minimal Agenda release keystore' -w`); pass it to Gradle through the
+environment variables above without printing it. Never use `~/new-upload-key.jks` (another app's key).
 
 ## Working rules
 
