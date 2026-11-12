@@ -29,7 +29,7 @@ read and written through the system calendar. See [PRIVACY.md](PRIVACY.md).
 
 ## Install
 
-- **Google Play** (paid, one-time purchase): TODO add Play Store link
+- **Google Play** (paid, one-time purchase): https://play.google.com/store/apps/details?id=eu.giant.agenda
 - **GitHub Releases** (free FOSS build, signed APK): https://github.com/renegens/MinimalAgenda/releases
 - **IzzyOnDroid** (free FOSS build): TODO add IzzyOnDroid link once listed
 
@@ -97,7 +97,7 @@ them, release builds are unsigned and the build still succeeds:
 Pushing a tag such as `v1.2.3` runs `.github/workflows/release.yml`, which runs the tests, builds the signed
 FOSS APK and the Play AAB, and creates a GitHub Release with the APK attached. When the
 `PLAY_SERVICE_ACCOUNT_JSON` secret is set, it also uploads the AAB to Google Play (internal track, draft by
-default). The AAB is always kept as a workflow artifact as well. `versionName` is the tag without the leading
+default; this repository sets the production track with a completed rollout). The AAB is always kept as a workflow artifact as well. `versionName` is the tag without the leading
 `v`, and `versionCode` is `major*10000 + minor*100 + patch` (v1.2.3 gives 10203). Tags with a suffix
 (`v1.2.3-rc1`) become GitHub pre-releases and are not uploaded to Google Play, since the suffix does not
 change `versionCode`.
@@ -120,6 +120,7 @@ Repository secrets and variables used by the workflow:
 | --- | --- | --- |
 | `PLAY_TRACK` | `internal` | Play track: `internal`, `alpha`, `beta` or `production` |
 | `PLAY_RELEASE_STATUS` | `draft` | `draft` or `completed`; Play accepts only `draft` until the app is published once |
+| `PLAY_UPLOAD` | unset | `false` skips the Play upload, for a `versionCode` already uploaded by hand |
 
 The full first-release checklist is in [docs/release-checklist.md](docs/release-checklist.md).
 
