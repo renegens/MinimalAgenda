@@ -1,0 +1,1 @@
+The menu in the top right now opens next to its button.

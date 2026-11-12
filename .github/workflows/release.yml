@@ -71,15 +71,20 @@ jobs:
           gh release create "$GITHUB_REF_NAME" "dist/MinimalAgenda-${VERSION_NAME}.apk" \
             --generate-notes --title "$GITHUB_REF_NAME" $PRERELEASE
 
-      # Google Play upload. Skipped until the PLAY_SERVICE_ACCOUNT_JSON secret exists, and for suffixed tags
-      # (a suffix does not change versionCode, so v1.2.0-rc1 and v1.2.0 could not both be uploaded).
+      # Google Play upload. Skipped until the PLAY_SERVICE_ACCOUNT_JSON secret exists, for suffixed tags
+      # (a suffix does not change versionCode, so v1.2.0-rc1 and v1.2.0 could not both be uploaded), and while
+      # the PLAY_UPLOAD repository variable is false (for a versionCode already uploaded to Play by hand).
       - name: Check Google Play upload
         id: play
         env:
           PLAY_SERVICE_ACCOUNT_JSON: ${{ secrets.PLAY_SERVICE_ACCOUNT_JSON }}
+          PLAY_UPLOAD: ${{ vars.PLAY_UPLOAD }}
         run: |
           if [[ -z "$PLAY_SERVICE_ACCOUNT_JSON" ]]; then
             echo "::notice::PLAY_SERVICE_ACCOUNT_JSON is not set; upload the AAB artifact to Google Play by hand."
+            echo "upload=false" >> "$GITHUB_OUTPUT"
+          elif [[ "$PLAY_UPLOAD" == "false" ]]; then
+            echo "::notice::PLAY_UPLOAD is false; not uploading to Google Play."
             echo "upload=false" >> "$GITHUB_OUTPUT"
           elif [[ "$VERSION_NAME" == *-* ]]; then
             echo "::notice::Pre-release tag; not uploading to Google Play."

@@ -90,7 +90,9 @@ Minimal Agenda is licensed under the GPL-3.0. Source code: https://github.com/re
 3. `gh secret set PLAY_SERVICE_ACCOUNT_JSON < service-account.json`, then delete the local JSON file.
 4. Optional repository variables (defaults: `internal`, `draft`):
    `gh variable set PLAY_TRACK --body internal` and, once the app has been published once,
-   `gh variable set PLAY_RELEASE_STATUS --body completed`.
+   `gh variable set PLAY_RELEASE_STATUS --body completed`. `gh variable set PLAY_UPLOAD --body false` skips the
+   Play upload for a tag whose versionCode was already uploaded by hand; delete it afterwards
+   (`gh variable delete PLAY_UPLOAD`).
 
 ## 4. Release
 
