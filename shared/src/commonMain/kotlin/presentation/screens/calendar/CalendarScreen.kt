@@ -141,28 +141,29 @@ fun CalendarScreen(
             topBar = {
                 SimpleTransparentToolbar(
                     backgroundColor = Color.Transparent,
-                    onMenuClick = { showToolbarMenu = true }
-                ) {
-                    if (showToolbarMenu) {
-                        CalendarToolbarMenu(
-                            isVisible = showToolbarMenu,
-                            onDismiss = { showToolbarMenu = false },
-                            showAll = state.showAll,
-                            onNowClicked = {
-                                viewModel.setEvent(
-                                    Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
-                                )
-                            },
-                            onToggleActive = {
-                                viewModel.setEvent(Event.ToggleActive)
-                            },
-                            onAdd = { onAddEvent(null) },
-                            onSettings = {
-                                viewModel.setEvent(Event.ShowSettings)
-                            },
-                        )
+                    onMenuClick = { showToolbarMenu = true },
+                    menu = {
+                        if (showToolbarMenu) {
+                            CalendarToolbarMenu(
+                                isVisible = showToolbarMenu,
+                                onDismiss = { showToolbarMenu = false },
+                                showAll = state.showAll,
+                                onNowClicked = {
+                                    viewModel.setEvent(
+                                        Event.OnNowClicked(Section.fromInt(pagerState.currentPage))
+                                    )
+                                },
+                                onToggleActive = {
+                                    viewModel.setEvent(Event.ToggleActive)
+                                },
+                                onAdd = { onAddEvent(null) },
+                                onSettings = {
+                                    viewModel.setEvent(Event.ShowSettings)
+                                },
+                            )
+                        }
                     }
-                }
+                ) {}
             },
             bottomBar = {
                 FloatingBottomNavigation(

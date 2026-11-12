@@ -26,6 +26,7 @@ fun SimpleTransparentToolbar(
     modifier: Modifier = Modifier,
     backgroundColor: Color = Color.Transparent,
     onMenuClick: (() -> Unit)? = null,
+    menu: @Composable () -> Unit = {},
     content: @Composable () -> Unit
 ) {
     Box(
@@ -63,6 +64,8 @@ fun SimpleTransparentToolbar(
                     modifier = Modifier.size(20.dp),
                     tint = MaterialTheme.colorScheme.onSurface
                 )
+                // Inside the button so the dropdown anchors to it
+                menu()
             }
         }
     }
@@ -83,7 +86,7 @@ fun CalendarToolbarMenu(
     val haptic = LocalHapticFeedback.current
 
     AppDropdownMenu(
-        offset = DpOffset(100.dp, -(4).dp),
+        offset = DpOffset(0.dp, 4.dp),
         expanded = isVisible,
         containerColor = MaterialTheme.colorScheme.surface.copy(alpha = 0.95f),
         onDismissRequest = {
